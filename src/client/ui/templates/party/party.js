@@ -30,7 +30,7 @@ define([
 			this.onEvent('onGetParty', this.onGetParty.bind(this));
 			this.onEvent('onPartyDisband', this.onPartyDisband.bind(this));
 
-			this.onEvent('onGetConnectedPlayer', this.onGetConnectedPlayer.bind(this));
+			this.onEvent('globalObjectListUpdated', this.globalObjectListUpdated.bind(this));
 
 			this.onEvent('onGetPartyStats', this.onGetPartyStats.bind(this));
 
@@ -38,46 +38,34 @@ define([
 			this.onTogglePartyView(config.partyView);
 		},
 
-		onGetConnectedPlayer: function (msg) {
+		globalObjectListUpdated: function ({ list }) {
 			if (!window.player)
 				return;
 
 			const { party } = this;
-			const { player: { serverId: playerId, zoneId: playerZone } } = window;
+			const { player: { serverId: playerId } } = window;
+
+			const player = list.find(l => l.id === playerId);
+			const { zoneId: playerZone } = player;
 
 			if (!party)
 				return;
 
-			if (!(msg instanceof Array))
-				msg = [msg];
+			list.forEach(l => {
+				const { id: mId, zoneId: mZone, level: mLevel } = l;
 
-			msg.forEach(m => {
-				const { id: mId, zoneId: mZone } = m;
-
-				if (!party.includes(m.id))
+				if (!party.includes(mId))
 					return;
 
 				if (mId !== playerId) {
-					const el = this.find('.member[memberId="' + m.id + '"]');
+					const el = this.find('.member[memberId="' + mId + '"]');
 					el.removeClass('differentZone');
 
-					if (m.zoneId !== playerZone)
+					if (mZone !== playerZone)
 						el.addClass('differentZone');
 
-					el.find('.txtLevel').html('level: ' + m.level);
-
-					return;
+					el.find('.txtLevel').html('level: ' + mLevel);
 				}
-
-				party.forEach(p => {
-					const mObj = globals.onlineList.find(o => o.id === p);
-
-					const el = this.find('.member[memberId="' + p + '"]');
-					el.removeClass('differentZone');
-
-					if (mObj.zoneId !== mZone)
-						el.addClass('differentZone');
-				});
 			});
 		},
 

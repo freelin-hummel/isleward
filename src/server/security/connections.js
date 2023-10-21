@@ -1,5 +1,6 @@
 //External Modules
 const objects = require('../objects/objects');
+const eventEmitter = require('../misc/events');
 
 //Helpers
 const { route, routeGlobal } = require('./connections/route');
@@ -56,14 +57,8 @@ module.exports = {
 		}
 
 		if (player.name) {
-			this.emit('events', {
-				onGetMessages: [{
-					messages: [{
-						class: 'color-blueB',
-						message: player.name + ' has gone offline'
-					}]
-				}],
-				onGetDisconnectedPlayer: [player.name]
+			eventEmitter.emit('playerObjRemoved', {
+				id: player.id
 			});
 
 			if (player.has('id'))
@@ -107,14 +102,8 @@ module.exports = {
 			}
 		});
 
-		this.emit('events', {
-			onGetMessages: [{
-				messages: [{
-					class: 'color-blueB',
-					message: player.name + ' has gone offline'
-				}]
-			}],
-			onGetDisconnectedPlayer: [player.name]
+		eventEmitter.emit('playerObjRemoved', {
+			id: player.id
 		});
 
 		//If we don't do this, the atlas will try to remove it from the thread

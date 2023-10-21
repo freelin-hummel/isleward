@@ -306,7 +306,20 @@
 	"overrides": [
 		{
 			"files": [
-				"**/clientComponents/**/*.js"
+				"clientComponents/**/*"
+			],
+			"extends": "../client/.eslintrc"
+		},
+		{
+			"files": [
+				"mods/**/ui/*",
+				"mods/**/clientComponents/**/*"
+			],
+			"extends": "../client/.eslintrc"
+		},
+		{
+			"files": [
+				"mods/**/ui/**/*"
 			],
 			"extends": "../client/.eslintrc"
 		}

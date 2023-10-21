@@ -2,24 +2,42 @@ const events = require('../../misc/events');
 const profanities = require('../../misc/profanities');
 const canChat = require('./canChat');
 
-const sendRegularMessage = ({ obj }, msg) => {
+const sendRegularMessage = async ({ obj }, msg) => {
 	const charname = obj.auth.charname;
 
 	const msgEvent = {
 		username: obj.account,
-		tagPrefix: '(',
-		tagSuffix: ')',
+		tagPrefix: null,
+		tagSuffix: null,
 		tags: [],
-		msgStyle: 'color-grayB'
+		emojiTag: null,
+		namePrefix: '',
+		nameSuffix: '',
+		msgStyle: null,
+		obj
 	};
 
-	events.emit('onBeforeGetChatStyles', msgEvent);
+	await events.emit('onBeforeGetChatStyles', msgEvent);
+
+	const { emojiTag } = msgEvent;
 
 	let usePrefix = '';
-	if (msgEvent.tags.length)
+	if (emojiTag) {
+		const imgX = (-emojiTag.sprite[0] * emojiTag.spriteSize);
+		const imgY = (-emojiTag.sprite[1] * emojiTag.spriteSize);
+		const backgroundPosition = `${imgX}px ${imgY}px`;
+
+		usePrefix = `<div class='emojiTag' style='background: url("${emojiTag.spritesheet}")  no-repeat scroll ${backgroundPosition} / auto;'></div>`;
+	} else if (msgEvent.tags.length > 0)
 		usePrefix = `${msgEvent.tagPrefix}${msgEvent.tags.join(' ')}${msgEvent.tagSuffix} `;
 
-	const finalMessage = `${usePrefix}${charname}: ${msg.data.message}`;
+	let useCharName = charname;
+	if (msgEvent.namePrefix)
+		useCharName = `${msgEvent.namePrefix}${useCharName}`;
+	if (msgEvent.nameSuffix)
+		useCharName = `${useCharName}${msgEvent.nameSuffix}`;
+
+	const finalMessage = `${usePrefix}${useCharName}: ${msg.data.message}`;
 
 	const item = msg.data.item ? JSON.parse(JSON.stringify(msg.data.item).replace(/(<([^>]+)>)/ig, '')) : undefined;
 
@@ -27,7 +45,7 @@ const sendRegularMessage = ({ obj }, msg) => {
 		event: 'onGetMessages',
 		data: {
 			messages: [{
-				class: msgEvent.msgStyle,
+				class: msgEvent.msgStyle ?? 'color-grayB',
 				message: finalMessage,
 				item,
 				type: 'chat',
@@ -157,7 +175,7 @@ const sendErrorMsg = (cpnSocial, msgString) => {
 	cpnSocial.sendMessage(msgString, 'color-redA');
 };
 
-module.exports = (cpnSocial, msg) => {
+module.exports = async (cpnSocial, msg) => {
 	const { data: msgData } = msg;
 
 	if (!msgData.message)
@@ -246,5 +264,5 @@ module.exports = (cpnSocial, msg) => {
 	if (!messageHandler)
 		return;
 
-	messageHandler(cpnSocial, msg);
+	await messageHandler(cpnSocial, msg);
 };

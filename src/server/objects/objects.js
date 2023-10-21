@@ -1,3 +1,5 @@
+const eventEmitter = require('../misc/events');
+
 let objBase = require('./objBase');
 
 module.exports = {
@@ -305,8 +307,11 @@ module.exports = {
 						class: 'color-blueB',
 						message: player.name + ' has reached level ' + obj.level
 					}]
-				}],
-				onGetConnectedPlayer: [cons.getCharacterList()]
+				}]
+			});
+
+			eventEmitter.emit('playerObjChanged', {
+				obj: player
 			});
 		}
 	},

@@ -214,8 +214,8 @@ define([
 				}
 
 				if (m.item) {
-					let source = message.split(':')[0];
-					message = source + ': <span class="q' + (m.item.quality || 0) + '">' + message.replace(source + ': ', '') + '</span>';
+					const [source, useMessage] = message.split(': {');
+					message = source + ': <span class="q' + (m.item.quality || 0) + '">&nbsp;{' + useMessage + '</span>';
 				}
 
 				let el = $('<div class="list-message ' + m.class + '">' + message + '</div>')
@@ -245,9 +245,9 @@ define([
 					const isChannel = m?.subType === 'custom';
 					if (isChannel) {
 						if (this.find('.filter[filter="' + m.channel + '"]').hasClass('active'))
-							el.show();
+							el.css({ display: 'flex' });
 						else
-							el.hide();
+							el.css({ display: 'none' });
 					}
 
 					if (isMobile && ['loot', 'info'].indexOf(m.type) !== -1) {

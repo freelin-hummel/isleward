@@ -107,33 +107,11 @@ module.exports = {
 
 		atlas.addObject(this.obj, true);
 
-		cons.emit('events', {
-			onGetMessages: [{
-				messages: [{
-					class: 'color-blueB',
-					message: this.obj.name + ' has come online'
-				}]
-			}],
-			onGetConnectedPlayer: [cons.getCharacterList()]
+		eventEmitter.emit('playerObjAdded', {
+			obj
 		});
 
 		cb();
-	},
-
-	broadcastSelf: function () {
-		let obj = this.obj;
-
-		let self = {
-			id: obj.id,
-			zoneId: obj.zoneId,
-			name: obj.name,
-			level: obj.level,
-			class: obj.class
-		};
-
-		cons.emit('events', {
-			onGetConnectedPlayer: [self]
-		});
 	},
 
 	hasSeen: function (id) {

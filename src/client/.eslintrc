@@ -220,7 +220,7 @@
 		"no-throw-literal": 2,
 		"no-undef": 1,
 		"no-undef-init": 2,
-		"no-underscore-dangle": 1,
+		"no-underscore-dangle": 0,
 		"no-unneeded-ternary": 2,
 		"no-unreachable": 1,
 		"no-unused-expressions": 2,

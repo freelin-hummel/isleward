@@ -9,7 +9,6 @@ const appRoot = (req, res) => {
 const appFile = (req, res) => {
 	let root = req.url.split('/')[1];
 	let file = req.params[0];
-	
 	file = file.replace('/' + root + '/', '');
 
 	const validRequest = (

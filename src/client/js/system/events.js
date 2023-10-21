@@ -26,10 +26,7 @@ define([
 			return callback;
 		},
 		clearQueue: function () {
-			//Hack to allow the player list to persist
-			this.queue.spliceWhere(function (q) {
-				return ((q.event !== 'onGetConnectedPlayer') && (q.event !== 'onGetDisconnectedPlayer'));
-			});
+			this.queue.length = 0;
 		},
 		off: function (eventName, callback) {
 			let list = this.events[eventName] || [];

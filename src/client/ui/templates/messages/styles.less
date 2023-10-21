@@ -53,6 +53,7 @@
 
 		.list-message {
 			display: none;
+			justify-content: row;
 			width: 100%;
 			padding: 5px 10px;
 			color: white;
@@ -64,7 +65,7 @@
 			drop-shadow(0px 2px 0px @blackD)
 			drop-shadow(2px 0px 0px @blackD)
 			drop-shadow(-2px 0px 0px @blackD);
-			word-wrap: break-word;
+			word-wrap: anywhere;
 			line-height: 18px;
 
 			&.q {
@@ -111,19 +112,27 @@
 		}
 
 		&.rep .rep {
-			display: block;
+			display: flex;
 		}
 
 		&.chat .chat {
-			display: block;
+			display: flex;
 		}
 
 		&.info .info {
-			display: block;
+			display: flex;
 		}
 
 		&.loot .loot {
-			display: block;
+			display: flex;
+		}
+
+		.emojiTag {
+			width: 24px;
+			height: 24px;
+			margin-top: -4px;
+			margin-right: 5px;
+			flex-shrink: 0;
 		}
 
 	}

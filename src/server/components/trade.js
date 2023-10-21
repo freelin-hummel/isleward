@@ -266,7 +266,7 @@ module.exports = {
 		let targetTrade = target.trade;
 
 		const item = this.obj.inventory.findItem(msg.itemId);
-		if (!item)
+		if (!item || item.worth <= 0 || item.eq || item.noDestroy)
 			return;
 
 		const oldQuantity = item.quantity;
@@ -312,7 +312,7 @@ module.exports = {
 		this.target = target;
 
 		let itemList = this.obj.inventory.items
-			.filter(i => ((i.worth > 0) && (!i.eq)));
+			.filter(i => i.worth > 0 && !i.eq && !i.noDestroy);
 		itemList = extend([], itemList);
 
 		this.obj.syncer.set(true, 'trade', 'sellList', {

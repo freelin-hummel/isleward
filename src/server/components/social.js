@@ -63,8 +63,8 @@ module.exports = {
 		});
 	},
 
-	chat: function (msg) {
-		chat(this, msg);
+	chat: async function (msg) {
+		await chat(this, msg);
 	},
 
 	dc: function () {

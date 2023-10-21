@@ -97,7 +97,7 @@ define([
 				else
 					path = this.root + 'ui/templates/' + type + '/' + type;
 			}
-		
+
 			require([path], this.onGetTemplate.bind(this, options, type));
 		},
 		

@@ -56,7 +56,9 @@ module.exports = {
 		serverObj.zoneId = thread.id;
 		serverObj.zoneName = thread.name;
 
-		serverObj.player.broadcastSelf();
+		events.emit('playerObjChanged', {
+			obj
+		});
 
 		const simpleObj = obj.getSimple ? obj.getSimple(true, true) : obj;
 

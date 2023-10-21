@@ -11,7 +11,6 @@ define([
 	'js/sound/sound',
 	'js/system/globals',
 	'js/components/components',
-	'ui/templates/online/online',
 	'ui/templates/tooltips/tooltips'
 ], function (
 	client,
