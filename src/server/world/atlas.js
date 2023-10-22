@@ -51,7 +51,7 @@ module.exports = {
 				event: 'onGetAnnouncement',
 				data: {
 					msg: 'Generating a new map, please wait as this may take a few moments..',
-					ttl: 5000
+					ttl: 500
 				}
 			});
 		}
