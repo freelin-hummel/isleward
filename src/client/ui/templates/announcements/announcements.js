@@ -43,7 +43,7 @@ define([
 				el.css('margin-top', e.top);
 
 			this.message = {
-				ttl: this.maxTtl,
+				ttl: e.ttl ?? this.maxTtl,
 				el: el
 			};
 		},

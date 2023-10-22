@@ -20,7 +20,7 @@ const getThreadFromId = threadId => {
 	return threads.find(t => t.id === threadId);
 };
 
-const gePlayerCountInThread = async thread => {
+const getPlayerCountInThread = async thread => {
 	const { playerCount } = await new Promise(res => {
 		const cb = registerCallback(res);
 
@@ -94,7 +94,7 @@ const messageHandlers = {
 	rezone: async function (thread, message) {
 		const { args: { obj, newZone, keepPos = true } } = message;
 
-		if (thread.instanced && (await gePlayerCountInThread(thread)) === 0) {
+		if (thread.instanced && (await getPlayerCountInThread(thread)) === 0) {
 			thread.worker.kill();
 			threads.spliceWhere(t => t === thread);
 		}
@@ -173,6 +173,12 @@ const spawnThread = async ({ name, path, instanced }) => {
 	return promise;
 };
 
+const doesThreadExist = ({ zoneName, zoneId }) => {
+	const exists = threads.some(t => t.id === zoneId && t.name === zoneName);
+
+	return exists;
+};
+
 const getThread = async ({ zoneName, zoneId }) => {
 	const result = {
 		resetObjPosition: false,
@@ -206,6 +212,13 @@ const getThread = async ({ zoneName, zoneId }) => {
 const killThread = thread => {
 	thread.worker.kill();
 	threads.spliceWhere(t => t === thread);
+};
+
+const killThreadIfEmpty = async thread => {
+	const playerCount = await getPlayerCountInThread(thread);
+
+	if (playerCount === 0)
+		killThread(thread);
 };
 
 const spawnMapThreads = async () => {
@@ -255,9 +268,11 @@ module.exports = {
 	getThread,
 	killThread,
 	getThreadFromId,
+	doesThreadExist,
 	spawnMapThreads,
 	messageAllThreads,
+	killThreadIfEmpty,
 	sendMessageToThread,
 	returnWhenThreadsIdle,
-	gePlayerCountInThread
+	getPlayerCountInThread
 };

@@ -2,7 +2,8 @@
 const objects = require('../objects/objects');
 const events = require('../misc/events');
 const {
-	getThread, killThread, sendMessageToThread, getThreadFromId, returnWhenThreadsIdle, gePlayerCountInThread
+	getThread, killThread, sendMessageToThread, getThreadFromId, doesThreadExist,
+	returnWhenThreadsIdle, getPlayerCountInThread, killThreadIfEmpty
 } = require('./threadManager');
 const { registerCallback, removeCallback } = require('./atlas/registerCallback');
 
@@ -40,10 +41,29 @@ module.exports = {
 				zoneId = partyLeader.zoneId;
 		}
 
-		const { thread, resetObjPosition } = await getThread({
+		const eGetThread = {
 			zoneName,
 			zoneId
-		});
+		};
+
+		if (!doesThreadExist(eGetThread)) {
+			serverObj.socket.emit('event', {
+				event: 'onGetAnnouncement',
+				data: {
+					msg: 'Generating a new map, please wait as this may take a few moments..',
+					ttl: 5000
+				}
+			});
+		}
+
+		const { thread, resetObjPosition } = await getThread(eGetThread);
+
+		//Perhaps the player disconnected while waiting for the thread to spawn
+		if (!obj.socket.connected) {
+			await killThreadIfEmpty(thread);
+
+			return;
+		}
 		
 		if (resetObjPosition) {
 			delete obj.x;
@@ -108,7 +128,7 @@ module.exports = {
 			return;
 		}
 
-		if (thread.instanced && (await gePlayerCountInThread(thread)) === 1) {
+		if (thread.instanced && (await getPlayerCountInThread(thread)) === 1) {
 			this.removeObjectFromInstancedZone(thread, playerId, callback);
 
 			return;

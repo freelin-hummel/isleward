@@ -107,10 +107,6 @@ module.exports = {
 
 		atlas.addObject(this.obj, true);
 
-		eventEmitter.emit('playerObjAdded', {
-			obj
-		});
-
 		cb();
 	},
 

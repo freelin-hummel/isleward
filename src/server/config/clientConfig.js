@@ -159,7 +159,8 @@ const config = {
 		]
 	},
 	uiLoginList: [
-		'login'
+		'login',
+		'announcements'
 	],
 	uiList: [
 		'inventory',
@@ -179,7 +180,6 @@ const config = {
 		'tooltips',
 		'tooltipInfo',
 		'tooltipItem',
-		'announcements',
 		'quests',
 		'events',
 		'progressBar',
