@@ -59,7 +59,7 @@ module.exports = {
 		const { thread, resetObjPosition } = await getThread(eGetThread);
 
 		//Perhaps the player disconnected while waiting for the thread to spawn
-		if (!obj.socket.connected) {
+		if (!serverObj.socket.connected) {
 			await killThreadIfEmpty(thread);
 
 			return;
