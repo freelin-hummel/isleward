@@ -194,7 +194,8 @@ const config = {
 		'passives',
 		'workbench',
 		'middleHud',
-		'options'
+		'options',
+		'announcements'
 	],
 	contextMenuActions: {
 		player: [],
