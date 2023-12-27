@@ -49,6 +49,10 @@ module.exports = {
 			if (!e.disabled)
 				this.configs.push(extend({}, e));
 		}, this);
+
+		this.instance.eventEmitter.emit('afterGetEventList', {
+			eventConfigs: this.configs
+		});
 	},
 
 	getEvent: function (name) {
