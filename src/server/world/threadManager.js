@@ -3,7 +3,6 @@ const childProcess = require('child_process');
 
 //Imports
 const objects = require('../objects/objects');
-const connections = require('../security/connections');
 const { mapList } = require('./mapManager');
 const { registerCallback } = require('./atlas/registerCallback');
 
@@ -76,7 +75,7 @@ const messageHandlers = {
 	},
 
 	callDifferentThread: function (thread, message) {
-		let obj = connections.players.find(p => (p.name === message.playerName));
+		let obj = cons.players.find(p => (p.name === message.playerName));
 		if (!obj)
 			return;
 

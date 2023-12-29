@@ -132,15 +132,19 @@ define([
 		create: function () {
 			this.el.addClass('disabled');
 
+			const eCreateCharacter = {
+				name: this.find('.txtName').val(),
+				class: this.class,
+				skinId: this.skinId,
+				prophecies: this.prophecies
+			};
+
+			events.emit('beforeCreateCharacter', eCreateCharacter);
+
 			client.request({
 				cpn: 'auth',
 				method: 'createCharacter',
-				data: {
-					name: this.find('.txtName').val(),
-					class: this.class,
-					skinId: this.skinId,
-					prophecies: this.prophecies
-				},
+				data: eCreateCharacter,
 				callback: this.onCreate.bind(this)
 			});
 		},

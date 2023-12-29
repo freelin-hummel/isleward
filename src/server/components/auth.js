@@ -500,10 +500,17 @@ module.exports = {
 			customChannels: this.customChannels
 		});
 
+		const eBeforeSaveCharacter = {
+			obj: simple,
+			config: data
+		};
+
+		eventEmitter.emit('beforeSaveCharacter', eBeforeSaveCharacter);
+
 		await io.setAsync({
 			key: name,
 			table: 'character',
-			value: simple,
+			value: eBeforeSaveCharacter.obj,
 			serialize: true
 		});
 
