@@ -213,6 +213,21 @@ const getThread = async ({ zoneName, zoneId }) => {
 			thread = getThreadFromName(map.name);
 	}
 
+	if (!thread) {
+		io.logError({
+			sourceModule: 'threadManager',
+			sourceMethod: 'getThread',
+			error: 'No thread found',
+			info: {
+				requestedZoneName: zoneName,
+				requestedZoneId: zoneId,
+				useMapName: map.name
+			}
+		});
+
+		process.exit();
+	}
+
 	if (!thread.isReady)
 		await thread.promise;
 

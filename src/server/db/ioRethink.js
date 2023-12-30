@@ -137,7 +137,16 @@ module.exports = {
 				})
 				.run();
 		} catch (e) {
-			this.logError(e, table, id);
+			this.logError({
+				sourceModule: 'ioRethink',
+				sourceMethod: 'setAsync',
+				error: e,
+				info: {
+					table,
+					key: id,
+					value: JSON.stringify(value)
+				}
+			});
 		}
 	},
 
@@ -151,7 +160,15 @@ module.exports = {
 				.insert(value, { conflict })
 				.run();
 		} catch (e) {
-			this.logError(e, table, JSON.stringify(value));
+			this.logError({
+				sourceModule: 'ioRethink',
+				sourceMethod: 'setFlat',
+				error: e,
+				info: {
+					table,
+					value: JSON.stringify(value)
+				}
+			});
 		}
 	},
 
@@ -193,7 +210,17 @@ module.exports = {
 				})
 				.run();
 		} catch (e) {
-			this.logError(e, table, key);
+			this.logError({
+				sourceModule: 'ioRethink',
+				sourceMethod: 'append',
+				error: e,
+				info: {
+					table,
+					key,
+					field,
+					value: JSON.stringify(value)
+				}
+			});
 		}
 	},
 
@@ -208,19 +235,26 @@ module.exports = {
 		return !!res;
 	},
 
-	logError: async function (error, table, key) {
+	logError: async function ({ sourceModule, sourceMethod, error, info }) {
 		try {
-			const errorValue = `${error.toString()} | ${error.stack.toString()} | ${table} | ${key}`;
-
 			await this.setAsync({
-				key: new Date(),
 				table: 'error',
-				value: errorValue
+				value: {
+					date: new Date(),
+					sourceModule,
+					sourceMethod,
+					error: error.toString(),
+					stack: error.stack.toString(),
+					info
+				}
 			});
 		} catch (e) {}
 
-		process.send({
-			event: 'onCrashed'
-		});
+		if (process.send) {
+			process.send({
+				event: 'onCrashed'
+			});
+		} else
+			process.exit();
 	}
 };
