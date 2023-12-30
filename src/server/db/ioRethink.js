@@ -33,6 +33,19 @@ module.exports = {
 					_.log(e);
 			}
 		}
+
+		//Create indices used for case-insensitive checks
+		if (!(await r.table('login').indexList()).includes('idLowerCase')) {
+			await r.table('login').indexCreate('idLowerCase', r.row('id').downcase());
+
+			_.log('Created index: idLowerCase on table: login');
+		}
+
+		if (!(await r.table('character').indexList()).includes('idLowerCase')) {
+			await r.table('character').indexCreate('idLowerCase', r.row('id').downcase());
+
+			_.log('Created index: idLowerCase on table: character');
+		}
 	},
 
 	createTable: async function (tableName) {
@@ -46,7 +59,7 @@ module.exports = {
 
 	getAsyncIgnoreCase: async function (table, key) {
 		const res = await r.table(table)
-			.filter(doc => doc('id').match(`(?i)^${key}$`))
+			.getAll(key.toLowerCase(), { index: 'idLowerCase' })
 			.run();
 
 		return res[0];

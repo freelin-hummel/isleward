@@ -425,7 +425,6 @@ module.exports = {
 		msg.callback();
 	},
 
-	/* eslint-disable-next-line max-lines-per-function */
 	createCharacter: async function (msg) {
 		let data = msg.data;
 		let name = data.name;
@@ -459,13 +458,7 @@ module.exports = {
 			return;
 		}
 
-		console.log('Starting new character create for', name);
-		const t1 = +new Date();
-
 		const releaseCreateLock = await getCreateLock();
-
-		const t2 = +new Date();		
-		console.log('Took', t2 - t1, 'ms to get a create lock');
 
 		let exists = await io.getAsync({
 			key: name,
@@ -473,9 +466,6 @@ module.exports = {
 			table: 'character',
 			noDefault: true
 		});
-
-		const t3 = +new Date();		
-		console.log('Took', t3 - t2, 'ms to check if the character exists');
 
 		if (exists) {
 			releaseCreateLock();
@@ -498,13 +488,7 @@ module.exports = {
 
 		let simple = this.obj.getSimple(true);
 
-		const t4 = +new Date();		
-		console.log('Took', t4 - t3, 'ms to build the simpleObj');
-
 		await this.verifySkin(simple);
-
-		const t5 = +new Date();		
-		console.log('Took', t5 - t4, 'ms to verify the skin');
 		
 		let prophecies = (data.prophecies || []).filter(p => p);
 		
@@ -523,9 +507,6 @@ module.exports = {
 
 		eventEmitter.emit('beforeSaveCharacter', eBeforeSaveCharacter);
 
-		const t6 = +new Date();		
-		console.log('Took', t6 - t5, 'ms to run beforeSaveCharacter');
-
 		await io.setAsync({
 			key: name,
 			table: 'character',
@@ -535,9 +516,6 @@ module.exports = {
 
 		this.characters[name] = simple;
 		this.characterList.push(name);
-
-		const t7 = +new Date();		
-		console.log('Took', t7 - t6, 'ms to save the character');
 		
 		await io.setAsync({
 			key: this.username,
@@ -545,9 +523,6 @@ module.exports = {
 			value: this.characterList,
 			serialize: true
 		});
-
-		const t8 = +new Date();		
-		console.log('Took', t8 - t7, 'ms to save the character list');
 
 		releaseCreateLock();
 
