@@ -222,7 +222,7 @@ define([
 			this.find('.message').html(msg);
 		},
 
-		onDeleteClick: function () {
+		onDeleteClick: async function () {
 			if (!this.selected)
 				return;
 
@@ -242,22 +242,34 @@ define([
 
 			this.el.addClass('disabled');
 
-			client.request({
-				cpn: 'auth',
-				method: 'deleteCharacter',
-				data: {
-					name: this.selected
-				},
-				callback: this.onGetCharacters.bind(this)
+			const result = await new Promise(res => {
+				client.request({
+					cpn: 'auth',
+					method: 'deleteCharacter',
+					data: {
+						name: this.selected
+					},
+					callback: res
+				});
 			});
+
+			if (!result.success) {
+				this.setMessage(result.msg);
+				this.el.removeClass('disabled');
+
+				return;
+			}
+
+			this.onGetCharacters(result.characterList);
 		},
 
 		onDeleteReset: function () {
-			this.setMessage('');
 			this.deleteCount = 0;
 			this.find('.btnDelete')
 				.removeClass('deleting')
 				.html('delete');
+
+			setTimeout(this.setMessage.bind(this, ''), 5000);
 		}
 	};
 });

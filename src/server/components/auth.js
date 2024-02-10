@@ -547,6 +547,24 @@ module.exports = {
 			return;
 		}
 
+		const msgBeforeDeleteCharacter = {
+			obj: this,
+			name: data.name,
+			success: true,
+			msg: null
+		};
+
+		await eventEmitter.emit('beforeDeleteCharacter', msgBeforeDeleteCharacter);
+
+		if (!msgBeforeDeleteCharacter.success) {
+			msg.callback({
+				success: false,
+				msg: msgBeforeDeleteCharacter.msg
+			});
+
+			return;
+		}
+
 		await io.deleteAsync({
 			key: data.name,
 			table: 'character'
@@ -576,7 +594,10 @@ module.exports = {
 				level: leaderboard.getLevel(c.name ? c.name : c)
 			}));
 
-		msg.callback(result);
+		msg.callback({
+			success: true,
+			characterList: result
+		});
 	},
 
 	permadie: function () {

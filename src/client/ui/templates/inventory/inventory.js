@@ -358,8 +358,16 @@ define([
 			if (isMobile)
 				this.hideTooltip(null, this.hoverItem);
 
+			const eBeforeShowItemContextMenu = {
+				sourceUi: 'inventory',
+				item: this.hoverItem,
+				ctxConfig
+			};
+
+			events.emit('beforeShowItemContextMenu', eBeforeShowItemContextMenu);
+
 			if (ctxConfig.length > 0)
-				events.emit('onContextMenu', ctxConfig, e);
+				events.emit('onContextMenu', eBeforeShowItemContextMenu.ctxConfig, e);
 
 			e.preventDefault();
 			return false;

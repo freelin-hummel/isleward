@@ -112,18 +112,6 @@ define([
 			events.emit('onShowItemTooltip', item, ttPos, true);
 		},
 
-		onClick: function (el, item) {
-			client.request({
-				cpn: 'player',
-				method: 'performAction',
-				data: {
-					cpn: 'equipment',
-					method: 'equip',
-					data: item.id
-				}
-			});
-		},
-
 		onGetStashItems: function (items) {
 			this.items = items;
 

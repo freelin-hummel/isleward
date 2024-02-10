@@ -1,4 +1,5 @@
 let herbs = require('../config/herbs');
+const eventEmitter = require('../misc/events');
 
 const defaultGatherChance = {
 	herb: 100,
@@ -122,8 +123,20 @@ module.exports = {
 	},
 
 	spawn: function (node) {
-		let blueprint = node.blueprint;
-		let position = this.getRandomSpawnPosition(node, blueprint);
+		const blueprint = node.blueprint;
+
+		const eBeforeSpawnResource = {
+			node,
+			position: undefined,
+			allowRandomPosition: true
+		};
+		eventEmitter.emit('beforeSpawnResource', eBeforeSpawnResource);
+
+		if (eBeforeSpawnResource.allowRandomPosition && !eBeforeSpawnResource.position)
+			eBeforeSpawnResource.position = this.getRandomSpawnPosition(node, blueprint);
+
+		const { position } = eBeforeSpawnResource;
+
 		if (!position)
 			return false;
 

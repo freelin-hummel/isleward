@@ -15,7 +15,7 @@ module.exports = {
 			this.trigger.destroyed = true;
 	},
 
-	talk: function (msg) {
+	talk: async function (msg) {
 		if (!msg)
 			return false;
 
@@ -41,7 +41,7 @@ module.exports = {
 		if ((target.trade) && (target.trade.faction))
 			this.obj.reputation.discoverFaction(target.trade.faction.id);
 
-		let state = target.dialogue.getState(this.obj, msg.state);
+		let state = await target.dialogue.getState(this.obj, msg.state);
 		if (!state) {
 			this.obj.syncer.set(true, 'dialogue', 'state', null);
 			return false;
@@ -54,7 +54,8 @@ module.exports = {
 		this.obj.syncer.set(true, 'dialogue', 'state', null);
 	},
 
-	getState: function (sourceObj, state = 1) {
+	/* eslint-disable-next-line max-lines-per-function */
+	getState: async function (sourceObj, state = 1) {
 		let result = null;
 		if ((state + '').indexOf('.') > -1) {
 			let config = this.states[(state + '').split('.')[0]];
@@ -93,8 +94,9 @@ module.exports = {
 
 			if (stateConfig.goto) {
 				if (result)
-					return this.getState(sourceObj, stateConfig.goto.success);
-				return this.getState(sourceObj, stateConfig.goto.failure);
+					return await this.getState(sourceObj, stateConfig.goto.success);
+
+				return await this.getState(sourceObj, stateConfig.goto.failure);
 			} 
 			if (result) {
 				useMsg = extend([], useMsg);
@@ -102,7 +104,7 @@ module.exports = {
 			} else
 				return null;
 		} else if (stateConfig.method) {
-			let methodResult = stateConfig.method.call(this.obj, sourceObj);
+			let methodResult = await stateConfig.method.call(this.obj, sourceObj);
 			if (methodResult) {
 				useMsg = extend([], useMsg);
 				useMsg[0].msg = methodResult;

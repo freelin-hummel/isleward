@@ -68,6 +68,8 @@ define([
 				pos.top = e.detail.clientY;
 			}
 
+			pos['max-height'] = window.innerHeight - pos.top - 10;
+
 			this.el
 				.css(pos)
 				.show();

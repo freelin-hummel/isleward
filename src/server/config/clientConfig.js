@@ -283,6 +283,26 @@ module.exports = {
 		return result;
 	},
 
+	getTileIndexInAtlasSync: function (spriteSheet, tileIndexInSource) {
+		const { atlasTextures, atlasTextureDimensions } = config;
+
+		const indexOfSheet = atlasTextures.indexOf(spriteSheet);
+
+		let tileCountBeforeSheet = 0;
+
+		for (let i = 0; i < indexOfSheet; i++) {
+			const sheet = atlasTextures[i];
+			const { width, height } = atlasTextureDimensions[sheet];
+
+			tileCountBeforeSheet += ((width / 8) * (height / 8));
+		}
+
+		//Tile index 0 is 'no tile' in map files so we need to increment by 1
+		const result = tileCountBeforeSheet + tileIndexInSource + 1;
+
+		return result;
+	},
+
 	//Used to send to clients
 	getClientConfig: function (msg) {
 		msg.callback(config);
