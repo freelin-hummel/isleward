@@ -1,5 +1,8 @@
 /* eslint-disable max-lines-per-function */
 
+const itemTypes = require('../items/config/types');
+const spellGenerator = require('../items/generators/spellbook');
+
 module.exports = {
 	fixDb: async function () {
 		await io.deleteAsync({
@@ -177,6 +180,36 @@ module.exports = {
 
 				if (effect.rolls.castSpell.type === 'smokebomb')
 					effect.rolls.castSpell.type = 'smokeBomb';
+			});
+
+		items
+			.filter(i => i.name === 'Princess Morgawsa\'s Trident' && i.type !== 'Trident')
+			.forEach(i => {
+				i.type = 'Trident';
+				i.requires[0].stat = 'int';
+
+				delete i.implicitStats;
+
+				const typeConfig = itemTypes.types[i.slot][i.type];
+				spellGenerator.generate(i, {
+					...typeConfig,
+					spellQuality: i.spell.quality
+				});
+			});
+
+		items
+			.filter(i => i.name === 'Steelclaw\'s Bite' && i.type !== 'Curved Dagger')
+			.forEach(i => {
+				i.type = 'Curved Dagger';
+				i.requires[0].stat = 'dex';
+
+				delete i.implicitStats;
+
+				const typeConfig = itemTypes.types[i.slot][i.type];
+				spellGenerator.generate(i, {
+					...typeConfig,
+					spellQuality: i.spell.quality
+				});
 			});
 
 		items
