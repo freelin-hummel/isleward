@@ -183,7 +183,13 @@ module.exports = {
 			});
 
 		items
-			.filter(i => i.name === 'Princess Morgawsa\'s Trident' && i.type !== 'Trident')
+			.filter(i =>
+				i.name === 'Princess Morgawsa\'s Trident' &&
+				(
+					i.type !== 'Trident' ||
+					i.spell.type !== 'projectile'
+				)
+			)
 			.forEach(i => {
 				i.type = 'Trident';
 				i.requires[0].stat = 'int';
@@ -198,7 +204,13 @@ module.exports = {
 			});
 
 		items
-			.filter(i => i.name === 'Steelclaw\'s Bite' && i.type !== 'Curved Dagger')
+			.filter(i =>
+				i.name === 'Steelclaw\'s Bite' &&
+				(
+					i.type !== 'Curved Dagger' ||
+					i.spell.type !== 'melee'
+				)
+			)
 			.forEach(i => {
 				i.type = 'Curved Dagger';
 				i.requires[0].stat = 'dex';
