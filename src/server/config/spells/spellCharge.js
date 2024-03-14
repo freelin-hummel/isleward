@@ -87,9 +87,11 @@ module.exports = {
 
 		this.queueCallback(
 			this.reachDestination.bind(this, target, targetPos, targetEffect, selfEffect),
-			ttl - 50,
-			this.destroyEffectOnTarget.bind(this, target, targetEffect)
+			ttl - 50
 		);
+
+		//To be called when the object is destroyed
+		this.obj.spellbook.registerDestroyCallback(this.destroyEffectOnTarget.bind(this, target, targetEffect));
 
 		return true;
 	},

@@ -148,9 +148,12 @@ module.exports = {
 					this.queueCallback(
 						this.endEffect.bind(this, m, targetPos, targetEffect),
 						ttl,
-						this.destroyEffectOnTarget.bind(this, m, targetEffect),
+						null,
 						m
 					);
+
+					//To be called when the object is destroyed
+					this.obj.spellbook.registerDestroyCallback(this.destroyEffectOnTarget.bind(this, m, targetEffect));
 				}
 			}
 		}

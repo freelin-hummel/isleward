@@ -409,6 +409,13 @@ module.exports = {
 		return didCast || isCasting;
 	},
 
+	//Callbacks to be called when this object is destroyed
+	registerDestroyCallback: function (callback) {
+		this.callbacks.push({
+			cbOnSelfDestroyed: callback
+		});
+	},
+
 	registerCallback: function (sourceId, callback, time, destroyCallback, targetId, destroyOnRezone) {
 		let obj = {
 			sourceId: sourceId,
@@ -508,8 +515,8 @@ module.exports = {
 
 	destroy: function () {
 		this.callbacks.forEach(c => {
-			if (c.destroyCallback)
-				c.destroyCallback();
+			if (c.cbOnSelfDestroyed)
+				c.cbOnSelfDestroyed();
 		});
 
 		this.spells.forEach(s => {
