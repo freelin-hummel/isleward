@@ -85,10 +85,15 @@ module.exports = {
 			}, -1);
 		}
 
-		this.queueCallback(this.reachDestination.bind(this, target, targetPos, targetEffect, selfEffect), ttl - 50);
+		this.queueCallback(
+			this.reachDestination.bind(this, target, targetPos, targetEffect, selfEffect),
+			ttl - 50,
+			this.destroyEffectOnTarget.bind(this, target, targetEffect)
+		);
 
 		return true;
 	},
+
 	reachDestination: function (target, targetPos, targetEffect, selfEffect) {
 		if (this.obj.destroyed)
 			return;
@@ -139,6 +144,10 @@ module.exports = {
 
 		if (this.castOnEnd)
 			this.obj.spellbook.spells[this.castOnEnd].cast();
+	},
+
+	destroyEffectOnTarget: function (target, targetEffect) {
+		target.effects.removeEffect(targetEffect.id);
 	},
 
 	isTileValid: function (physics, fromX, fromY, toX, toY) {

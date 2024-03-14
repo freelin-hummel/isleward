@@ -145,7 +145,12 @@ module.exports = {
 						}]
 					});
 
-					this.queueCallback(this.endEffect.bind(this, m, targetPos, targetEffect), ttl, null, m);
+					this.queueCallback(
+						this.endEffect.bind(this, m, targetPos, targetEffect),
+						ttl,
+						this.destroyEffectOnTarget.bind(this, m, targetEffect),
+						m
+					);
 				}
 			}
 		}
@@ -200,5 +205,9 @@ module.exports = {
 			spell: this
 		};
 		target.fireEvent('afterPositionChange', moveEvent);
+	},
+
+	destroyEffectOnTarget: function (target, targetEffect) {
+		target.effects.removeEffect(targetEffect.id);
 	}
 };

@@ -507,6 +507,11 @@ module.exports = {
 	},
 
 	destroy: function () {
+		this.callbacks.forEach(c => {
+			if (c.destroyCallback)
+				c.destroyCallback();
+		});
+
 		this.spells.forEach(s => {
 			if (s.destroy)
 				s.destroy();
