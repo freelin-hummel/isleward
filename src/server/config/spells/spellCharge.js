@@ -149,7 +149,8 @@ module.exports = {
 	},
 
 	destroyEffectOnTarget: function (target, targetEffect) {
-		target.effects.removeEffect(targetEffect.id);
+		if (targetEffect)
+			target.effects.removeEffect(targetEffect.id);
 	},
 
 	isTileValid: function (physics, fromX, fromY, toX, toY) {
