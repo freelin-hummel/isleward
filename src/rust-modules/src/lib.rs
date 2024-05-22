@@ -15,18 +15,26 @@ pub mod physics {
     pub struct Physics {
         pub graph: External<Graph<(), ()>>,
         pub collision_map: Vec<Vec<bool>>,
-        pub cells: Vec<Vec<Vec<i32>>>,
+        pub cells: Vec<Vec<Vec<PhysicsObject>>>,
         pub width: i32,
         pub height: i32,
     }
 
+    #[derive(Debug, Clone, Copy)]
+    #[napi(object)]
     pub struct PhysicsObject {
-        x: i32,
-        y: i32,
-        width: i32,
-        height: i32,
-        id: i32,
+        pub x: i32,
+        pub y: i32,
+        pub width: i32,
+        pub height: i32,
+        pub id: i32,
         // area: Vec<i32>
+    }
+
+    impl PartialEq for PhysicsObject {
+        fn eq(&self, other: &Self) -> bool {
+            self.id == other.id
+        }
     }
 
     impl From<&JsObject> for PhysicsObject {
@@ -95,11 +103,11 @@ pub mod physics {
                     let cells = &mut row[j];
 
                     for c in &mut *cells {
-                        if !ret.contains(c) {
-                            ret.push(*c);
+                        if !ret.contains(&c.id) {
+                            ret.push(c.id);
                         }
                     }
-                    cells.push(obj.id);
+                    cells.push(obj);
                 }
             }
             dbg!(&ret);
@@ -130,9 +138,9 @@ pub mod physics {
                     }
                     remove_ids.clear();
                     for c in &mut *cells {
-                        if *c != o_id {
-                            if !ret.contains(c) {
-                                ret.push(*c);
+                        if c.id != o_id {
+                            if !ret.contains(&c.id) {
+                                ret.push(c.id);
                             }
                         } else {
                             remove_ids.push(*c);
@@ -148,53 +156,54 @@ pub mod physics {
         #[napi]
         pub fn before_add_object(
             &self,
-            obj: JsObject,
+            _obj: JsObject,
             x: i32,
             y: i32,
-            fromX: i32,
-            fromY: i32,
+            from_x: Option<i32>,
+            from_y: i32,
         ) -> Option<Vec<i32>> {
+            let x: usize = x.try_into().unwrap();
             if x >= self.cells.len() {
                 return None;
             }
-            let row = &self.cells[x];
+            let row: &[Vec<PhysicsObject>] = &self.cells[x];
+            let y: usize = y.try_into().unwrap();
             if y >= row.len() {
                 return None;
             }
 
-            let cell = row[y];
+            let cell: &[PhysicsObject] = &row[y];
 
-            let cLen = cell.len();
             let mut ret = vec![];
-            for i in 0..cLen {
-                let c = cell[i];
-
-                //If we have fromX and fromY, check if the target cell doesn't contain the same obj (like a notice area)
-                if (c.width) && (fromX) {
+            for c in cell {
+                //If we have from_x and from_y, check if the target cell doesn't contain the same obj (like a notice area)
+                if let Some(from_x) =
+                    /*(c.width) TODO: Is width always defined? &&*/
+                    from_x
+                {
                     // if (c.area) {
-                    //     if ((this.isInPolygon(x, y, c.area)) && (!this.isInPolygon(fromX, fromY, c.area))) {
+                    //     if ((this.isInPolygon(x, y, c.area)) && (!this.isInPolygon(from_x, from_y, c.area))) {
                     //         c.collisionEnter(obj);
                     //         obj.collisionEnter(c);
                     //     }
                     // } else
-                    if (fromX < c.x)
-                        || (fromY < c.y)
-                        || (fromX >= c.x + c.width)
-                        || (fromY >= c.y + c.height)
+                    if (from_x < c.x
+                        || from_y < c.y
+                        || from_x >= c.x + c.width
+                        || from_y >= c.y + c.height)
+                        && !ret.contains(&c.id)
                     {
-                        if !ret.contains(c) {
-                            ret.push(c);
-                        }
+                        ret.push(c.id);
                     }
                 } else {
                     //If a callback returns true, it means we collide
-                    if !ret.contains(c) {
-                        ret.push(c)
+                    if !ret.contains(&c.id) {
+                        ret.push(c.id)
                     }
                 }
             }
 
-            return Some(ret);
+            Some(ret)
         }
     }
 }

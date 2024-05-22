@@ -13,8 +13,15 @@ export namespace physics {
   export interface Physics {
     graph: ExternalObject<Graph>
     collisionMap: Array<Array<boolean>>
-    cells: Array<Array<Array<number>>>
+    cells: Array<Array<Array<PhysicsObject>>>
     width: number
     height: number
+  }
+  export interface PhysicsObject {
+    x: number
+    y: number
+    width: number
+    height: number
+    id: number
   }
 }
