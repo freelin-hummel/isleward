@@ -20,14 +20,14 @@ pub mod physics {
         pub height: i32,
     }
 
-    #[derive(Debug, Clone, Copy)]
+    #[derive(Debug, Clone)]
     #[napi(object)]
     pub struct PhysicsObject {
         pub x: i32,
         pub y: i32,
         pub width: i32,
         pub height: i32,
-        pub id: i32,
+        pub id: String,
         // area: Vec<i32>
     }
 
@@ -79,7 +79,7 @@ pub mod physics {
         }
 
         #[napi]
-        pub fn add_region(&mut self, jobj: JsObject) -> Vec<i32> {
+        pub fn add_region(&mut self, jobj: JsObject) -> Vec<String> {
             let obj = PhysicsObject::from(&jobj);
             let low_x = obj.x;
             let low_y = obj.y;
@@ -88,7 +88,7 @@ pub mod physics {
             let cells = &mut self.cells;
             let mut ret = vec![];
 
-            dbg!(obj.id);
+            dbg!(&obj.id);
             for i in low_x..high_x {
                 let i: usize = i.try_into().unwrap();
                 if i > cells.len() {
@@ -104,17 +104,17 @@ pub mod physics {
 
                     for c in &mut *cells {
                         if !ret.contains(&c.id) {
-                            ret.push(c.id);
+                            ret.push(c.id.to_string());
                         }
                     }
-                    cells.push(obj);
+                    cells.push(obj.clone());
                 }
             }
             dbg!(&ret);
             ret
         }
 
-        pub fn remove_region(&mut self, jobj: JsObject) -> Vec<i32> {
+        pub fn remove_region(&mut self, jobj: JsObject) -> Vec<String> {
             let obj = PhysicsObject::from(&jobj);
             let o_id = obj.id;
 
@@ -140,10 +140,10 @@ pub mod physics {
                     for c in &mut *cells {
                         if c.id != o_id {
                             if !ret.contains(&c.id) {
-                                ret.push(c.id);
+                                ret.push(c.id.to_string());
                             }
                         } else {
-                            remove_ids.push(*c);
+                            remove_ids.push(c.clone());
                         }
                     }
 
@@ -161,7 +161,7 @@ pub mod physics {
             y: i32,
             from_x: Option<i32>,
             from_y: i32,
-        ) -> Option<Vec<i32>> {
+        ) -> Option<Vec<String>> {
             let x: usize = x.try_into().unwrap();
             if x >= self.cells.len() {
                 return None;
@@ -177,33 +177,50 @@ pub mod physics {
             let mut ret = vec![];
             for c in cell {
                 //If we have from_x and from_y, check if the target cell doesn't contain the same obj (like a notice area)
-                if let Some(from_x) =
-                    /*(c.width) TODO: Is width always defined? &&*/
-                    from_x
-                {
+                if c.width == 0 && from_x.is_some() {
                     // if (c.area) {
                     //     if ((this.isInPolygon(x, y, c.area)) && (!this.isInPolygon(from_x, from_y, c.area))) {
                     //         c.collisionEnter(obj);
                     //         obj.collisionEnter(c);
                     //     }
                     // } else
+                    let from_x = from_x.unwrap();
                     if (from_x < c.x
                         || from_y < c.y
                         || from_x >= c.x + c.width
                         || from_y >= c.y + c.height)
                         && !ret.contains(&c.id)
                     {
-                        ret.push(c.id);
+                        ret.push(c.id.to_string());
                     }
                 } else {
                     //If a callback returns true, it means we collide
                     if !ret.contains(&c.id) {
-                        ret.push(c.id)
+                        ret.push(c.id.to_string());
                     }
                 }
             }
 
             Some(ret)
+        }
+
+        #[napi]
+        pub fn add_object(&self, _obj: JsObject, x: i32, y: i32) {
+            let x: usize = x.try_into().unwrap();
+            if x >= self.cells.len() {
+                return;
+            }
+            let row: &[Vec<PhysicsObject>] = &self.cells[x];
+            let y: usize = y.try_into().unwrap();
+            if y >= row.len() {
+                return;
+            }
+
+            let cell: &[PhysicsObject] = &row[y];
+
+            let obj = PhysicsObject::from(&_obj);
+
+            cell.push(obj);
         }
     }
 }
