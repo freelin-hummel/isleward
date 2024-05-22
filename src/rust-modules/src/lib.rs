@@ -144,5 +144,57 @@ pub mod physics {
             }
             ret
         }
+
+        #[napi]
+        pub fn before_add_object(
+            &self,
+            obj: JsObject,
+            x: i32,
+            y: i32,
+            fromX: i32,
+            fromY: i32,
+        ) -> Option<Vec<i32>> {
+            if x >= self.cells.len() {
+                return None;
+            }
+            let row = &self.cells[x];
+            if y >= row.len() {
+                return None;
+            }
+
+            let cell = row[y];
+
+            let cLen = cell.len();
+            let mut ret = vec![];
+            for i in 0..cLen {
+                let c = cell[i];
+
+                //If we have fromX and fromY, check if the target cell doesn't contain the same obj (like a notice area)
+                if (c.width) && (fromX) {
+                    // if (c.area) {
+                    //     if ((this.isInPolygon(x, y, c.area)) && (!this.isInPolygon(fromX, fromY, c.area))) {
+                    //         c.collisionEnter(obj);
+                    //         obj.collisionEnter(c);
+                    //     }
+                    // } else
+                    if (fromX < c.x)
+                        || (fromY < c.y)
+                        || (fromX >= c.x + c.width)
+                        || (fromY >= c.y + c.height)
+                    {
+                        if !ret.contains(c) {
+                            ret.push(c);
+                        }
+                    }
+                } else {
+                    //If a callback returns true, it means we collide
+                    if !ret.contains(c) {
+                        ret.push(c)
+                    }
+                }
+            }
+
+            return Some(ret);
+        }
     }
 }
