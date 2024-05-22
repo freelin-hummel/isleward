@@ -10,6 +10,7 @@ pub mod physics {
         JsObject,
     };
     use petgraph::Graph;
+    use tracing::{debug, error};
 
     #[napi(object)]
     pub struct Physics {
@@ -39,12 +40,25 @@ pub mod physics {
 
     impl From<&JsObject> for PhysicsObject {
         fn from(value: &JsObject) -> Self {
+            let id = match value.get_named_property::<i32>("id") {
+                Ok(num) => num.to_string(),
+                Err(e) => {
+                    debug!("{e:?} <- Number from js");
+                    value
+                        .get_named_property::<String>("id")
+                        .unwrap_or_else(|e| {
+                            error!("{e:?}. Could not get a string id from js");
+                            String::new()
+                        })
+                }
+            };
+
             PhysicsObject {
                 x: value.get_named_property("x").unwrap_or_default(),
                 y: value.get_named_property("y").unwrap_or_default(),
                 width: value.get_named_property("width").unwrap_or_default(),
                 height: value.get_named_property("height").unwrap_or_default(),
-                id: value.get_named_property("id").unwrap_or_default(),
+                id,
             }
         }
     }
@@ -88,7 +102,7 @@ pub mod physics {
             let cells = &mut self.cells;
             let mut ret = vec![];
 
-            dbg!(&obj.id);
+            // dbg!(&obj.id);
             for i in low_x..high_x {
                 let i: usize = i.try_into().unwrap();
                 if i > cells.len() {
@@ -160,7 +174,7 @@ pub mod physics {
             x: i32,
             y: i32,
             from_x: Option<i32>,
-            from_y: i32,
+            from_y: Option<i32>,
         ) -> Option<Vec<String>> {
             let x: usize = x.try_into().unwrap();
             if x >= self.cells.len() {
@@ -177,7 +191,7 @@ pub mod physics {
             let mut ret = vec![];
             for c in cell {
                 //If we have from_x and from_y, check if the target cell doesn't contain the same obj (like a notice area)
-                if c.width == 0 && from_x.is_some() {
+                if c.width == 0 && from_x.is_some() && from_y.is_some() {
                     // if (c.area) {
                     //     if ((this.isInPolygon(x, y, c.area)) && (!this.isInPolygon(from_x, from_y, c.area))) {
                     //         c.collisionEnter(obj);
@@ -185,6 +199,7 @@ pub mod physics {
                     //     }
                     // } else
                     let from_x = from_x.unwrap();
+                    let from_y = from_y.unwrap();
                     if (from_x < c.x
                         || from_y < c.y
                         || from_x >= c.x + c.width
@@ -205,18 +220,18 @@ pub mod physics {
         }
 
         #[napi]
-        pub fn add_object(&self, _obj: JsObject, x: i32, y: i32) {
+        pub fn add_object(&mut self, _obj: JsObject, x: i32, y: i32) {
             let x: usize = x.try_into().unwrap();
             if x >= self.cells.len() {
                 return;
             }
-            let row: &[Vec<PhysicsObject>] = &self.cells[x];
+            let row: &mut Vec<Vec<PhysicsObject>> = &mut self.cells[x];
             let y: usize = y.try_into().unwrap();
             if y >= row.len() {
                 return;
             }
 
-            let cell: &[PhysicsObject] = &row[y];
+            let cell: &mut Vec<PhysicsObject> = &mut row[y];
 
             let obj = PhysicsObject::from(&_obj);
 

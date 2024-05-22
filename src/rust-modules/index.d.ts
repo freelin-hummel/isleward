@@ -22,6 +22,6 @@ export namespace physics {
     y: number
     width: number
     height: number
-    id: number
+    id: string
   }
 }

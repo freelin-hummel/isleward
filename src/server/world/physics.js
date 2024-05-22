@@ -32,9 +32,7 @@ module.exports = {
 	},
 
 	addRegion: function (obj) {
-		console.log(`->,${obj.id}`)
 		const toCall = this.ph.addRegion(obj);
-		console.log(toCall);
 		objects.filter(x=>toCall.includes(x.id)).forEach(x=>{
 			x.collisionEnter(obj);
 			obj.collisionEnter(x);
@@ -77,44 +75,20 @@ module.exports = {
 	},
 
 	addObject: function (obj, x, y, fromX, fromY) {
-		let row = this.cells[x];
-
-		if (!row)
-			return;
-
-		let cell = row[y];
-
-		if (!cell)
-			return;
-
-		let cLen = cell.length;
-		for (let i = 0; i < cLen; i++) {
-			let c = cell[i];
-
-			//If we have fromX and fromY, check if the target cell doesn't contain the same obj (like a notice area)
-			if ((c.width) && (fromX)) {
-				if (c.area) {
-					if ((this.isInPolygon(x, y, c.area)) && (!this.isInPolygon(fromX, fromY, c.area))) {
-						c.collisionEnter(obj);
-						obj.collisionEnter(c);
-					}
-				} else if ((fromX < c.x) || (fromY < c.y) || (fromX >= c.x + c.width) || (fromY >= c.y + c.height)) {
-					c.collisionEnter(obj);
-					obj.collisionEnter(c);
-				}
-			} else {
-				//If a callback returns true, it means we collide
-				if (c.collisionEnter(obj))
-					return;
-				obj.collisionEnter(c);
+		const toCall = this.ph.beforeAddObject(obj, x, y, fromX, fromY);
+		for (var i=0;i<toCall.length;i++) {
+			let checkObj = objects.objects.find(x=>x.id+'' === toCall[i]);
+			if (!checkObj) {
+				// TODO: Ensure these can be ignored. Possible the object has already been deleted from the world
+				continue;
 			}
+			if (checkObj.collisionEnter(obj)) {
+				return;
+			}
+			obj.collisionEnter(checkObj);
+			
 		}
-
-		//Perhaps a collisionEvent caused us to move somewhere else, in which case, we don't push to the cell
-		// as we assume that the collisionEvent handled it for us
-		if (obj.x === x && obj.y === y)
-			cell.push(obj);
-		
+		this.ph.addObject(obj,x,y);
 		return true;
 	},
 
