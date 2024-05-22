@@ -1,4 +1,8 @@
+const objects = require('../objects/objects');
 let pathfinder = require('../misc/pathfinder');
+const rm = require('../../rust-modules')
+
+
 
 let sqrt = Math.sqrt.bind(Math);
 let ceil = Math.ceil.bind(Math);
@@ -15,8 +19,10 @@ module.exports = {
 	init: function (collisionMap) {
 		this.collisionMap = collisionMap;
 
+
 		this.width = collisionMap.length;
 		this.height = collisionMap[0].length;
+		this.ph = new rm.physics.Physics(this.width,this.height);
 
 		this.cells = _.get2dArray(this.width, this.height, 'array');
 
@@ -26,31 +32,14 @@ module.exports = {
 	},
 
 	addRegion: function (obj) {
-		let lowX = obj.x;
-		let lowY = obj.y;
-		let highX = lowX + obj.width;
-		let highY = lowY + obj.height;
-		let cells = this.cells;
-
-		for (let i = lowX; i < highX; i++) {
-			let row = cells[i];
-			for (let j = lowY; j < highY; j++) {
-				let cell = row[j];
-
-				if (!cell)
-					continue;
-
-				let cLen = cell.length;
-				for (let k = 0; k < cLen; k++) {
-					let c = cell[k];
-
-					c.collisionEnter(obj);
-					obj.collisionEnter(c);
-				}
-
-				cell.push(obj);
-			}
-		}
+		console.log(`->,${obj.id}`)
+		const toCall = this.ph.addRegion(obj);
+		console.log(toCall);
+		objects.filter(x=>toCall.includes(x.id)).forEach(x=>{
+			x.collisionEnter(obj);
+			obj.collisionEnter(x);
+		});
+		
 	},
 
 	removeRegion: function (obj) {
