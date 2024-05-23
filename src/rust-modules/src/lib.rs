@@ -5,16 +5,20 @@ extern crate napi_derive;
 
 #[napi]
 pub mod physics {
+    use std::{error::Error, fs::File, path::PathBuf};
+
     use napi::{
         bindgen_prelude::{External, ObjectFinalize},
         JsObject,
     };
-    use petgraph::{algo, prelude::*, Graph, Undirected};
+    use petgraph::{algo, prelude::*, visit::IntoNodeReferences, Graph};
     use tracing::{debug, error};
+
+    type PhysicsGraph = UnGraph<Coordinate, ()>;
 
     #[napi(object)]
     pub struct Physics {
-        pub graph: External<UnGraph<(), ()>>,
+        pub graph: External<PhysicsGraph>,
         pub collision_map: Vec<Vec<i32>>,
         pub cells: Vec<Vec<Vec<PhysicsObject>>>,
         pub width: i32,
@@ -32,11 +36,26 @@ pub mod physics {
         // area: Vec<i32>
     }
 
-    #[derive(Debug, Clone, Copy)]
+    #[derive(Debug, Clone, Copy, PartialEq)]
     #[napi(object)]
     pub struct Coordinate {
-        pub x: f64,
-        pub y: f64,
+        pub x: i32,
+        pub y: i32,
+    }
+
+    impl Coordinate {
+        fn find_node(&self, gr: &PhysicsGraph) -> Option<NodeIndex> {
+            gr.node_references()
+                .find(|(_, c)| *c == self)
+                .map(|(i, _)| i)
+        }
+    }
+
+    impl ToString for Coordinate {
+        fn to_string(&self) -> String {
+            let Self { x, y } = self;
+            format!("{x};{y}")
+        }
     }
 
     #[derive(Debug, Clone, Copy)]
@@ -84,6 +103,35 @@ pub mod physics {
         }
     }
 
+    fn write_graph_to_csv(gr: &PhysicsGraph, mut path: PathBuf) -> Result<(), Box<dyn Error>> {
+        path.push("nodes.csv");
+        // Open a file to write nodes
+        let mut wtr_node = csv::Writer::from_writer(File::create(&path)?);
+        wtr_node.write_record(["id", "label"])?;
+
+        // Write node data
+        for node in gr.node_indices() {
+            wtr_node.write_record(&[node.index().to_string(), gr[node].to_string()])?;
+        }
+        wtr_node.flush()?;
+        path.pop();
+        path.push("edges.csv");
+        // Open a file to write edges
+        let mut wtr_edge = csv::Writer::from_writer(File::create(path)?);
+        wtr_edge.write_record(["source", "target"])?;
+
+        // Write edge data
+        for edge in gr.edge_references() {
+            wtr_edge.write_record(&[
+                edge.source().index().to_string(),
+                edge.target().index().to_string(),
+            ])?;
+        }
+        wtr_edge.flush()?;
+
+        Ok(())
+    }
+
     #[napi]
     impl Physics {
         #[napi(constructor)]
@@ -96,7 +144,34 @@ pub mod physics {
                 }
                 cells.push(row);
             }
+            let gr = matrix_to_graph(&collision_map);
+            // let from = Coordinate { x: 117, y: 53 }.find_node(&gr).unwrap();
+            // let to_coord = Coordinate { x: 112, y: 57 };
+            // let to = to_coord.find_node(&gr).unwrap();
+            // dbg!(algo::has_path_connecting(&gr, from, to, None));
+            // let t = Instant::now();
+            // let ass: Vec<_> = algo::astar(
+            //     &gr,
+            //     from,
+            //     |finish| finish == to,
+            //     |_| 0,
+            //     |n| {
+            //         let Coordinate { x, y } = gr[n];
+            //         *[(x - to_coord.x).abs(), (y - to_coord.y).abs()]
+            //             .iter()
+            //             .max()
+            //             .unwrap()
+            //     },
+            // )
+            // .unwrap()
+            // .1
+            // .into_iter()
+            // .map(|x| gr[x])
+            // .collect();
+            // dbg!(t.elapsed());
+            // dbg!(ass);
 
+            // write_graph_to_csv(&gr, "/tmp".into()).unwrap();
             Physics {
                 graph: matrix_to_graph(&collision_map).into(),
                 collision_map,
@@ -409,62 +484,85 @@ pub mod physics {
         ) -> Option<Vec<Coordinate>> {
             let from = self
                 .graph
-                .node_indices()
-                .nth((from_y * self.width + from_x).try_into().unwrap())
+                .node_references()
+                .find(|(_, Coordinate { x, y })| from_y == *y && from_x == *x)
+                .map(|(i, _)| i)
                 .unwrap();
-            let to = self
+            let (to, to_coord) = self
                 .graph
-                .node_indices()
-                .nth((to_y * self.width + to_x).try_into().unwrap())
+                .node_references()
+                .find(|(_, Coordinate { x, y })| to_x == *x && to_y == *y)
                 .unwrap();
 
-            if let Some(ids) =
-                algo::astar(&*self.graph, from, |finish| finish == to, |_| 0, |_| 0).map(|(_, x)| x)
+            if let Some(ids) = algo::astar(
+                &*self.graph,
+                from,
+                |finish| finish == to,
+                |_| 0,
+                |n| {
+                    let Coordinate { x, y } = self.graph[n];
+                    *[(x - to_coord.x).abs(), (y - to_coord.y).abs()]
+                        .iter()
+                        .max()
+                        .unwrap()
+                },
+            )
+            .map(|(_, x)| x)
             {
-                return Some(
-                    ids.into_iter()
-                        .map(|id| {
-                            let y = (id.index() as f64 / self.width as f64).floor();
-                            let x = id.index() as f64 - y * self.width as f64;
-                            Coordinate { x, y }
-                        })
-                        .collect(),
-                );
+                return Some(ids.into_iter().skip(1).map(|id| self.graph[id]).collect());
             }
             None
         }
     }
 
     // Function to create a graph from a 2D matrix
-    fn matrix_to_graph(matrix: &[Vec<i32>]) -> Graph<(), (), Undirected> {
-        let mut graph = Graph::new_undirected();
+    fn matrix_to_graph(matrix: &[Vec<i32>]) -> PhysicsGraph {
         let size = matrix.len();
         let inner_size = matrix[0].len();
-        let mut nodes = vec![vec![NodeIndex::default(); inner_size]; size];
+        let mut graph = Graph::with_capacity(size * inner_size, inner_size * size * 8);
+        // let mut nodes = vec![vec![NodeIndex::default(); inner_size]; size];
 
         // Add nodes to the graph
-        for row in nodes.iter_mut() {
-            for cell in row.iter_mut() {
-                *cell = graph.add_node(());
+        for (x, row) in matrix.iter().enumerate() {
+            for (y, _) in row.iter().enumerate() {
+                if matrix[x][y] == 0 {
+                    graph.add_node(Coordinate {
+                        x: x.try_into().unwrap(),
+                        y: y.try_into().unwrap(),
+                    });
+                }
             }
         }
+        //dbg!(size, inner_size);
 
         // Add edges based on the collision map
         for i in 1..size - 1 {
             for j in 1..inner_size - 1 {
-                if matrix[i][j] == 0 {
+                if matrix[i][j] == 1 {
                     continue;
                 }
-                for x in i - 1..=i + 1 {
+                let from = Coordinate {
+                    x: i.try_into().unwrap(),
+                    y: j.try_into().unwrap(),
+                }
+                .find_node(&graph)
+                .unwrap();
+                for (x, _) in matrix.iter().enumerate().take(i + 1 + 1).skip(i - 1) {
                     for y in j - 1..=j + 1 {
                         if x == i && y == j {
                             continue;
                         }
-                        let from = nodes[i][j];
-                        let to = nodes[x][y];
-                        if matrix[x][y] == 1 && graph.find_edge(from, to).is_none() {
-                            graph.add_edge(from, to, ());
+                        if matrix[x][y] == 1 {
+                            continue;
                         }
+                        let to = Coordinate {
+                            x: x.try_into().unwrap(),
+                            y: y.try_into().unwrap(),
+                        }
+                        .find_node(&graph)
+                        .unwrap();
+
+                        graph.add_edge(from, to, ());
                     }
                 }
             }
