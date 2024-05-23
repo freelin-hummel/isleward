@@ -59,13 +59,13 @@ const drawRoom = (scope, instance, room) => {
 						});
 						if (isThisExit) {
 							map[x][y] = scope.randomizeTile(floorTile);
-							collisionMap[x][y] = false;
+							collisionMap[x][y] = 0;
 						} else
-							collisionMap[x][y] = true;
+							collisionMap[x][y] = 1;
 					}
 				}
 			} else if (didCollide) {
-				collisionMap[x][y] = false;
+				collisionMap[x][y] = 0;
 				map[x][y] = scope.randomizeTile(floorTile);
 			}
 		}

@@ -1,8 +1,6 @@
 const objects = require('../objects/objects');
 let pathfinder = require('../misc/pathfinder');
-const rm = require('../../rust-modules')
-
-
+const rm = require('../../rust-modules');
 
 let sqrt = Math.sqrt.bind(Math);
 let ceil = Math.ceil.bind(Math);
@@ -19,10 +17,9 @@ module.exports = {
 	init: function (collisionMap) {
 		this.collisionMap = collisionMap;
 
-
 		this.width = collisionMap.length;
 		this.height = collisionMap[0].length;
-		this.ph = new rm.physics.Physics(collisionMap,this.width,this.height);
+		this.ph = new rm.physics.Physics(collisionMap, this.width, this.height);
 
 		this.cells = _.get2dArray(this.width, this.height, 'array');
 
@@ -32,222 +29,116 @@ module.exports = {
 	},
 
 	addRegion: function (obj) {
-		const toCall = this.ph.addRegion(obj);
-		objects.filter(x=>toCall.includes(x.id)).forEach(x=>{
-			x.collisionEnter(obj);
-			obj.collisionEnter(x);
-		});
+		const idsOfCollidingObjects = this.ph.addRegion(obj);
 		
+		for (let id of idsOfCollidingObjects) {
+			const f = objects.objects.find(o => o.id + '' === id);
+
+			f.collisionEnter(obj);
+			obj.collisionEnter(f);
+		}
 	},
 
 	removeRegion: function (obj) {
-		let oId = obj.id;
+		const idsOfCollidingObjects = this.ph.removeRegion(obj);
 
-		let lowX = obj.x;
-		let lowY = obj.y;
-		let highX = lowX + obj.width;
-		let highY = lowY + obj.height;
-		let cells = this.cells;
+		for (let id of idsOfCollidingObjects) {
+			const f = objects.objects.find(o => o.id + '' === id);
 
-		for (let i = lowX; i < highX; i++) {
-			let row = cells[i];
-			for (let j = lowY; j < highY; j++) {
-				let cell = row[j];
-
-				if (!cell)
-					continue;
-
-				let cLen = cell.length;
-				for (let k = 0; k < cLen; k++) {
-					let c = cell[k];
-
-					if (c.id !== oId) {
-						c.collisionExit(obj);
-						obj.collisionExit(c);
-					} else {
-						cell.splice(k, 1);
-						k--;
-						cLen--;
-					}
-				}
-			}
+			f.collisionExit(obj);
+			obj.collisionExit(f);
 		}
 	},
 
 	addObject: function (obj, x, y, fromX, fromY) {
-		const toCall = this.ph.beforeAddObject(obj, x, y, fromX, fromY);
-		for (var i=0;i<toCall.length;i++) {
-			let checkObj = objects.objects.find(x=>x.id+'' === toCall[i]);
-			if (!checkObj) {
-				// TODO: Ensure these can be ignored. Possible the object has already been deleted from the world
+		const idsOfCollidingObjects = this.ph.beforeAddObject(x, y, fromX, fromY);
+
+		for (let id of idsOfCollidingObjects) {
+			const checkObj = objects.objects.find(f => f.id + '' === id);
+
+			// TODO: Ensure these can be ignored. Possible the object has already been deleted from the world
+			if (!checkObj)
 				continue;
-			}
-			if (checkObj.collisionEnter(obj)) {
+			else if (checkObj.collisionEnter(obj)) 
 				return;
-			}
-			obj.collisionEnter(checkObj);
 			
+			obj.collisionEnter(checkObj);
 		}
-		this.ph.addObject(obj,x,y);
+
+		this.ph.addObject(obj, x, y);
+
 		return true;
 	},
 
 	removeObject: function (obj, x, y, toX, toY) {
-		let row = this.cells[x];
+		const idsOfCollidingObjects = this.ph.removeObject(obj, x, y, toX, toY);
 
-		if (!row)
-			return;
+		for (let id of idsOfCollidingObjects) {
+			const checkObj = objects.objects.find(f => f.id + '' === id);
 
-		let cell = row[y];
-
-		if (!cell)
-			return;
-
-		let oId = obj.id;
-		let cLen = cell.length;
-		for (let i = 0; i < cLen; i++) {
-			let c = cell[i];
-
-			if (c.id !== oId) {
-				//If we have toX and toY, check if the target cell doesn't contain the same obj (like a notice area)
-				if ((c.width) && (toX)) {
-					if (c.area) {
-						if ((this.isInPolygon(x, y, c.area)) && (!this.isInPolygon(toX, toY, c.area))) {
-							c.collisionExit(obj);
-							obj.collisionExit(c);
-						}
-					} else if ((toX < c.x) || (toY < c.y) || (toX >= c.x + c.width) || (toY >= c.y + c.height)) {
-						c.collisionExit(obj);
-						obj.collisionExit(c);
-					}
-				} else {
-					c.collisionExit(obj);
-					obj.collisionExit(c);
-				}
-			} else {
-				cell.splice(i, 1);
-				i--;
-				cLen--;
-			}
+			checkObj.collisionExit(obj); 
+			obj.collisionExit(checkObj);
 		}
 	},
 
 	isValid: function (x, y) {
-		let row = this.cells[x];
+		const isInvalid = (
+			x < 0 ||
+			x >= this.width ||
+			y < 0 ||
+			y >= this.height ||
+			this.collisionMap[x][y] === 1
+		);
 
-		if ((!row) || (row.length <= y) || (!this.graph.grid[x][y]))
-			return false;
-		return true;
+		return !isInvalid;
 	},
 
 	getCell: function (x, y) {
-		let row = this.cells[x];
+		const idsOfObjects = this.ph.getCell(x, y);
 
-		if (!row)
-			return [];
+		const res = idsOfObjects.map(id => objects.objects.find(f => f.id + '' === id));
 
-		let cell = row[y];
-
-		if (!cell)
-			return [];
-
-		return cell;
+		return res;
 	},
 	getArea: function (x1, y1, x2, y2, filter) {
-		let width = this.width;
-		let height = this.height;
+		const { width, height } = this;
 
-		x1 = ~~x1;
-		y1 = ~~y1;
+		const idsOfObjects = this.ph.getArea(
+			Math.max(0, x1),
+			Math.max(0, y1),
+			Math.min(x2, width - 1),
+			Math.min(y2, height - 1)
+		);
 
-		x2 = ~~x2;
-		y2 = ~~y2;
+		let res = idsOfObjects.map(id => objects.objects.find(f => f.id + '' === id));
 
-		if (x1 < 0)
-			x1 = 0;
-		if (x2 >= width)
-			x2 = width - 1;
-		if (y1 < 0)
-			y1 = 0;
-		if (y2 >= height)
-			y2 = height - 1;
+		if (filter)
+			res = res.filter(f => filter(f));
 
-		let cells = this.cells;
-		let grid = this.graph.grid;
-
-		let result = [];
-		for (let i = x1; i <= x2; i++) {
-			let row = cells[i];
-			let gridRow = grid[i];
-			for (let j = y1; j <= y2; j++) {
-				if (!gridRow[j])
-					continue;
-
-				let cell = row[j];
-				let cLen = cell.length;
-				for (let k = 0; k < cLen; k++) {
-					let c = cell[k];
-
-					if (filter) {
-						if (filter(c))
-							result.push(c);
-					} else
-						result.push(c);
-				}
-			}
-		}
-
-		return result;
+		return res;
 	},
 
 	getOpenCellInArea: function (x1, y1, x2, y2) {
-		let width = this.width;
-		let height = this.height;
+		const { width, height } = this;
 
-		x1 = ~~x1;
-		y1 = ~~y1;
+		const cellCoordinates = this.ph.getOpenCellInArea(
+			Math.max(0, x1),
+			Math.max(0, y1),
+			Math.min(x2, width - 1),
+			Math.min(y2, height - 1)
+		);
 
-		x2 = ~~x2;
-		y2 = ~~y2;
+		const firstEntry = cellCoordinates.find(c => {
+			const contents = this.getCell(c.x, c.y);
 
-		if (x1 < 0)
-			x1 = 0;
-		else if (x2 >= width)
-			x2 = width - 1;
-		if (y1 < 0)
-			y1 = 0;
-		else if (y2 >= height)
-			y2 = height - 1;
+			//If the only contents are notices, we can still use it
+			return (
+				contents.length === 0 ||
+				!contents.some(f => !f.notice)
+			);
+		});
 
-		let cells = this.cells;
-		let grid = this.graph.grid;
-
-		for (let i = x1; i <= x2; i++) {
-			let row = cells[i];
-			let gridRow = grid[i];
-			for (let j = y1; j <= y2; j++) {
-				if (!gridRow[j])
-					continue;
-
-				let cell = row[j];
-				if (cell.length === 0) {
-					return {
-						x: i,
-						y: j
-					};
-				} 
-				//If the only contents are notices, we can still use it
-				let allNotices = !cell.some(c => !c.notice);
-				if (allNotices) {
-					return {
-						x: i,
-						y: j
-					};
-				}
-			}
-		}
-
-		return null;
+		return firstEntry;
 	},
 
 	getPath: function (from, to) {
@@ -274,11 +165,8 @@ module.exports = {
 			return [];
 
 		let path = this.ph.getPath(fromX, toX, fromY, toY);
-		console.log({fromX,fromY},{toX,toY}, !!path);
-		if (!path) {
+		if (!path) 
 			return [];
-		}
-		console.log(path)
 
 		return path;
 	},

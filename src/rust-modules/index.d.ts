@@ -12,7 +12,7 @@ export class ExternalObject<T> {
 export namespace physics {
   export interface Physics {
     graph: ExternalObject<UnGraph>
-    collisionMap: Array<Array<boolean>>
+    collisionMap: Array<Array<number>>
     cells: Array<Array<Array<PhysicsObject>>>
     width: number
     height: number
@@ -25,6 +25,10 @@ export namespace physics {
     id: string
   }
   export interface Coordinate {
+    x: number
+    y: number
+  }
+  export interface IntCoordinate {
     x: number
     y: number
   }

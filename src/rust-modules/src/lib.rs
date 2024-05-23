@@ -15,7 +15,7 @@ pub mod physics {
     #[napi(object)]
     pub struct Physics {
         pub graph: External<UnGraph<(), ()>>,
-        pub collision_map: Vec<Vec<bool>>,
+        pub collision_map: Vec<Vec<i32>>,
         pub cells: Vec<Vec<Vec<PhysicsObject>>>,
         pub width: i32,
         pub height: i32,
@@ -37,6 +37,13 @@ pub mod physics {
     pub struct Coordinate {
         pub x: f64,
         pub y: f64,
+    }
+
+    #[derive(Debug, Clone, Copy)]
+    #[napi(object)]
+    pub struct IntCoordinate {
+        pub x: i32,
+        pub y: i32,
     }
 
     impl PartialEq for PhysicsObject {
@@ -92,7 +99,7 @@ pub mod physics {
 
             Physics {
                 graph: matrix_to_graph(&collision_map).into(),
-                collision_map: vec![],
+                collision_map,
                 cells,
                 width,
                 height,
@@ -109,7 +116,6 @@ pub mod physics {
             let cells = &mut self.cells;
             let mut ret = vec![];
 
-            dbg!(&obj.id);
             for i in low_x..high_x {
                 let i: usize = i.try_into().unwrap();
                 if i > cells.len() {
@@ -131,7 +137,6 @@ pub mod physics {
                     cells.push(obj.clone());
                 }
             }
-            dbg!(&ret);
             ret
         }
 
@@ -177,7 +182,6 @@ pub mod physics {
         #[napi]
         pub fn before_add_object(
             &self,
-            _obj: JsObject,
             x: i32,
             y: i32,
             from_x: Option<i32>,
@@ -215,11 +219,8 @@ pub mod physics {
                     {
                         ret.push(c.id.to_string());
                     }
-                } else {
-                    //If a callback returns true, it means we collide
-                    if !ret.contains(&c.id) {
-                        ret.push(c.id.to_string());
-                    }
+                } else if !ret.contains(&c.id) {
+                    ret.push(c.id.to_string());
                 }
             }
 
@@ -227,7 +228,7 @@ pub mod physics {
         }
 
         #[napi]
-        pub fn add_object(&mut self, _obj: JsObject, x: i32, y: i32) {
+        pub fn add_object(&mut self, obj: JsObject, x: i32, y: i32) {
             let x: usize = x.try_into().unwrap();
             if x >= self.cells.len() {
                 return;
@@ -240,9 +241,162 @@ pub mod physics {
 
             let cell: &mut Vec<PhysicsObject> = &mut row[y];
 
-            let obj = PhysicsObject::from(&_obj);
+            let obj = PhysicsObject::from(&obj);
 
             cell.push(obj);
+        }
+
+        #[napi]
+        pub fn remove_object(
+            &mut self,
+            obj: JsObject,
+            x: i32,
+            y: i32,
+            to_x: Option<i32>,
+            to_y: Option<i32>,
+        ) -> Option<Vec<String>> {
+            let obj = PhysicsObject::from(&obj);
+
+            let cells = &mut self.cells;
+
+            let x: usize = x.try_into().unwrap();
+            if x >= cells.len() {
+                return None;
+            }
+            let row = &mut cells[x];
+            let y: usize = y.try_into().unwrap();
+            if y >= row.len() {
+                return None;
+            }
+
+            let cell = &mut row[y];
+
+            let mut ret = vec![];
+            let mut remove_ids = vec![];
+
+            for c in &mut *cell {
+                if c.id != obj.id {
+                    //If we have from_x and from_y, check if the target cell doesn't contain the same obj (like a notice area)
+                    if c.width == 0 && to_x.is_some() && to_y.is_some() {
+                        // if (c.area) {
+                        //     if ((this.isInPolygon(x, y, c.area)) && (!this.isInPolygon(from_x, from_y, c.area))) {
+                        //         c.collisionExit(obj);
+                        //         obj.collisionExit(c);
+                        //     }
+                        // } else
+                        let to_x = to_x.unwrap();
+                        let to_y = to_y.unwrap();
+                        if (to_x < c.x
+                            || to_y < c.y
+                            || to_x >= c.x + c.width
+                            || to_y >= c.y + c.height)
+                            && !ret.contains(&c.id)
+                        {
+                            ret.push(c.id.to_string());
+                        }
+                    } else if !ret.contains(&c.id) {
+                        ret.push(c.id.to_string());
+                    }
+                } else {
+                    remove_ids.push(c.clone());
+                }
+            }
+
+            cell.retain(|c| !remove_ids.contains(c));
+
+            Some(ret)
+        }
+
+        #[napi]
+        pub fn get_cell(&self, x: i32, y: i32) -> Option<Vec<String>> {
+            let x: usize = x.try_into().unwrap();
+            if x >= self.cells.len() {
+                return None;
+            }
+            let row: &[Vec<PhysicsObject>] = &self.cells[x];
+            let y: usize = y.try_into().unwrap();
+            if y >= row.len() {
+                return None;
+            }
+
+            let cell: &[PhysicsObject] = &row[y];
+
+            let mut ret = vec![];
+            for c in cell {
+                ret.push(c.id.to_string());
+            }
+
+            Some(ret)
+        }
+
+        #[napi]
+        pub fn get_area(&mut self, x1: i32, y1: i32, x2: i32, y2: i32) -> Option<Vec<String>> {
+            let cells = &mut self.cells;
+
+            let mut ret = vec![];
+
+            for i in x1..=x2 {
+                let i: usize = i.try_into().unwrap();
+                let row = &mut cells[i];
+                for j in y1..=y2 {
+                    let j: usize = j.try_into().unwrap();
+                    let cells = &mut row[j];
+
+                    if cells.is_empty() {
+                        continue;
+                    }
+                    for c in &mut *cells {
+                        ret.push(c.id.to_string());
+                    }
+                }
+            }
+
+            Some(ret)
+        }
+
+        #[napi]
+        pub fn get_open_cell_in_area(
+            &mut self,
+            x1: i32,
+            y1: i32,
+            x2: i32,
+            y2: i32,
+        ) -> Option<Vec<IntCoordinate>> {
+            let cells = &mut self.cells;
+            let collision_map = &self.collision_map;
+
+            let mut ret = vec![];
+
+            for i in x1..=x2 {
+                let i: usize = i.try_into().unwrap();
+                let row = &mut cells[i];
+                for j in y1..=y2 {
+                    let j: usize = j.try_into().unwrap();
+                    let cell = &mut row[j];
+
+                    if collision_map[i][j] == 1 {
+                        continue;
+                    }
+
+                    if !cell.is_empty() {
+                        if !cell.iter().any(|c| c.width == 0) {
+                            ret.push(IntCoordinate {
+                                x: i as i32,
+                                y: j as i32,
+                            });
+                        }
+
+                        continue;
+                    }
+
+                    ret.push(IntCoordinate {
+                        x: i as i32,
+                        y: j as i32,
+                    });
+                }
+            }
+
+            Some(ret)
         }
 
         #[napi]
