@@ -274,11 +274,10 @@ module.exports = {
 			return [];
 
 		let path = this.ph.getPath(fromX, toX, fromY, toY);
-		console.log({fromX,fromY},{toX,toY}, !!path);
+		
 		if (!path) {
 			return [];
 		}
-		console.log(path)
 
 		return path;
 	},

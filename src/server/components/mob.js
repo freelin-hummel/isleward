@@ -340,6 +340,7 @@ module.exports = {
 			}
 
 			let p = path[0];
+			console.log(p.x,p.y);
 			obj.queue({
 				action: 'move',
 				data: {
