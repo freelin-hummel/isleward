@@ -22,7 +22,7 @@ module.exports = {
 
 		this.width = collisionMap.length;
 		this.height = collisionMap[0].length;
-		this.ph = new rm.physics.Physics(this.width,this.height);
+		this.ph = new rm.physics.Physics(collisionMap,this.width,this.height);
 
 		this.cells = _.get2dArray(this.width, this.height, 'array');
 
@@ -273,15 +273,12 @@ module.exports = {
 		if ((!grid[toX]) || (grid[toX].length <= toY) || (toX < 0) || (toY < 0))
 			return [];
 
-		let path = pathfinder.astar.search(graph, {
-			x: fromX,
-			y: fromY
-		}, {
-			x: toX,
-			y: toY
-		}, {
-			closest: true
-		});
+		let path = this.ph.getPath(fromX, toX, fromY, toY);
+		console.log({fromX,fromY},{toX,toY}, !!path);
+		if (!path) {
+			return [];
+		}
+		console.log(path)
 
 		return path;
 	},

@@ -9,12 +9,12 @@ pub mod physics {
         bindgen_prelude::{External, ObjectFinalize},
         JsObject,
     };
-    use petgraph::Graph;
+    use petgraph::{algo, prelude::*, Graph, Undirected};
     use tracing::{debug, error};
 
     #[napi(object)]
     pub struct Physics {
-        pub graph: External<Graph<(), ()>>,
+        pub graph: External<UnGraph<(), ()>>,
         pub collision_map: Vec<Vec<bool>>,
         pub cells: Vec<Vec<Vec<PhysicsObject>>>,
         pub width: i32,
@@ -30,6 +30,13 @@ pub mod physics {
         pub height: i32,
         pub id: String,
         // area: Vec<i32>
+    }
+
+    #[derive(Debug, Clone, Copy)]
+    #[napi(object)]
+    pub struct Coordinate {
+        pub x: f64,
+        pub y: f64,
     }
 
     impl PartialEq for PhysicsObject {
@@ -73,7 +80,7 @@ pub mod physics {
     #[napi]
     impl Physics {
         #[napi(constructor)]
-        pub fn init(width: i32, height: i32) -> Physics {
+        pub fn init(collision_map: Vec<Vec<i32>>, width: i32, height: i32) -> Physics {
             let mut cells = Vec::with_capacity(width.try_into().unwrap());
             for _ in 0..width {
                 let mut row = Vec::with_capacity(height.try_into().unwrap());
@@ -84,11 +91,11 @@ pub mod physics {
             }
 
             Physics {
-                graph: Graph::new().into(),
+                graph: matrix_to_graph(&collision_map).into(),
                 collision_map: vec![],
                 cells,
-                width: 0,
-                height: 0,
+                width,
+                height,
             }
         }
 
@@ -102,7 +109,7 @@ pub mod physics {
             let cells = &mut self.cells;
             let mut ret = vec![];
 
-            // dbg!(&obj.id);
+            dbg!(&obj.id);
             for i in low_x..high_x {
                 let i: usize = i.try_into().unwrap();
                 if i > cells.len() {
@@ -237,5 +244,78 @@ pub mod physics {
 
             cell.push(obj);
         }
+
+        #[napi]
+        pub fn get_path(
+            &self,
+            from_x: i32,
+            to_x: i32,
+            from_y: i32,
+            to_y: i32,
+        ) -> Option<Vec<Coordinate>> {
+            let from = self
+                .graph
+                .node_indices()
+                .nth((from_y * self.width + from_x).try_into().unwrap())
+                .unwrap();
+            let to = self
+                .graph
+                .node_indices()
+                .nth((to_y * self.width + to_x).try_into().unwrap())
+                .unwrap();
+
+            if let Some(ids) =
+                algo::astar(&*self.graph, from, |finish| finish == to, |_| 0, |_| 0).map(|(_, x)| x)
+            {
+                return Some(
+                    ids.into_iter()
+                        .map(|id| {
+                            let y = (id.index() as f64 / self.width as f64).floor();
+                            let x = id.index() as f64 - y * self.width as f64;
+                            Coordinate { x, y }
+                        })
+                        .collect(),
+                );
+            }
+            None
+        }
+    }
+
+    // Function to create a graph from a 2D matrix
+    fn matrix_to_graph(matrix: &[Vec<i32>]) -> Graph<(), (), Undirected> {
+        let mut graph = Graph::new_undirected();
+        let size = matrix.len();
+        let inner_size = matrix[0].len();
+        let mut nodes = vec![vec![NodeIndex::default(); inner_size]; size];
+
+        // Add nodes to the graph
+        for row in nodes.iter_mut() {
+            for cell in row.iter_mut() {
+                *cell = graph.add_node(());
+            }
+        }
+
+        // Add edges based on the collision map
+        for i in 1..size - 1 {
+            for j in 1..inner_size - 1 {
+                if matrix[i][j] == 0 {
+                    continue;
+                }
+                for x in i - 1..=i + 1 {
+                    for y in j - 1..=j + 1 {
+                        if x == i && y == j {
+                            continue;
+                        }
+                        let from = nodes[i][j];
+                        let to = nodes[x][y];
+                        if matrix[x][y] == 1 && graph.find_edge(from, to).is_none() {
+                            graph.add_edge(from, to, ());
+                        }
+                    }
+                }
+            }
+        }
+
+        graph
     }
 }
