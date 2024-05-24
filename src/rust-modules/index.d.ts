@@ -9,6 +9,11 @@ export class ExternalObject<T> {
     [K: symbol]: T
   }
 }
+export namespace logging {
+  export interface LogInstance {
+    sub: undefined
+  }
+}
 export namespace physics {
   export interface Physics {
     graph: ExternalObject<PhysicsGraph>

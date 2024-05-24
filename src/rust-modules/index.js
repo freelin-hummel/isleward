@@ -310,6 +310,7 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { physics } = nativeBinding
+const { logging, physics } = nativeBinding
 
+module.exports.logging = logging
 module.exports.physics = physics

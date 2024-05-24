@@ -4,6 +4,48 @@
 extern crate napi_derive;
 
 #[napi]
+pub mod logging {
+    use napi::bindgen_prelude::ObjectFinalize;
+    use tracing_subscriber::fmt::format::FmtSpan;
+    use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
+    use tracing_subscriber::util::SubscriberInitExt;
+
+    #[napi(object)]
+    pub struct LogInstance {
+        pub sub: (),
+    }
+
+    impl Default for LogInstance {
+        fn default() -> Self {
+            Self::new()
+        }
+    }
+
+    #[napi]
+    impl LogInstance {
+        #[napi(constructor)]
+        pub fn new() -> Self {
+            Self {
+                sub: tracing_subscriber::registry()
+                    .with(
+                        tracing_subscriber::EnvFilter::try_from_default_env()
+                            .unwrap_or_else(|_| "info".into()),
+                    )
+                    .with(tracing_subscriber::fmt::layer().with_span_events(FmtSpan::CLOSE))
+                    .init(),
+            }
+        }
+    }
+
+    impl ObjectFinalize for LogInstance {
+        fn finalize(self, _env: napi::Env) -> napi::Result<()> {
+            //TODO: Check if the External object needs some kind of manual cleanup
+            Ok(())
+        }
+    }
+}
+
+#[napi]
 pub mod physics {
 
     use napi::{
@@ -126,8 +168,12 @@ pub mod physics {
                 cells.push(row);
             }
 
+            debug!("Building graph.");
+            let graph = matrix_to_graph(&collision_map).into();
+            debug!("Physics initialized");
+
             Physics {
-                graph: matrix_to_graph(&collision_map).into(),
+                graph,
                 collision_map,
                 cells,
                 width,

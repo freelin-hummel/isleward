@@ -7,6 +7,8 @@ global.instancer = require('./instancer');
 global.eventManager = require('../events/events');
 global.clientConfig = require('../config/clientConfig');
 global.rezoneManager = require('./rezoneManager');
+const rm = require('../../rust-modules');
+new rm.logging.LogInstance();
 
 //Imports
 const components = require('../components/components');
