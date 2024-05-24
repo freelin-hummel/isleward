@@ -5,10 +5,9 @@ extern crate napi_derive;
 
 #[napi]
 pub mod physics {
-    use std::{error::Error, fs::File, path::PathBuf};
 
     use napi::{
-        bindgen_prelude::{External, ObjectFinalize},
+        bindgen_prelude::{External, Null, ObjectFinalize, Undefined},
         JsObject,
     };
     use petgraph::{algo, prelude::*, visit::IntoNodeReferences, Graph};
@@ -33,7 +32,7 @@ pub mod physics {
         pub width: i32,
         pub height: i32,
         pub id: String,
-        // area: Vec<i32>
+        pub is_notice: bool, // area: Vec<i32>
     }
 
     #[derive(Debug, Clone, Copy, PartialEq)]
@@ -86,11 +85,14 @@ pub mod physics {
                 }
             };
 
+            assert!(value.get_named_property::<Null>("notice").is_err());
+
             PhysicsObject {
                 x: value.get_named_property("x").unwrap_or_default(),
                 y: value.get_named_property("y").unwrap_or_default(),
                 width: value.get_named_property("width").unwrap_or_default(),
                 height: value.get_named_property("height").unwrap_or_default(),
+                is_notice: value.get_named_property::<Undefined>("notice").is_err(),
                 id,
             }
         }
@@ -101,35 +103,6 @@ pub mod physics {
             //TODO: Check if the External object needs some kind of manual cleanup
             Ok(())
         }
-    }
-
-    fn write_graph_to_csv(gr: &PhysicsGraph, mut path: PathBuf) -> Result<(), Box<dyn Error>> {
-        path.push("nodes.csv");
-        // Open a file to write nodes
-        let mut wtr_node = csv::Writer::from_writer(File::create(&path)?);
-        wtr_node.write_record(["id", "label"])?;
-
-        // Write node data
-        for node in gr.node_indices() {
-            wtr_node.write_record(&[node.index().to_string(), gr[node].to_string()])?;
-        }
-        wtr_node.flush()?;
-        path.pop();
-        path.push("edges.csv");
-        // Open a file to write edges
-        let mut wtr_edge = csv::Writer::from_writer(File::create(path)?);
-        wtr_edge.write_record(["source", "target"])?;
-
-        // Write edge data
-        for edge in gr.edge_references() {
-            wtr_edge.write_record(&[
-                edge.source().index().to_string(),
-                edge.target().index().to_string(),
-            ])?;
-        }
-        wtr_edge.flush()?;
-
-        Ok(())
     }
 
     #[napi]
@@ -144,34 +117,7 @@ pub mod physics {
                 }
                 cells.push(row);
             }
-            let gr = matrix_to_graph(&collision_map);
-            // let from = Coordinate { x: 117, y: 53 }.find_node(&gr).unwrap();
-            // let to_coord = Coordinate { x: 112, y: 57 };
-            // let to = to_coord.find_node(&gr).unwrap();
-            // dbg!(algo::has_path_connecting(&gr, from, to, None));
-            // let t = Instant::now();
-            // let ass: Vec<_> = algo::astar(
-            //     &gr,
-            //     from,
-            //     |finish| finish == to,
-            //     |_| 0,
-            //     |n| {
-            //         let Coordinate { x, y } = gr[n];
-            //         *[(x - to_coord.x).abs(), (y - to_coord.y).abs()]
-            //             .iter()
-            //             .max()
-            //             .unwrap()
-            //     },
-            // )
-            // .unwrap()
-            // .1
-            // .into_iter()
-            // .map(|x| gr[x])
-            // .collect();
-            // dbg!(t.elapsed());
-            // dbg!(ass);
 
-            // write_graph_to_csv(&gr, "/tmp".into()).unwrap();
             Physics {
                 graph: matrix_to_graph(&collision_map).into(),
                 collision_map,
@@ -395,13 +341,7 @@ pub mod physics {
             }
 
             let cell: &[PhysicsObject] = &row[y];
-
-            let mut ret = vec![];
-            for c in cell {
-                ret.push(c.id.to_string());
-            }
-
-            Some(ret)
+            return Some(cell.iter().map(|x| x.id.to_string()).collect());
         }
 
         #[napi]
@@ -413,6 +353,7 @@ pub mod physics {
             for i in x1..=x2 {
                 let i: usize = i.try_into().unwrap();
                 let row = &mut cells[i];
+
                 for j in y1..=y2 {
                     let j: usize = j.try_into().unwrap();
                     let cells = &mut row[j];
@@ -454,7 +395,7 @@ pub mod physics {
                     }
 
                     if !cell.is_empty() {
-                        if !cell.iter().any(|c| c.width == 0) {
+                        if !cell.iter().any(|c| !c.is_notice) {
                             ret.push(IntCoordinate {
                                 x: i as i32,
                                 y: j as i32,
@@ -512,6 +453,63 @@ pub mod physics {
                 return Some(ids.into_iter().skip(1).map(|id| self.graph[id]).collect());
             }
             None
+        }
+        #[napi]
+        pub fn has_los(&self, from_x: i32, from_y: i32, to_x: i32, to_y: i32) -> bool {
+            if (from_x < 0)
+                || (from_y < 0)
+                || (from_x >= self.width) | (from_y >= self.height)
+                || (to_x < 0)
+                || (to_y < 0)
+                || (to_x >= self.width) | (to_y >= self.height)
+            {
+                return false;
+            }
+
+            let collision_map = &self.collision_map;
+            let from_xi: usize = from_x.try_into().unwrap();
+            let from_yi: usize = from_y.try_into().unwrap();
+
+            let to_xi: usize = to_x.try_into().unwrap();
+            let to_yi: usize = to_y.try_into().unwrap();
+
+            if collision_map[from_xi][from_yi] == 1 || collision_map[to_xi][to_yi] == 1 {
+                return false;
+            }
+
+            let mut dx = (to_x - from_x) as f64;
+            let mut dy = (to_y - from_y) as f64;
+
+            let mut from_x = from_x as f64;
+            let mut from_y = from_y as f64;
+
+            let distance = ((dx * dx) + (dy * dy)).sqrt();
+
+            dx /= distance;
+            dy /= distance;
+
+            from_x += 0.5;
+            from_y += 0.5;
+
+            debug!("float distance: {distance}");
+            let idistance = distance.ceil() as usize;
+            debug!("int distance: {idistance}");
+
+            for _ in 0..idistance {
+                from_x += dx;
+                from_y += dy;
+
+                let x = from_x.floor() as usize;
+                let y = from_y.floor() as usize;
+
+                if collision_map[x][y] == 1 {
+                    return false;
+                } else if (x == to_xi) && (y == to_yi) {
+                    return true;
+                }
+            }
+
+            true
         }
     }
 

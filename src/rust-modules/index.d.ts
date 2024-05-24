@@ -23,6 +23,7 @@ export namespace physics {
     width: number
     height: number
     id: string
+    isNotice: boolean
   }
   export interface Coordinate {
     x: number

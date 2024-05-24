@@ -197,46 +197,7 @@ module.exports = {
 		return true;
 	},
 	hasLos: function (fromX, fromY, toX, toY) {
-		if ((fromX < 0) || (fromY < 0) || (fromX >= this.width) | (fromY >= this.height) || (toX < 0) || (toY < 0) || (toX >= this.width) | (toY >= this.height))
-			return false;
-
-		let graphGrid = this.graph.grid;
-
-		if ((!graphGrid[fromX][fromY]) || (!graphGrid[toX][toY]))
-			return false;
-
-		let dx = toX - fromX;
-		let dy = toY - fromY;
-
-		let distance = sqrt((dx * dx) + (dy * dy));
-
-		dx /= distance;
-		dy /= distance;
-
-		fromX += 0.5;
-		fromY += 0.5;
-
-		distance = ceil(distance);
-
-		let x = 0;
-		let y = 0;
-
-		for (let i = 0; i < distance; i++) {
-			fromX += dx;
-			fromY += dy;
-
-			x = ~~fromX;
-			y = ~~fromY;
-
-			let node = graphGrid[x][y];
-
-			if ((!node) || (node.weight === 0))
-				return false;
-			else if ((x === toX) && (y === toY))
-				return true;
-		}
-
-		return true;
+		return this.ph.hasLos(...arguments);
 	},
 
 	getClosestPos: function (fromX, fromY, toX, toY, target, obj) {
