@@ -14,6 +14,7 @@ pub mod physics {
     use tracing::{debug, error};
 
     type PhysicsGraph = UnGraph<Coordinate, ()>;
+    type Area = Vec<Vec<i32>>;
 
     #[napi(object)]
     pub struct Physics {
@@ -32,7 +33,8 @@ pub mod physics {
         pub width: i32,
         pub height: i32,
         pub id: String,
-        pub is_notice: bool, // area: Vec<i32>
+        pub is_notice: bool,
+        pub area: Option<Area>,
     }
 
     #[derive(Debug, Clone, Copy, PartialEq)]
@@ -86,6 +88,7 @@ pub mod physics {
             };
 
             assert!(value.get_named_property::<Null>("notice").is_err());
+            assert!(value.get_named_property::<Null>("area").is_err());
 
             PhysicsObject {
                 x: value.get_named_property("x").unwrap_or_default(),
@@ -93,6 +96,11 @@ pub mod physics {
                 width: value.get_named_property("width").unwrap_or_default(),
                 height: value.get_named_property("height").unwrap_or_default(),
                 is_notice: value.get_named_property::<Undefined>("notice").is_err(),
+                area: if value.get_named_property::<Undefined>("notice").is_ok() {
+                    None
+                } else {
+                    Some(value.get_named_property("area").unwrap_or_default())
+                },
                 id,
             }
         }
@@ -208,31 +216,32 @@ pub mod physics {
             from_x: Option<i32>,
             from_y: Option<i32>,
         ) -> Option<Vec<String>> {
-            let x: usize = x.try_into().unwrap();
-            if x >= self.cells.len() {
+            let xi: usize = x.try_into().unwrap();
+            if xi >= self.cells.len() {
                 return None;
             }
-            let row: &[Vec<PhysicsObject>] = &self.cells[x];
-            let y: usize = y.try_into().unwrap();
-            if y >= row.len() {
+            let row: &[Vec<PhysicsObject>] = &self.cells[xi];
+            let yi: usize = y.try_into().unwrap();
+            if yi >= row.len() {
                 return None;
             }
 
-            let cell: &[PhysicsObject] = &row[y];
+            let cell: &[PhysicsObject] = &row[yi];
 
             let mut ret = vec![];
             for c in cell {
                 //If we have from_x and from_y, check if the target cell doesn't contain the same obj (like a notice area)
                 if c.width == 0 && from_x.is_some() && from_y.is_some() {
-                    // if (c.area) {
-                    //     if ((this.isInPolygon(x, y, c.area)) && (!this.isInPolygon(from_x, from_y, c.area))) {
-                    //         c.collisionEnter(obj);
-                    //         obj.collisionEnter(c);
-                    //     }
-                    // } else
                     let from_x = from_x.unwrap();
                     let from_y = from_y.unwrap();
-                    if (from_x < c.x
+                    if let Some(area) = &c.area {
+                        if self.is_in_polygon_int(x, y, area)
+                            && !self.is_in_polygon_int(from_x, from_y, area)
+                            && !ret.contains(&c.id)
+                        {
+                            ret.push(c.id.to_string());
+                        }
+                    } else if (from_x < c.x
                         || from_y < c.y
                         || from_x >= c.x + c.width
                         || from_y >= c.y + c.height)
@@ -278,36 +287,37 @@ pub mod physics {
         ) -> Option<Vec<String>> {
             let obj = PhysicsObject::from(&obj);
 
-            let cells = &mut self.cells;
+            let cells = &self.cells;
 
-            let x: usize = x.try_into().unwrap();
-            if x >= cells.len() {
+            let xi: usize = x.try_into().unwrap();
+            if xi >= cells.len() {
                 return None;
             }
-            let row = &mut cells[x];
-            let y: usize = y.try_into().unwrap();
-            if y >= row.len() {
+            let row = &cells[xi];
+            let yi: usize = y.try_into().unwrap();
+            if yi >= row.len() {
                 return None;
             }
 
-            let cell = &mut row[y];
+            let cell = &row[yi];
 
             let mut ret = vec![];
             let mut remove_ids = vec![];
 
-            for c in &mut *cell {
+            for c in cell {
                 if c.id != obj.id {
                     //If we have from_x and from_y, check if the target cell doesn't contain the same obj (like a notice area)
                     if c.width == 0 && to_x.is_some() && to_y.is_some() {
-                        // if (c.area) {
-                        //     if ((this.isInPolygon(x, y, c.area)) && (!this.isInPolygon(from_x, from_y, c.area))) {
-                        //         c.collisionExit(obj);
-                        //         obj.collisionExit(c);
-                        //     }
-                        // } else
                         let to_x = to_x.unwrap();
                         let to_y = to_y.unwrap();
-                        if (to_x < c.x
+                        if let Some(area) = &c.area {
+                            if (self.is_in_polygon_int(x, y, area))
+                                && (!self.is_in_polygon_int(to_x, to_y, area))
+                                && !ret.contains(&c.id)
+                            {
+                                ret.push(c.id.to_string())
+                            }
+                        } else if (to_x < c.x
                             || to_y < c.y
                             || to_x >= c.x + c.width
                             || to_y >= c.y + c.height)
@@ -322,7 +332,7 @@ pub mod physics {
                     remove_ids.push(c.clone());
                 }
             }
-
+            let cell = &mut self.cells[xi][yi];
             cell.retain(|c| !remove_ids.contains(c));
 
             Some(ret)
@@ -510,6 +520,42 @@ pub mod physics {
             }
 
             true
+        }
+
+        #[napi]
+        pub fn is_in_polygon(&self, x: i32, y: i32, verts: Area) -> bool {
+            self.is_in_polygon_int(x, y, &verts)
+        }
+
+        #[inline(always)]
+        pub fn is_in_polygon_int(&self, x: i32, y: i32, verts: &Area) -> bool {
+            let mut inside = false;
+
+            let v_len = verts.len();
+
+            let mut i = 0;
+            let mut j = v_len - 1;
+
+            while i < v_len {
+                let vi = &verts[i];
+                let vj = &verts[j];
+
+                let xi = vi[0];
+                let yi = vi[1];
+                let xj = vj[0];
+                let yj = vj[1];
+
+                let does_intersect =
+                    ((yi > y) != (yj > y)) && (x < ((((xj - xi) * (y - yi)) / (yj - yi)) + xi));
+
+                if does_intersect {
+                    inside = !inside;
+                }
+                j = i;
+                i += 1;
+            }
+
+            inside
         }
     }
 

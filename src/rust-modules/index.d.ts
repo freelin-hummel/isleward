@@ -24,6 +24,7 @@ export namespace physics {
     height: number
     id: string
     isNotice: boolean
+    area?: Area
   }
   export interface Coordinate {
     x: number

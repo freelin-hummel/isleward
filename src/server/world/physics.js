@@ -329,27 +329,6 @@ module.exports = {
 	},
 
 	isInPolygon: function (x, y, verts) {
-		let inside = false;
-
-		let vLen = verts.length;
-		for (let i = 0, j = vLen - 1; i < vLen; j = i++) {
-			let vi = verts[i];
-			let vj = verts[j];
-
-			let xi = vi[0];
-			let yi = vi[1];
-			let xj = vj[0];
-			let yj = vj[1];
-
-			let doesIntersect = (
-				((yi > y) !== (yj > y)) &&
-					(x < ((((xj - xi) * (y - yi)) / (yj - yi)) + xi))
-			);
-
-			if (doesIntersect)
-				inside = !inside;
-		}
-
-		return inside;
+		return this.ph.isInPolygon(...arguments);
 	}
 };
