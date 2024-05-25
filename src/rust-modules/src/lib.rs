@@ -277,7 +277,7 @@ pub mod physics {
             let mut ret = vec![];
             for c in cell {
                 //If we have from_x and from_y, check if the target cell doesn't contain the same obj (like a notice area)
-                if c.width == 0 && from_x.is_some() && from_y.is_some() {
+                if c.width != 0 && from_x.is_some() && from_y.is_some() {
                     let from_x = from_x.unwrap();
                     let from_y = from_y.unwrap();
                     if let Some(area) = &c.area {
@@ -353,7 +353,7 @@ pub mod physics {
             for c in cell {
                 if c.id != obj.id {
                     //If we have from_x and from_y, check if the target cell doesn't contain the same obj (like a notice area)
-                    if c.width == 0 && to_x.is_some() && to_y.is_some() {
+                    if c.width != 0 && to_x.is_some() && to_y.is_some() {
                         let to_x = to_x.unwrap();
                         let to_y = to_y.unwrap();
                         if let Some(area) = &c.area {
