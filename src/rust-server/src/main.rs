@@ -28,7 +28,7 @@ async fn main() {
 
     let app = Router::new()
         .nest_service("/", ServeDir::new("../../client"))
-        .nest_service("/server", ServeDir::new("../../server"))
+        .nest("/server", server_router())
         // .route("/socket.io", get(ws_handler))
         // .route("/socket.io/", get(ws_handler))
         .layer(
@@ -47,6 +47,21 @@ async fn main() {
     )
     .await
     .unwrap();
+}
+
+fn server_router() -> Router {
+    Router::new()
+        .nest_service(
+            "/clientComponents",
+            ServeDir::new("../../server/clientComponents"),
+        )
+        .nest("/mods", mods_router())
+}
+
+fn mods_router() -> Router {
+    Router::new()
+        .nest_service("/ui", ServeDir::new("../../server/mods/ui"))
+        .nest_service("/audio", ServeDir::new("../../server/mods/audio"))
 }
 
 // async fn ws_handler(ws: WebSocketUpgrade) -> Response {
