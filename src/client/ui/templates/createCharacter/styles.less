@@ -24,7 +24,8 @@
 		width: 613px;
 		background-color: #3a3b4a;
 
-		.left, .right {
+		.left,
+		.right {
 			float: left;
 			height: 100%;
 		}
@@ -33,7 +34,8 @@
 			width: calc(100% - (@boxPadding * 2) - 160px);
 			padding: @boxPadding 0px @boxPadding @boxPadding;
 
-			.txtClass, .txtCostume {
+			.txtClass,
+			.txtCostume {
 				cursor: pointer;
 				-webkit-user-select: none;
 
@@ -177,38 +179,6 @@
 			}
 
 			.list {
-				.prophecy {
-					padding-top: 0px;
-					width: 50%;
-					float: left;
-					height: 24px;
-					margin-bottom: 24px;
-					color: @redA;
-					cursor: pointer;
-
-					&:after {
-						content: '  ✗';
-					}
-
-					&.active {
-						color: @greenA;
-
-						&:after {
-							content: '  ✔';
-						}
-
-					}
-
-					&.disabled {
-						color: @white;
-					}
-
-					&:hover {
-						color: @white;
-					}
-
-				}
-
 			}
 
 		}

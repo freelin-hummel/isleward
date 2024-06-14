@@ -22,8 +22,6 @@ define([
 		costume: 0,
 		skinId: null,
 
-		prophecies: [],
-
 		beforeRender: function () {
 			const { clientConfig: { logoPath } } = globals;
 			if (!logoPath)
@@ -49,11 +47,6 @@ define([
 
 			this.find('.btnBack').on('click', this.back.bind(this));
 			this.find('.btnCreate').on('click', this.create.bind(this));
-
-			this.find('.prophecy')
-				.on('click', this.onProphecyClick.bind(this))
-				.on('mousemove', this.onProphecyHover.bind(this))
-				.on('mouseleave', this.onProphecyUnhover.bind(this));
 		},
 
 		getSkins: function () {
@@ -82,51 +75,14 @@ define([
 			this.changeCostume();
 		},
 
-		onProphecyHover: function (e) {
-			let el = $(e.target);
-
-			let pos = {
-				x: e.clientX + 25,
-				y: e.clientY
-			};
-
-			let text = el.attr('tooltip');
-
-			events.emit('onShowTooltip', text, el[0], pos);
-			$('.uiTooltips .tooltip').addClass('bright');
-		},
-
-		onProphecyUnhover: function (e) {
-			let el = $(e.target);
-			events.emit('onHideTooltip', el[0]);
-		},
-
-		onProphecyClick: function (e) {
-			let el = $(e.target);
-			let pName = el.attr('prophecy');
-
-			if (el.hasClass('active')) {
-				this.prophecies.spliceWhere(function (p) {
-					return (p === pName);
-				});
-				el.removeClass('active');
-			} else {
-				this.prophecies.push(pName);
-				el.addClass('active');
-			}
-		},
-
-		clear: function () {
-			this.prophecies = [];
-			this.find('.prophecy').removeClass('active');
-		},
+		clear: function () {},
 
 		back: function () {
 			this.clear();
 
 			this.destroy();
 
-			uiFactory.build('characters', {});
+			uiFactory.build('characters');
 		},
 
 		create: function () {
@@ -135,8 +91,7 @@ define([
 			const eCreateCharacter = {
 				name: this.find('.txtName').val(),
 				class: this.class,
-				skinId: this.skinId,
-				prophecies: this.prophecies
+				skinId: this.skinId
 			};
 
 			events.emit('beforeCreateCharacter', eCreateCharacter);

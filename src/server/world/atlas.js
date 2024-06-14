@@ -2,8 +2,7 @@
 const objects = require('../objects/objects');
 const events = require('../misc/events');
 const {
-	getThread, killThread, sendMessageToThread, getThreadFromId, doesThreadExist,
-	returnWhenThreadsIdle, getPlayerCountInThread, killThreadIfEmpty
+	getThread, sendMessageToThread, getThreadFromId, returnWhenThreadsIdle, trackPlayerOnThread, untrackPlayerOnThread
 } = require('./threadManager');
 const { registerCallback, removeCallback } = require('./atlas/registerCallback');
 
@@ -19,7 +18,7 @@ module.exports = {
 		//While rezoning, this is set to true. So we remove it
 		delete serverObj.rezoning;
 
-		events.emit('onBeforePlayerEnterWorld', obj);
+		await events.emit('onBeforePlayerEnterWorld', { obj });
 
 		let { zoneName, zoneId } = obj;
 
@@ -42,29 +41,18 @@ module.exports = {
 		}
 
 		const eGetThread = {
+			serverObj,
 			zoneName,
-			zoneId
+			zoneId,
+			obj
 		};
-
-		if (!doesThreadExist(eGetThread)) {
-			serverObj.socket.emit('event', {
-				event: 'onGetAnnouncement',
-				data: {
-					msg: 'Generating a new map, please wait as this may take a few moments..',
-					ttl: 500
-				}
-			});
-		}
 
 		const { thread, resetObjPosition } = await getThread(eGetThread);
 
 		//Perhaps the player disconnected while waiting for the thread to spawn
-		if (!serverObj.socket.connected) {
-			await killThreadIfEmpty(thread);
-
+		if (!serverObj.socket.connected)
 			return;
-		}
-		
+
 		if (resetObjPosition) {
 			delete obj.x;
 			delete obj.y;
@@ -82,8 +70,10 @@ module.exports = {
 
 		const simpleObj = obj.getSimple ? obj.getSimple(true, true) : obj;
 
+		trackPlayerOnThread(thread, serverObj);
+
 		sendMessageToThread({
-			threadId: obj.zoneId,
+			threadId: serverObj.threadId,
 			msg: {
 				method: 'addObject',
 				args: {
@@ -95,29 +85,7 @@ module.exports = {
 		});
 	},
 
-	removeObjectFromInstancedZone: async function (thread, objId, callback) {
-		await new Promise(res => {
-			const cb = this.registerCallback(res);
-
-			thread.worker.send({
-				method: 'forceSavePlayer',
-				args: {
-					playerId: objId,
-					callbackId: cb
-				}
-			});
-		});
-
-		killThread(thread);
-
-		if (callback)
-			callback();
-	},
-
 	removeObject: async function (obj, skipLocal, callback) {
-		//We need to store the player id because the calling thread might delete it (connections.unzone)
-		const playerId = obj.id;
-
 		if (!skipLocal)
 			objects.removeObject(obj);
 
@@ -128,18 +96,12 @@ module.exports = {
 			return;
 		}
 
-		if (thread.instanced && (await getPlayerCountInThread(thread)) === 1) {
-			this.removeObjectFromInstancedZone(thread, playerId, callback);
-
-			return;
-		}
-
 		let callbackId = null;
 		if (callback)
 			callbackId = this.registerCallback(callback);
 
 		sendMessageToThread({
-			threadId: obj.zoneId,
+			threadId: obj.threadId,
 			msg: {
 				method: 'removeObject',
 				args: {
@@ -148,10 +110,12 @@ module.exports = {
 				}
 			}
 		});
+
+		untrackPlayerOnThread(thread, obj);
 	},
 	updateObject: function (obj, msgObj) {
 		sendMessageToThread({
-			threadId: obj.zoneId,
+			threadId: obj.threadId,
 			msg: {
 				method: 'updateObject',
 				args: {
@@ -163,7 +127,7 @@ module.exports = {
 	},
 	queueAction: function (obj, action) {
 		sendMessageToThread({
-			threadId: obj.zoneId,
+			threadId: obj.threadId,
 			msg: {
 				method: 'queueAction',
 				args: {
@@ -175,7 +139,7 @@ module.exports = {
 	},
 	performAction: function (obj, action) {
 		sendMessageToThread({
-			threadId: obj.zoneId,
+			threadId: obj.threadId,
 			msg: {
 				method: 'performAction',
 				args: {
@@ -202,8 +166,8 @@ module.exports = {
 		await returnWhenThreadsIdle();
 	},
 
-	forceSavePlayer: async function (playerId, zoneId) {
-		const thread = getThreadFromId(zoneId);
+	forceSavePlayer: async function (obj) {
+		const thread = getThreadFromId(obj.threadId);
 
 		if (!thread)
 			return;
@@ -214,7 +178,7 @@ module.exports = {
 			thread.worker.send({
 				method: 'forceSavePlayer',
 				args: {
-					playerId,
+					playerId: obj.id,
 					callbackId
 				}
 			});

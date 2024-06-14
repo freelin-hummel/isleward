@@ -1,22 +1,26 @@
 @import "../../../css/colors.less";
-@pad: 8px;
-@btnSize: 64px;
 
 .uiMenu {
 	position: absolute;
 	right: 10px;
 	bottom: 10px;
-	width: ((@btnSize * 4) + (@pad * 10));
-	height: ((@btnSize * 2) + (@pad * 2));
-	padding: @pad;
+	padding: 10px;
 	background-color: fade(@blackC, 90%);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	row-gap: 0px;
+	flex-direction: row;
+	justify-content: center;
+	width: 306px;
+
+	.break {
+		width: 100%;
+	}
 
 	[class^="btn"] {
-		width: @btnSize;
-		height: @btnSize;
-		float: left;
-		margin: 0px @pad;
-		float: left;
+		width: 64px;
+		height: 64px;
 		cursor: pointer;
 		position: relative;
 
@@ -99,8 +103,8 @@
 	bottom: auto;
 	top: 10px;
 	right: 10px;
-	width: @btnSize;
-	height: @btnSize;
+	width: 64px;
+	height: 64px;
 
 	&:after {
 		content: '';
@@ -109,8 +113,8 @@
 		top: 0px;
 		background: url('../../../images/uiIcons.png');
 		background-position: 0px -64px;
-		width: @btnSize;
-		height: @btnSize;
+		width: 64px;
+		height: 64px;
 	}
 
 	> * {
@@ -143,8 +147,8 @@
 			top: 50%;
 			transform: translateY(-50%);
 			background-color: fade(@blackC, 90%);
-			width: @btnSize;
-			height: @btnSize;
+			width: 64px;
+			height: 64px;
 
 			.icon {
 				width: 100%;

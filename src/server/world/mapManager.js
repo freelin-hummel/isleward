@@ -16,6 +16,7 @@ const mapList = [
 //Helpers
 const init = () => {
 	events.emit('onBeforeGetMapList', mapList);
+	events.emit('onBeforeFinalizeMapList', mapList);
 };
 
 //Exports

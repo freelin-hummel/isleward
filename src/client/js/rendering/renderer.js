@@ -7,8 +7,9 @@ define([
 	'js/rendering/particles',
 	'js/rendering/shaders/outline',
 	'js/rendering/spritePool',
+	'js/rendering/helpers/updateSprites',
 	'js/system/globals',
-	'js/rendering/renderLoginBackground',
+	'js/rendering/helpers/renderLoginBackground',
 	'js/rendering/helpers/resetRenderer'
 ], function (
 	resources,
@@ -19,6 +20,7 @@ define([
 	particles,
 	shaderOutline,
 	spritePool,
+	updateSprites,
 	globals,
 	renderLoginBackground,
 	resetRenderer
@@ -76,6 +78,8 @@ define([
 		lastTick: null,
 
 		hiddenRooms: null,
+
+		staticCamera: false,
 
 		init: function () {
 			PIXI.settings.GC_MODE = PIXI.GC_MODES.AUTO;
@@ -200,9 +204,12 @@ define([
 			this.renderer.resize(this.width, this.height);
 			if (window.player) {
 				this.setPosition({
-					x: (window.player.x - (this.width / (scale * 2))) * scale,
-					y: (window.player.y - (this.height / (scale * 2))) * scale
-				}, true);
+					pos: {
+						x: window.player.x,
+						y: window.player.y
+					},
+					instant: true
+				});
 			}
 
 			if (this.titleScreen) {
@@ -278,10 +285,14 @@ define([
 		},
 
 		onGetMap: function (msg) {
-			this.titleScreen = false;
-			physics.init(msg.collisionMap);
+			const { zoneId, collisionMap, map, hiddenRooms, clientObjects, rendererConfig } = msg;
+			const { staticCamera = false, cameraPosition } = rendererConfig;
 
-			let map = this.map = msg.map;
+			this.map = map;
+
+			this.titleScreen = false;
+			physics.init(collisionMap);
+
 			let w = this.w = map.length;
 			let h = this.h = map[0].length;
 
@@ -301,7 +312,7 @@ define([
 			this.stage.filters = [new PIXI.filters.AlphaFilter()];
 			this.stage.filterArea = new PIXI.Rectangle(0, 0, Math.max(w * scale, this.width), Math.max(h * scale, this.height));
 
-			this.hiddenRooms = msg.hiddenRooms;
+			this.hiddenRooms = hiddenRooms;
 
 			this.sprites = _.get2dArray(w, h, 'array');
 
@@ -316,16 +327,30 @@ define([
 			if (this.zoneId !== null) {
 				events.emit('onRezone', {
 					oldZoneId: this.zoneId,
-					newZoneId: msg.zoneId
+					newZoneId: zoneId
 				});
 			}
 
-			this.zoneId = msg.zoneId;
+			this.zoneId = zoneId;
 
-			msg.clientObjects.forEach(c => {
+			clientObjects.forEach(c => {
 				c.zoneId = this.zoneId;
 				events.emit('onGetObject', c);
 			});
+
+			if (staticCamera) {
+				this.staticCamera = true;
+
+				this.setPosition({
+					pos: {
+						x: cameraPosition.x,
+						y: cameraPosition.y
+					},
+					instant: true,
+					staticPosition: true
+				});
+			} else
+				this.staticCamera = false;
 
 			//Normally, the mounts mod queues this event when unmounting.
 			// If we rezone, our effects are destroyed, so the event is queued,
@@ -334,9 +359,17 @@ define([
 			events.emit('onMoveSpeedChange', 0);
 		},
 
-		setPosition: function (pos, instant) {
-			pos.x += 16;
-			pos.y += 16;
+		/*
+		pos: { x, y }
+			The x and y positions the camera should be centered on (not yet multiplied by scale)
+		instant: boolean
+			should the camera pan to the location or not
+		*/
+		setPosition: function ({ pos = { x: 0, y: 0 }, instant, staticPosition }) {
+			let { x, y } = pos;
+
+			x = (x - (this.width / (scale * 2))) * scale;
+			y = (y - (this.height / (scale * 2))) * scale;
 
 			let player = window.player;
 			if (player) {
@@ -362,13 +395,29 @@ define([
 				}
 			}
 
+			const staticCamera = window.staticCamera ?? this.staticCamera;
+			if (staticCamera && staticPosition === undefined) {
+				this.updateSprites();
+				
+				return;
+			}
+
 			if (instant) {
 				this.moveTo = null;
-				this.pos = pos;
-				this.stage.x = -~~this.pos.x;
-				this.stage.y = -~~this.pos.y;
-			} else
-				this.moveTo = pos;
+
+				this.pos = {
+					x,
+					y
+				};
+
+				this.stage.x = -~~x;
+				this.stage.y = -~~y;
+			} else {
+				this.moveTo = {
+					x,
+					y
+				};
+			}
 
 			this.updateSprites();
 		},
@@ -437,194 +486,7 @@ define([
 		},
 
 		updateSprites: function () {
-			if (this.titleScreen)
-				return;
-
-			const player = window.player;
-			if (!player)
-				return;
-
-			const { w, h, width, height, stage, map, sprites } = this;
-
-			const x = ~~((-stage.x / scale) + (width / (scale * 2)));
-			const y = ~~((-stage.y / scale) + (height / (scale * 2)));
-
-			this.lastUpdatePos.x = stage.x;
-			this.lastUpdatePos.y = stage.y;
-
-			const container = this.layers.tileSprites;
-
-			const sw = this.showTilesW;
-			const sh = this.showTilesH;
-
-			let lowX = Math.max(0, x - sw + 1);
-			let lowY = Math.max(0, y - sh + 2);
-			let highX = Math.min(w, x + sw - 2);
-			let highY = Math.min(h, y + sh - 2);
-
-			let addedSprite = false;
-
-			const checkHidden = this.isHidden.bind(this);
-			const buildTile = this.buildTile.bind(this);
-
-			const newVisible = [];
-			const newHidden = [];
-
-			for (let i = lowX; i < highX; i++) {
-				let mapRow = map[i];
-				let spriteRow = sprites[i];
-
-				for (let j = lowY; j < highY; j++) {
-					const cell = mapRow[j];
-					if (!cell)
-						continue;
-
-					const cLen = cell.length;
-					if (!cLen)
-						return;
-
-					const rendered = spriteRow[j];
-					const isHidden = checkHidden(i, j);
-
-					if (isHidden) {
-						const nonFakeRendered = rendered.filter(r => !r.isFake);
-
-						const rLen = nonFakeRendered.length;
-						for (let k = 0; k < rLen; k++) {
-							const sprite = nonFakeRendered[k];
-
-							sprite.visible = false;
-							spritePool.store(sprite);
-							rendered.spliceWhere(s => s === sprite);
-						}
-
-						if (cell.visible) {
-							cell.visible = false;
-							newHidden.push({
-								x: i,
-								y: j
-							});
-						}
-
-						const hasFake = cell.some(c => c[0] === '-');
-						if (hasFake) {
-							const isFakeRendered = rendered.some(r => r.isFake);
-							if (isFakeRendered)
-								continue;
-						} else
-							continue;
-					} else {
-						const fakeRendered = rendered.filter(r => r.isFake);
-
-						const rLen = fakeRendered.length;
-						for (let k = 0; k < rLen; k++) {
-							const sprite = fakeRendered[k];
-
-							sprite.visible = false;
-							spritePool.store(sprite);
-							rendered.spliceWhere(s => s === sprite);
-						}
-
-						if (!cell.visible) {
-							cell.visible = true;
-							newVisible.push({
-								x: i,
-								y: j
-							});
-						}
-
-						const hasNonFake = cell.some(c => c[0] !== '-');
-						if (hasNonFake) {
-							const isNonFakeRendered = rendered.some(r => !r.isFake);
-							if (isNonFakeRendered)
-								continue;
-						} else
-							continue;
-					}
-
-					for (let k = 0; k < cLen; k++) {
-						let c = cell[k];
-						if (c === '0' || c === '')
-							continue;
-
-						const isFake = +c < 0;
-						if (isFake && !isHidden)
-							continue;
-						else if (!isFake && isHidden)
-							continue;
-
-						if (isFake)
-							c = -c;
-
-						c--;
-
-						let flipped = '';
-						if (tileOpacity.canFlip(c)) {
-							if (mRandom() < 0.5)
-								flipped = 'flip';
-						}
-
-						let tile = spritePool.getSprite(flipped + c);
-						if (!tile) {
-							tile = buildTile(c, i, j);
-							container.addChild(tile);
-							tile.type = c;
-							tile.sheetNum = tileOpacity.getSheetNum(c);
-							addedSprite = true;
-						} else {
-							tile.position.x = i * scale;
-							tile.position.y = j * scale;
-							if (flipped !== '')
-								tile.position.x += scale;
-							tile.visible = true;
-						}
-
-						if (isFake)
-							tile.isFake = isFake;
-
-						tile.z = k;
-
-						rendered.push(tile);
-					}
-				}
-			}
-
-			lowX = Math.max(0, lowX - 10);
-			lowY = Math.max(0, lowY - 10);
-			highX = Math.min(w - 1, highX + 10);
-			highY = Math.min(h - 1, highY + 10);
-
-			for (let i = lowX; i < highX; i++) {
-				const mapRow = map[i];
-				let spriteRow = sprites[i];
-				let outside = ((i >= x - sw) && (i < x + sw));
-				for (let j = lowY; j < highY; j++) {
-					if ((outside) && (j >= y - sh) && (j < y + sh))
-						continue;
-
-					const cell = mapRow[j];
-
-					if (cell.visible) {
-						cell.visible = false;
-						newHidden.push({ x: i, y: j });
-					}
-
-					let list = spriteRow[j];
-					let lLen = list.length;
-					for (let k = 0; k < lLen; k++) {
-						let sprite = list[k];
-						sprite.visible = false;
-						spritePool.store(sprite);
-					}
-					spriteRow[j] = [];
-				}
-			}
-
-			events.emit('onTilesVisible', newVisible, true);
-			events.emit('onTilesVisible', newHidden, false);
-
-			if (addedSprite)
-				container.children.sort((a, b) => a.z - b.z);
+			updateSprites(this);
 		},
 
 		update: function () {
@@ -662,8 +524,10 @@ define([
 					this.moveTo = null;
 				}
 
+				const staticCamera = this.staticCamera || window.staticCamera;
+
 				let stage = this.stage;
-				if (window.staticCamera !== true) {
+				if (staticCamera !== true) {
 					stage.x = -~~this.pos.x;
 					stage.y = -~~this.pos.y;
 				}
@@ -751,7 +615,7 @@ define([
 			return filter;
 		},
 
-		removeFilter: function (sprite, filter) {
+		removeFilter: function (sprite) {
 			if (sprite.filters)
 				sprite.filters = null;
 		},
@@ -897,6 +761,58 @@ define([
 				cell.push(tile);
 				cell.visible = true;
 			});
+		},
+
+		updateMapRows: function (rows) {
+			const { map, sprites, layers: { tileSprites: container } } = this;
+
+			rows.forEach(({ rowNumber: x, cols }) => {
+				const row = sprites[x];
+
+				cols.forEach(({ colNumber: y, cells }) => {
+					const cellSprites = row[y];
+
+					cellSprites.forEach(c => {
+						c.visible = false;
+						spritePool.store(c);
+					});
+
+					cellSprites.length = 0;
+
+					map[x][y] = cells;
+
+					cells.forEach((m, k) => {
+						m--;
+
+						let flipped = '';
+						if (tileOpacity.canFlip(m)) {
+							if (mRandom() < 0.5)
+								flipped = 'flip';
+						}
+
+						let tile = spritePool.getSprite(flipped + m);
+						if (!tile) {
+							tile = this.buildTile(m, x, y);
+							container.addChild(tile);
+							tile.type = m;
+							tile.sheetNum = tileOpacity.getSheetNum(m);
+						} else {
+							tile.position.x = x * scale;
+							tile.position.y = y * scale;
+							if (flipped !== '')
+								tile.position.x += scale;
+							tile.visible = true;
+						}
+
+						tile.z = k;
+
+						cellSprites.push(tile);
+						cellSprites.visible = true;
+					});
+				});
+			});
+
+			container.children.sort((a, b) => a.z - b.z);
 		},
 
 		render: function () {

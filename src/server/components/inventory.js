@@ -15,11 +15,13 @@ const dropBag = require('./inventory/dropBag');
 const useItem = require('./inventory/useItem');
 const { isItemStackable } = require('./inventory/helpers');
 
+const inventorySizeBase = 50;
+
 //Component
 module.exports = {
 	type: 'inventory',
 
-	inventorySize: 50,
+	inventorySize: inventorySizeBase,
 	items: [],
 
 	blueprint: null,
@@ -27,6 +29,8 @@ module.exports = {
 	init: function (blueprint, isTransfer) {
 		let items = blueprint.items || [];
 		let iLen = items.length;
+
+		this.inventorySize = blueprint.inventorySize ?? inventorySizeBase;
 
 		//Spells should be sorted so they're EQ'd in the right order
 		items.sort(function (a, b) {
@@ -81,6 +85,7 @@ module.exports = {
 	save: function () {
 		return {
 			type: 'inventory',
+			inventorySize: this.inventorySize,
 			items: this.items.map(this.simplifyItem.bind(this))
 		};
 	},
@@ -91,6 +96,7 @@ module.exports = {
 
 		return {
 			type: 'inventory',
+			inventorySize: this.inventorySize,
 			items: this.items.map(this.simplifyItem.bind(this))
 		};
 	},
@@ -616,7 +622,7 @@ module.exports = {
 	hasSpaceList: function (items, noStack) {
 		if (this.inventorySize === -1)
 			return true;
-		
+
 		let slots = this.inventorySize - this.obj.inventory.items.filter(f => !f.eq).length;
 		for (const item of items) {
 			if (isItemStackable(item) && (!noStack)) {

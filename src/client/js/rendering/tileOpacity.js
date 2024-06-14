@@ -46,6 +46,23 @@ define([
 			};
 		},
 
+		getCellInAtlas: function (cell, sheetName) {
+			const { clientConfig: { atlasTextureDimensions, atlasTextures } } = globals;
+
+			const indexInAtlas = atlasTextures.indexOf(sheetName);
+
+			let offset = 0;
+
+			for (let i = 0; i < indexInAtlas; i++) {
+				const dimensions = atlasTextureDimensions[atlasTextures[i]];
+				const spriteCount = dimensions.w * dimensions.h;
+
+				offset += spriteCount;
+			}
+
+			return cell + offset;
+		},
+
 		map: function (tile) {
 			const { clientConfig: { tileOpacities } } = globals;
 

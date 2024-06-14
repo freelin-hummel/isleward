@@ -11,25 +11,35 @@ define([
 	globals,
 	tosAcceptanceValid
 ) {
+	//Some UIs are strings. In these cases, the path should default to the client/ui/templates folder
+	const setUiTypes = list => {
+		list.forEach((l, i) => {
+			if (typeof(l) === 'string') {
+				list[i] = {
+					type: l,
+					path: `ui/templates/${l}`,
+					autoLoadOnPlay: true
+				};
+			} else if (l.type === undefined)
+				l.type = l.path.split('/').pop();
+			else if (l.path === undefined)
+				l.path = `ui/templates/${l.type}`;
+		});
+	};
+
 	return {
 		uis: [],
-		root: '',
 		ingameUisBuilt: false,
 
-		init: function (root) {
-			if (root)
-				this.root = root + '/';
-
+		init: function () {
 			events.on('onBuildIngameUis', this.onBuildIngameUis.bind(this));
 			events.on('onUiKeyDown', this.onUiKeyDown.bind(this));
 			events.on('onResize', this.onResize.bind(this));
 
-			globals.clientConfig.uiLoginList.forEach(u => {
-				if (u.path)
-					this.buildModUi(u);
-				else
-					this.build(u);
-			});
+			setUiTypes(globals.clientConfig.uiLoginList);
+			setUiTypes(globals.clientConfig.uiList);
+
+			globals.clientConfig.uiLoginList.forEach(u => this.buildFromConfig(u));
 		},
 
 		onBuildIngameUis: async function () {
@@ -37,26 +47,26 @@ define([
 				events.clearQueue();
 
 				await Promise.all(
-					globals.clientConfig.uiList.map(u => {
-						const uiType = u.path ? u.path.split('/').pop() : u;
+					globals.clientConfig.uiList
+						.filter(u => u.autoLoadOnPlay !== false)
+						.map(u => {
+							return new Promise(res => {
+								const doneCheck = () => {
+									const isDone = this.uis.some(ui => ui.type === u.type);
+									if (isDone) {
+										res();
 
-						return new Promise(res => {
-							const doneCheck = () => {
-								const isDone = this.uis.some(ui => ui.type === uiType);
-								if (isDone) {
-									res();
+										return;
+									}
 
-									return;
-								}
+									setTimeout(doneCheck, 100);
+								};
 
-								setTimeout(doneCheck, 100);
-							};
+								this.buildFromConfig(u);
 
-							this.build(uiType, { path: u.path });
-
-							doneCheck();
-						});
-					})
+								doneCheck();
+							});
+						})
 				);
 
 				this.ingameUisBuilt = true;
@@ -69,41 +79,27 @@ define([
 			});
 		},
 
-		buildModUi: function (config) {
-			const type = config.path.split('/').pop();
+		build: function (type) {
+			const config = globals.clientConfig.uiList.find(u => u.type === type);
 
-			this.build(type, {
-				path: config.path
-			});
+			this.buildFromConfig(config);
 		},
 
-		build: function (type, options) {
+		buildFromConfig: async function (config) {
+			const { type, path } = config;
+
 			let className = 'ui' + type[0].toUpperCase() + type.substr(1);
 			let el = $('.' + className);
 			if (el.length > 0)
 				return;
 
-			this.getTemplate(type, options);
-		},
+			const fullPath = `${path}/${type}`;
 
-		getTemplate: function (type, options) {
-			let path = null;
-			if (options && options.path)
-				path = options.path + `\\${type}.js`;
-			else {
-				const entryInClientConfig = globals.clientConfig.uiList.find(u => u.type === type);
-				if (entryInClientConfig)
-					path = entryInClientConfig.path;
-				else
-					path = this.root + 'ui/templates/' + type + '/' + type;
-			}
+			const template = await new Promise(res => {
+				require([fullPath], res);
+			});
 
-			require([path], this.onGetTemplate.bind(this, options, type));
-		},
-		
-		onGetTemplate: function (options, type, template) {
 			let ui = $.extend(true, { type }, uiBase, template);
-			ui.setOptions(options);
 		
 			requestAnimationFrame(this.renderUi.bind(this, ui));
 		},
@@ -158,7 +154,9 @@ define([
 
 		afterPreload: function () {
 			if (!globals.clientConfig.tos.required || tosAcceptanceValid()) {
-				this.build('characters');
+				const uiCharactersConfig = globals.clientConfig.uiList.find(f => f.type === 'characters');
+
+				this.buildFromConfig(uiCharactersConfig);
 
 				return;
 			}

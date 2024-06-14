@@ -288,12 +288,7 @@ module.exports = {
 		for (let p in obj) 
 			player[p] = obj[p];
 
-		if (obj.permadead)
-			await leaderboard.killCharacter(player.name);
-
 		if (obj.level) {
-			await leaderboard.setLevel(player.name, obj.level);
-
 			player.components.find(c => c.type === 'stats').values.level = obj.level;
 
 			cons.emit('events', {

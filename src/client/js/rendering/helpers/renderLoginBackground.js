@@ -30,13 +30,16 @@ define([
 
 		const { width, height, layers } = renderer;
 
-		renderer.setPosition({
-			x: 0,
-			y: 0
-		}, true);
-
 		let w = Math.ceil(width / scale) + 1;
 		let h = Math.ceil(height / scale) + 1;
+
+		renderer.setPosition({
+			pos: {
+				x: w / 2,
+				y: h / 2
+			},
+			instant: true
+		});
 
 		const midX = ~~(w / 2);
 		const midY = ~~(h / 2);

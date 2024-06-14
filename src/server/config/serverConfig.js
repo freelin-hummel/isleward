@@ -3,14 +3,14 @@
 module.exports = {
 	version: '0.14.0',
 	port: 4000,
-	startupMessage: 'Server: ready',
+	startupMessage: 'Ready: Server',
 
 	nodeEnv: process.env.NODE_ENV,
 
 	//Options:
 	// sqlite
 	// rethink
-	db: process.env.IWD_DB || 'sqlite',
+	db: process.env.IWD_DB || 'rethink',
 	dbHost: process.env.IWD_DB_HOST || 'localhost',
 	dbPort: process.env.IWD_DB_PORT || 28015,
 	dbName: process.env.IWD_DB_NAME || 'live',

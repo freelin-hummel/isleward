@@ -37,7 +37,7 @@ module.exports = {
 		else
 			this.mobTypes[name]++;
 
-		spawner.zonePrint = extend({}, this.zoneConfig.mobs.default, this.zoneConfig.mobs[name] || {});
+		spawner.zonePrint = extend({}, this.zoneConfig.mobs.default, this.zoneConfig.mobs[(blueprint.objZoneName ?? blueprint.name).toLowerCase()] || {});
 	},
 
 	spawn: function (spawner) {

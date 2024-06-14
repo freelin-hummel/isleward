@@ -69,9 +69,12 @@ define([
 
 		positionCamera: function (x, y, instant) {
 			renderer.setPosition({
-				x: (x - (renderer.width / (scale * 2))) * scale,
-				y: (y - (renderer.height / (scale * 2))) * scale
-			}, instant);
+				pos: {
+					x,
+					y
+				},
+				instant
+			});
 		},
 
 		teleportToPosition: function ({ x, y }) {

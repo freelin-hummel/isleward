@@ -87,10 +87,6 @@ module.exports = {
 		}
 		obj.addComponent('effects', blueprintEffects);
 
-		let prophecies = character.components.find(c => c.type === 'prophecies');
-		if (prophecies)
-			obj.addComponent('prophecies', prophecies);
-
 		['equipment', 'passives', 'inventory', 'quests', 'events'].forEach(c => {
 			obj.addComponent(c, character.components.find(f => f.type === c));
 		});
@@ -122,7 +118,7 @@ module.exports = {
 		this.seen.spliceWhere(s => s === id);
 	},
 
-	die: function (source, permadeath) {
+	die: function (source) {
 		let obj = this.obj;
 
 		obj.clearQueue();
@@ -134,44 +130,33 @@ module.exports = {
 
 		obj.aggro.die();
 
-		if (!permadeath) {
-			let level = obj.stats.values.level;
-			let spawns = obj.spawn;
-			let spawnPos = spawns.filter(s => ((s.maxLevel && s.maxLevel >= level) || !s.maxLevel));
-			if (!spawnPos.length || !source.name)
-				spawnPos = spawns[0];
-			else if (source.name) {
-				let sourceSpawnPos = spawnPos.find(s => ((s.source) && (s.source.toLowerCase() === source.name.toLowerCase())));
-				if (sourceSpawnPos)
-					spawnPos = sourceSpawnPos;
-				else
-					spawnPos = spawnPos[0];
-			}
-
-			obj.instance.eventEmitter.emit('onBeforePlayerRespawn', obj, spawnPos);
-
-			obj.x = spawnPos.x;
-			obj.y = spawnPos.y;
-
-			obj.stats.die(source);
-
-			process.send({
-				method: 'object',
-				serverId: obj.serverId,
-				obj: {
-					dead: true
-				}
-			});
-		} else {
-			process.send({
-				method: 'object',
-				serverId: obj.serverId,
-				obj: {
-					dead: true,
-					permadead: true
-				}
-			});
+		let level = obj.stats.values.level;
+		let spawns = obj.spawn;
+		let spawnPos = spawns.filter(s => ((s.maxLevel && s.maxLevel >= level) || !s.maxLevel));
+		if (!spawnPos.length || !source.name)
+			spawnPos = spawns[0];
+		else if (source.name) {
+			let sourceSpawnPos = spawnPos.find(s => ((s.source) && (s.source.toLowerCase() === source.name.toLowerCase())));
+			if (sourceSpawnPos)
+				spawnPos = sourceSpawnPos;
+			else
+				spawnPos = spawnPos[0];
 		}
+
+		obj.instance.eventEmitter.emit('onBeforePlayerRespawn', obj, spawnPos);
+
+		obj.x = spawnPos.x;
+		obj.y = spawnPos.y;
+
+		obj.stats.die(source);
+
+		process.send({
+			method: 'object',
+			serverId: obj.serverId,
+			obj: {
+				dead: true
+			}
+		});
 
 		obj.fireEvent('onAfterDeath', source);
 		obj.auth.track('combat', 'death', source.name, 1);
