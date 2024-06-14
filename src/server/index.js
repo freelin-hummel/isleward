@@ -1,5 +1,5 @@
+//Imports
 require('./globals');
-
 const server = require('./server/index');
 const components = require('./components/components');
 const mods = require('./misc/mods');
@@ -13,19 +13,17 @@ const itemTypes = require('./items/config/types');
 const salvager = require('./items/salvager');
 const recipes = require('./config/recipes/recipes');
 const mapManager = require('./world/mapManager');
-const fixes = require('./fixes/fixes');
 const profanities = require('./misc/profanities');
 const routerConfig = require('./security/routerConfig');
-const { spawnMapThreads } = require('./world/threadManager');
+const threadManager = require('./world/threadManager');
 
-let startup = {
+//Module
+const startup = {
 	init: function () {
 		io.init(this.onDbReady.bind(this));
 	},
 
 	onDbReady: async function () {
-		await fixes.fixDb();
-
 		process.on('unhandledRejection', this.onError.bind(this));
 		process.on('uncaughtException', this.onError.bind(this));
 
@@ -56,9 +54,7 @@ let startup = {
 
 		await server.init();
 
-		await leaderboard.init();
-
-		await spawnMapThreads();
+		await threadManager.init();
 	},
 
 	onError: async function (e) {

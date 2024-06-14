@@ -5,6 +5,12 @@ const fs = require('fs');
 const phaseTemplate = require('./phases/phaseTemplate');
 const { mapList } = require('../world/mapManager');
 
+//Internals
+const phasePaths = [{
+	type: 'end',
+	path: './phases/phaseEnd'
+}];
+
 //Helpers
 const applyVariablesToDescription = (desc, variables) => {
 	if (!variables)
@@ -25,6 +31,10 @@ module.exports = {
 
 	init: function (instance) {
 		this.instance = instance;
+
+		this.instance.eventEmitter.emit('beforeGetEventPhasePaths', {
+			phasePaths
+		});
 
 		const zoneName = this.instance.map.name;
 		const zonePath = mapList.find(z => z.name === zoneName).path;
@@ -434,8 +444,15 @@ module.exports = {
 
 			let phase = event.phases[i];
 			if (!phase) {
-				let phaseFile = 'phase' + p.type[0].toUpperCase() + p.type.substr(1);
-				let typeTemplate = require('./phases/' + phaseFile);
+				let typeTemplate;
+
+				const phasePathEntry = phasePaths.find(f => f.type === p.type);
+				if (!phasePathEntry) {
+					const phaseFile = 'phase' + p.type[0].toUpperCase() + p.type.substr(1);
+					typeTemplate = require('./phases/' + phaseFile);
+				} else
+					typeTemplate = require(`../${phasePathEntry.path}`);
+
 				phase = extend({
 					instance: this.instance,
 					event: event

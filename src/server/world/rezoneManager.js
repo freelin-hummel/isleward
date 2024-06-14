@@ -12,23 +12,24 @@ const unstageRezone = msg => {
 	stagedRezones.spliceWhere(s => s.simplifiedObj.serverId === msg.obj.id);
 };
 
-const stageRezone = (simplifiedObj, targetZone) => {
+const stageRezone = ({ simplifiedObj, targetZone, keepPos = false }) => {
 	const { serverId } = simplifiedObj;
 
 	stagedRezones.spliceWhere(o => o.simplifiedObj.serverId === serverId);
 
-	stagedRezones.push({ simplifiedObj, targetZone });
+	stagedRezones.push({ simplifiedObj, targetZone, keepPos });
 };
 
 const doRezone = stagedRezone => {
-	const { simplifiedObj, targetZone } = stagedRezone;
+	const { simplifiedObj, targetZone, keepPos } = stagedRezone;
 
 	process.send({
 		method: 'rezone',
 		id: simplifiedObj.serverId,
 		args: {
 			obj: simplifiedObj,
-			newZone: targetZone
+			newZone: targetZone,
+			keepPos
 		}
 	});
 };

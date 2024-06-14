@@ -49,7 +49,6 @@
 		"cons": false,
 		"atlas": false,
 		"instancer": false,
-		"leaderboard": false,
 		"clientConfig": false,
 		"random": false,
 		"consts": false,

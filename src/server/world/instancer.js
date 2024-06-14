@@ -26,6 +26,9 @@ module.exports = {
 
 	lastTime: 0,
 
+	mapName: null,
+	threadArgs: null,
+
 	init: function (args) {
 		const { zoneId, zoneName } = args;
 
@@ -65,7 +68,7 @@ module.exports = {
 			map.randomMap.init(fakeInstance);
 			this.startRegen();
 		} else
-			_.log('(M ' + map.name + '): Ready');
+			_.log(`Ready: ${this.threadArgs.id}`);
 
 		map.clientMap.zoneId = this.zoneId;
 
@@ -164,7 +167,7 @@ module.exports = {
 
 		this.addQueue = [];
 
-		_.log('(M ' + map.name + '): Ready');
+		_.log(`Ready: ${this.threadArgs.id}`);
 	},
 
 	tick: function () {

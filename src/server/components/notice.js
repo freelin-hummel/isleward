@@ -8,8 +8,6 @@ module.exports = {
 
 	maxLevel: 0,
 
-	contents: [],
-
 	init: function (blueprint) {
 		this.msg = blueprint.msg;
 		this.msgFunction = blueprint.msgFunction;
@@ -18,10 +16,6 @@ module.exports = {
 		this.maxLevel = blueprint.maxLevel || 0;
 
 		this.syncer = this.obj.instance.syncer;
-	},
-
-	destroy: function () {
-		this.contents.forEach(c => this.collisionExit(c));
 	},
 
 	callAction: function (obj, actionName) {
@@ -61,8 +55,6 @@ module.exports = {
 		else if ((this.maxLevel) && (obj.stats.values.level > this.maxLevel))
 			return;
 
-		this.contents.push(obj);
-
 		this.callAction(obj, 'enter');
 
 		if (!this.msg && !this.msgFunction)
@@ -85,6 +77,13 @@ module.exports = {
 		}, [obj.serverId]);
 	},
 
+	collisionStay: function (obj) {
+		if (!obj.player)
+			return;
+
+		this.callAction(obj, 'stay');
+	},
+
 	collisionExit: function (obj, force) {
 		if (!force) {
 			if (!obj.player)
@@ -92,8 +91,6 @@ module.exports = {
 			else if ((this.maxLevel) && (obj.stats.values.level > this.maxLevel))
 				return;
 		}
-
-		this.contents.spliceWhere(c => (c === obj));
 
 		this.callAction(obj, 'exit');
 

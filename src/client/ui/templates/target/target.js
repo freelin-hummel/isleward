@@ -52,10 +52,9 @@ define([
 			const originalEvent = e.event ? e.event : e;
 
 			let target = this.target;
-			//This is kind of a hack. We check if the target has a prophecies component since we can't check for
-			// target.player (only the logged-in player has a player component)
-			if (!target || !target.dialogue || target === window.player || target.prophecies) {
-				if (target.prophecies) {
+			//TODO: How do we know if this is a player?
+			if (!target || !target.dialogue || target === window.player || target.class !== undefined) {
+				if (target.class !== undefined) {
 					const inspectContext = [
 						target.name,
 						'----------', {

@@ -100,7 +100,7 @@ define([
 		},
 
 		onNewClick: function () {
-			uiFactory.build('createCharacter', {});
+			uiFactory.build('createCharacter');
 			this.destroy();
 		},
 
@@ -203,19 +203,9 @@ define([
 			this.characterInfo[charName] = result;
 			this.selected = charName;
 
-			let prophecies = result.components.find(function (c) {
-				return (c.type === 'prophecies');
-			});
-
-			if ((prophecies) && (prophecies.list.indexOf('hardcore') > -1))
-				this.find('.name').html(charName + ' (hc)');
-
 			this.find('.btnPlay').removeClass('disabled');
 
-			if (result.permadead) {
-				this.find('.name').html(charName + ' (hc - rip)');
-				this.find('.btnPlay').addClass('disabled');
-			}
+			events.emit('afterGetCharacter', { character: result });
 		},
 
 		setMessage: function (msg) {

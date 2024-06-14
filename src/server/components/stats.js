@@ -256,20 +256,19 @@ module.exports = {
 	//Source is the object that caused you to gain xp (mostly yourself)
 	//Target is the source of the xp (a mob or quest)
 	getXp: function (amount, source, target) {
-		let obj = this.obj;
-		let values = this.values;
+		const { obj, values } = this;
 
 		if (values.level === consts.maxLevel)
 			return;
 
-		let xpEvent = {
+		const xpEvent = {
 			source: source,
 			target: target,
 			amount: amount,
 			multiplier: 1
 		};
-
 		obj.fireEvent('beforeGetXp', xpEvent);
+
 		if (xpEvent.amount === 0)
 			return;
 
@@ -288,8 +287,9 @@ module.exports = {
 			text: '+' + amount + ' xp'
 		}, -1);
 
-		let syncO = {};
+		const syncO = {};
 		let didLevelUp = false;
+		const levelBefore = values.level;
 
 		while (values.xp >= values.xpMax) {
 			didLevelUp = true;
@@ -322,7 +322,7 @@ module.exports = {
 		}
 
 		if (didLevelUp) {
-			let cellContents = obj.instance.physics.getCell(obj.x, obj.y);
+			const cellContents = obj.instance.physics.getCell(obj.x, obj.y);
 			cellContents.forEach(function (c) {
 				c.fireEvent('onCellPlayerLevelUp', obj);
 			});
@@ -337,10 +337,16 @@ module.exports = {
 		});
 
 		if (didLevelUp) {
-			this.obj.syncer.setObject(true, 'stats', 'values', 'hpMax', values.hpMax);
-			this.obj.syncer.setObject(true, 'stats', 'values', 'level', values.level);
-			this.obj.syncer.setObject(false, 'stats', 'values', 'hpMax', values.hpMax);
-			this.obj.syncer.setObject(false, 'stats', 'values', 'level', values.level);
+			obj.syncer.setObject(true, 'stats', 'values', 'hpMax', values.hpMax);
+			obj.syncer.setObject(true, 'stats', 'values', 'level', values.level);
+			obj.syncer.setObject(false, 'stats', 'values', 'hpMax', values.hpMax);
+			obj.syncer.setObject(false, 'stats', 'values', 'level', values.level);
+
+			obj.instance.eventEmitter.emit('afterActorLevelUp', {
+				obj,
+				levelBefore,
+				levelAfter: values.level
+			});
 		}
 	},
 
@@ -408,31 +414,21 @@ module.exports = {
 
 		const deathEvent = {
 			target: obj,
-			source: killSource
+			source: killSource,
+			success: true
 		}; 
 
 		obj.instance.eventEmitter.emit('onAfterActorDies', deathEvent);
 		obj.fireEvent('afterDeath', deathEvent);
 
+		if (!deathEvent.success)
+			return;
+
 		if (obj.player) {
 			obj.syncer.setObject(false, 'stats', 'values', 'hp', this.values.hp);
-			if (deathEvent.permadeath) {
-				obj.auth.permadie();
+			this.values.hp = 0;
 
-				obj.instance.syncer.queue('onGetMessages', {
-					messages: {
-						class: 'color-redA',
-						message: `(level ${this.values.level}) ${obj.name} has forever left the shores of the living.`
-					}
-				}, -1);
-
-				this.syncer.queue('onPermadeath', {
-					source: killSource.name
-				}, [obj.serverId]);
-			} else
-				this.values.hp = 0;
-
-			obj.player.die(killSource, deathEvent.permadeath);
+			obj.player.die(killSource);
 		} else {
 			if (obj.effects)
 				obj.effects.die();

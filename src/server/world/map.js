@@ -48,7 +48,15 @@ module.exports = {
 
 	collisionMap: null,
 
-	clientMap: null,
+	clientMap: {
+		zoneId: null,
+		map: null,
+		collisionMap: null,
+		clientObjects: null,
+		padding: null,
+		hiddenRooms: null,
+		staticCamera: false
+	},
 	oldLayers: {
 		tiles: null,
 		walls: null,
@@ -125,14 +133,18 @@ module.exports = {
 	create: function () {
 		this.getMapFile();
 
-		this.clientMap = {
+		const { layers, collisionMap, objBlueprints, hiddenRooms, zoneConfig } = this;
+		const { rendererConfig = {} } = zoneConfig;
+
+		Object.assign(this.clientMap, {
 			zoneId: -1,
-			map: this.layers,
-			collisionMap: this.collisionMap,
-			clientObjects: this.objBlueprints,
-			padding: padding,
-			hiddenRooms: this.hiddenRooms
-		};
+			map: layers,
+			collisionMap,
+			clientObjects: objBlueprints,
+			padding,
+			hiddenRooms,
+			rendererConfig
+		});
 	},
 
 	getMapFile: function () {
@@ -456,12 +468,10 @@ module.exports = {
 			if (objZoneName !== name)
 				blueprint.objZoneName = objZoneName;
 
-			if (this.zoneConfig) {
-				if ((this.zoneConfig.objects) && (this.zoneConfig.objects[objZoneName.toLowerCase()]))
-					extend(blueprint, this.zoneConfig.objects[objZoneName.toLowerCase()]);
-				else if ((this.zoneConfig.objects) && (this.zoneConfig.mobs[objZoneName.toLowerCase()]))
-					extend(blueprint, this.zoneConfig.mobs[objZoneName.toLowerCase()]);
-			}
+			if (this.zoneConfig?.objects?.[objZoneName.toLowerCase()])
+				extend(blueprint, this.zoneConfig.objects[objZoneName.toLowerCase()]);
+			else if (this.zoneConfig?.mobs?.[objZoneName.toLowerCase()])
+				extend(blueprint, this.zoneConfig.mobs[objZoneName.toLowerCase()]);
 
 			if (blueprint.blocking)
 				this.collisionMap[blueprint.x][blueprint.y] = 1;

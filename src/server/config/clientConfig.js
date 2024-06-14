@@ -188,14 +188,21 @@ const config = {
 		'trade',
 		'overlay',
 		'death',
-		'leaderboard',
 		'reputation',
 		'wardrobe',
 		'passives',
 		'workbench',
 		'middleHud',
 		'options',
-		'announcements'
+		'announcements',
+		{
+			type: 'createCharacter',
+			autoLoadOnPlay: false
+		},
+		{
+			type: 'characters',
+			autoLoadOnPlay: false
+		}
 	],
 	contextMenuActions: {
 		player: [],

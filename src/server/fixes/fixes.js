@@ -4,10 +4,24 @@ const itemTypes = require('../items/config/types');
 const spellGenerator = require('../items/generators/spellbook');
 
 module.exports = {
-	fixDb: async function () {
-		await io.deleteAsync({
-			key: 'list',
-			table: 'leaderboard'
+	fixCharacterList: function (username, characterList) {
+		let didChange = false;
+
+		characterList.forEach((l, i) => {
+			if (typeof(l) === 'object') {
+				characterList[i] = l.name;
+				didChange = true;
+			}
+		});
+
+		if (!didChange)
+			return;
+
+		io.setAsync({
+			table: 'characterList',
+			key: username,
+			value: characterList,
+			serialize: true
 		});
 	},
 

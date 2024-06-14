@@ -9,21 +9,6 @@ const routerConfig = {
 					data: []
 				}
 			},
-			leaderboard: {
-				requestList: {
-					callback: true,
-					data: [
-						{
-							key: 'offset',
-							dataType: 'integer'
-						},
-						{
-							key: 'prophecies',
-							dataType: 'arrayOfStrings'
-						}
-					]
-				}
-			},
 			cons: {
 				unzone: {
 					callback: true,
@@ -104,10 +89,6 @@ const routerConfig = {
 						{
 							key: 'skinId',
 							dataType: 'string'
-						},
-						{
-							key: 'prophecies',
-							dataType: 'arrayOfStrings'
 						}
 					]
 				},

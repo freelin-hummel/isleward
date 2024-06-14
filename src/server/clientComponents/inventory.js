@@ -7,15 +7,23 @@ define([
 		type: 'inventory',
 
 		items: [],
+		inventorySize: 50,
 
 		init: function (blueprint) {
 			events.emit('onGetItems', this.items);
+			events.emit('onGetInventorySize', this.inventorySize);
 		},
 
-		extend: function ({ destroyItems, getItems }) {
+		extend: function ({ destroyItems, getItems, inventorySize }) {
 			const { items } = this;
 
 			let rerenderNeeded = false;
+
+			if (inventorySize) {
+				this.inventorySize = inventorySize;
+
+				events.emit('onGetInventorySize', this.inventorySize);
+			}
 
 			if (destroyItems) {
 				rerenderNeeded = true;

@@ -23,6 +23,7 @@ define([
 		centered: true,
 
 		items: [],
+		inventorySize: 50,
 
 		dragItem: null,
 		dragEl: null,
@@ -35,6 +36,7 @@ define([
 
 		postRender: function () {
 			this.onEvent('onGetItems', this.onGetItems.bind(this));
+			this.onEvent('onGetInventorySize', this.onGetInventorySize.bind(this));
 			this.onEvent('onDestroyItems', this.onDestroyItems.bind(this));
 			this.onEvent('onShowInventory', this.toggle.bind(this));
 			this.onEvent('onToggleQualityIndicators', this.onToggleQualityIndicators.bind(this));
@@ -62,7 +64,9 @@ define([
 		},
 
 		build: function () {
-			let container = this.el.find('.grid')
+			const { el, inventorySize } = this;
+
+			let container = el.find('.grid')
 				.empty();
 
 			let items = this.items
@@ -70,7 +74,11 @@ define([
 					return !item.eq;
 				});
 
-			let iLen = Math.max(items.length, 50);
+			let iLen = Math.max(items.length, inventorySize);
+
+			el.removeClass('scrolls');
+			if (inventorySize > 50)
+				el.addClass('scrolls');
 
 			let rendered = [];
 
@@ -477,6 +485,13 @@ define([
 			}
 
 			events.emit('onShowItemTooltip', item, ttPos, true);
+		},
+
+		onGetInventorySize: function (inventorySize) {
+			this.inventorySize = inventorySize;
+
+			if (this.shown)
+				this.build();
 		},
 
 		onGetItems: function (items, rerender) {

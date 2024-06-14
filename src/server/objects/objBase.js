@@ -7,6 +7,8 @@ module.exports = {
 
 	eventListeners: [],
 
+	collisionContents: undefined,
+
 	addComponent: function (type, blueprint, isTransfer) {
 		let cpn = this[type];
 		if (!cpn) {
@@ -326,22 +328,49 @@ module.exports = {
 	},
 
 	collisionEnter: function (obj) {
-		let cpns = this.components;
-		let cLen = cpns.length;
+		if (this.collisionContents === undefined)
+			this.collisionContents = [];
+
+		const { collisionContents, components: cpns } = this;
+
+		if (collisionContents.includes(obj.id))
+			return;
+
+		collisionContents.push(obj.id);
+
+		const cLen = cpns.length;
 		for (let i = 0; i < cLen; i++) {
-			let c = cpns[i];
-			if (c.collisionEnter) {
-				if (c.collisionEnter(obj))
-					return true;
-			}
+			const c = cpns[i];
+			if (c.collisionEnter && c.collisionEnter(obj))
+				return true;
+		}
+	},
+
+	collisionStay: function (obj) {
+		const { collisionContents, components: cpns } = this;
+
+		if (!collisionContents.includes(obj.id))
+			return;
+
+		const cLen = cpns.length;
+		for (let i = 0; i < cLen; i++) {
+			const c = cpns[i];
+			if (c.collisionStay)
+				c.collisionStay(obj);
 		}
 	},
 
 	collisionExit: function (obj) {
-		let cpns = this.components;
-		let cLen = cpns.length;
+		const { collisionContents, components: cpns } = this;
+
+		if (!collisionContents.includes(obj.id))
+			return;
+
+		collisionContents.spliceWhere(c => c === obj.id);
+
+		const cLen = cpns.length;
 		for (let i = 0; i < cLen; i++) {
-			let c = cpns[i];
+			const c = cpns[i];
 			if (c.collisionExit)
 				c.collisionExit(obj);
 		}
@@ -394,13 +423,12 @@ module.exports = {
 	},
 
 	destroy: function () {
-		let cpns = this.components;
-		let len = cpns.length;
-		for (let i = 0; i < len; i++) {
-			let c = cpns[i];
-			if (c.destroy)
-				c.destroy();
-		}
+		const { components: cpns, collisionContents } = this;
+
+		if (collisionContents)
+			collisionContents.forEach(c => this.collisionExit(c));
+
+		cpns.forEach(c => c.destroy && c.destroy());
 	},
 
 	toString: function () {

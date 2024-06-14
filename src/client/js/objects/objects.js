@@ -173,9 +173,12 @@ define([
 				sound.unload(obj.zoneId);
 
 				renderer.setPosition({
-					x: (obj.x - (renderer.width / (scale * 2))) * scale,
-					y: (obj.y - (renderer.height / (scale * 2))) * scale
-				}, true);
+					pos: {
+						x: obj.x,
+						y: obj.y
+					},
+					instant: true
+				});
 			}
 
 			this.objects.push(obj);
@@ -246,6 +249,8 @@ define([
 
 			if (template.filters && !obj.sprite?.filters?.length)
 				renderer.addFilter(obj.sprite, template.filters[0]);
+			else if (template.filters && template.filters.length === 0 && obj.sprite?.filters?.length > 0)
+				renderer.removeFilter(obj.sprite);
 
 			if (template.name) {
 				if (obj.nameSprite)

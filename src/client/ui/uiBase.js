@@ -8,7 +8,6 @@ define([
 		centeredY: false,
 
 		el: null,
-		options: null,
 		shown: true,
 
 		eventCallbacks: {},
@@ -61,10 +60,6 @@ define([
 
 		onMouseEnter: function (enter) {
 			events.emit('onUiHover', enter);
-		},
-
-		setOptions: function (options) {
-			this.options = options;
 		},
 
 		on: function (el, eventName, callback) {

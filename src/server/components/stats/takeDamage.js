@@ -59,16 +59,17 @@ const takeDamage = (cpnStats, eventDamage) => {
 
 	obj.aggro.tryEngage(source, amount, threatMult);
 
-	let died = (values.hp <= 0);
-
-	if (died) {
-		let death = {
+	if (values.hp <= 0) {
+		const emBeforeActorDies = {
+			obj,
+			source,
 			success: true
 		};
-		obj.instance.eventEmitter.emit('onBeforeActorDies', death, obj, source);
-		obj.fireEvent('beforeDeath', death);
 
-		if (death.success) 
+		obj.instance.eventEmitter.emit('beforeActorDies', emBeforeActorDies);
+		obj.fireEvent('beforeDeath', emBeforeActorDies);
+
+		if (emBeforeActorDies.success) 
 			cpnStats.preDeath(source);
 	} else {
 		source.aggro.tryEngage(obj, 0);

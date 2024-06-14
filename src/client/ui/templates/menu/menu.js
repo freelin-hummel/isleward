@@ -19,7 +19,6 @@ define([
 			this.find('.btnInventory').on('click', this.handler.bind(this, 'onShowInventory'));
 			this.find('.btnEquipment').on('click', this.handler.bind(this, 'onShowEquipment'));
 			this.find('.btnOnline').on('click', this.handler.bind(this, 'onShowOnline'));
-			this.find('.btnLeaderboard').on('click', this.handler.bind(this, 'onShowLeaderboard'));
 			this.find('.btnReputation').on('click', this.handler.bind(this, 'onShowReputation'));
 			this.find('.btnMainMenu').on('click', this.handler.bind(this, 'onShowMainMenu'));
 			this.find('.btnPassives').on('click', this.handler.bind(this, 'onShowPassives'));

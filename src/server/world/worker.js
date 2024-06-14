@@ -26,7 +26,9 @@ const profanities = require('../misc/profanities');
 const eventEmitter = require('../misc/events');
 
 //Worker
-instancer.mapName = process.argv[2];
+const threadArgs = JSON.parse(process.argv[2]);
+instancer.mapName = threadArgs.name;
+instancer.threadArgs = threadArgs;
 
 const onCpnsReady = async function () {
 	factions.init();
@@ -51,6 +53,7 @@ const onCpnsReady = async function () {
 };
 
 const onModsReady = function () {
+	consts.init(threadArgs);
 	components.init(onCpnsReady);
 };
 

@@ -296,7 +296,7 @@ module.exports = {
 	},
 
 	//Sends multiple notifications to yourself
-	// messages = [{ msg, className, type }]
+	// messages = [{ message, className, type }]
 	notifySelfArray: function (messages) {
 		const { obj: { id, serverId, instance: { syncer } } } = this;
 
