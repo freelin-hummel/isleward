@@ -567,7 +567,7 @@ module.exports = {
 
 		const msgBeforeDeleteCharacter = {
 			obj: this,
-			name: data.name,
+			name: name,
 			success: true,
 			msg: null
 		};
@@ -597,7 +597,16 @@ module.exports = {
 			serialize: true
 		});
 
-		callback(this.characterList);
+		let listToSendToClient = [...this.characterList];
+
+		const emBeforeSendClientCharacterList = {
+			obj: this.obj,
+			characterList: listToSendToClient
+		};
+		await eventEmitter.emit('beforeSendClientCharacterList', emBeforeSendClientCharacterList);
+		listToSendToClient = emBeforeSendClientCharacterList.characterList;
+
+		callback(listToSendToClient);
 	},
 
 	getAccountLevel: function () {
