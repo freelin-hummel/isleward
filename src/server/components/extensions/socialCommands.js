@@ -34,7 +34,7 @@ let commandRoles = {
 	getXp: 10,
 	setPassword: 10,
 	giveSkin: 10,
-	getMaterials: 10,
+	getMaterials: 0,
 	rezone: 10,
 	startEvent: 10,
 	stopEvent: 10,
