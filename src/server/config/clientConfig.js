@@ -202,6 +202,10 @@ const config = {
 		{
 			type: 'characters',
 			autoLoadOnPlay: false
+		},
+		{
+			type: 'terms',
+			autoLoadOnPlay: false
 		}
 	],
 	contextMenuActions: {
