@@ -187,6 +187,7 @@ define([
 
 		buildTitleScreen: function () {
 			this.titleScreen = true;
+			this.staticCamera = false;
 
 			renderLoginBackground(this);
 		},
