@@ -363,7 +363,8 @@ module.exports = {
 	collisionExit: function (obj) {
 		const { collisionContents, components: cpns } = this;
 
-		if (!collisionContents.includes(obj.id))
+		//Collision contents might not exist if nothing ever entered
+		if (!collisionContents || collisionContents.includes(obj.id))
 			return;
 
 		collisionContents.spliceWhere(c => c === obj.id);

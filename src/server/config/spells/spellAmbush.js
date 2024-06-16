@@ -103,7 +103,13 @@ module.exports = {
 			targetPos.y += offsetY;
 		}
 
-		let targetEffect = target.effects.addEffect({
+		const selfEffect = this.obj.effects.addEffect({
+			type: 'stunned',
+			silent: true,
+			force: true
+		});
+
+		const targetEffect = target.effects.addEffect({
 			type: 'stunned',
 			ttl: this.stunDuration
 		});
@@ -126,10 +132,10 @@ module.exports = {
 			}, -1);
 		}
 
-		physics.removeObject(obj, obj.x, obj.y);
-		physics.addObject(obj, targetPos.x, targetPos.y);
+		physics.removeObject(obj, obj.x, obj.y, targetPos.x, targetPos.y);
+		physics.addObject(obj, targetPos.x, targetPos.y, obj.x, obj.y);
 
-		this.reachDestination(target, targetPos);
+		this.reachDestination(target, targetPos, selfEffect);
 
 		return true;
 	},
@@ -165,11 +171,13 @@ module.exports = {
 		}]);
 	},
 
-	reachDestination: function (target, targetPos) {
-		if (this.obj.destroyed)
+	reachDestination: function (target, targetPos, selfEffect) {
+		const { obj, threatMult, noEvents } = this;
+
+		if (obj.destroyed)
 			return;
 
-		let obj = this.obj;
+		obj.effects.removeEffect(selfEffect.id);
 
 		obj.x = targetPos.x;
 		obj.y = targetPos.y;
@@ -180,16 +188,16 @@ module.exports = {
 
 		this.onCastTick(0.01);
 
-		this.obj.aggro.move();
+		obj.aggro.move();
 
 		let damage = this.getDamage(target);
 		target.stats.takeDamage({
 			damage,
-			threatMult: this.threatMult,
-			source: this.obj,
+			threatMult,
+			source: obj,
 			target,
 			spellName: 'ambush',
-			noEvents: this.noEvents
+			noEvents
 		});
 	},
 
