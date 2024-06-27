@@ -207,10 +207,7 @@ define([
 			this.renderer.resize(this.width, this.height);
 			if (window.player) {
 				this.setPosition({
-					pos: {
-						x: window.player.x,
-						y: window.player.y
-					},
+					centerOnObject: window.player,
 					instant: true
 				});
 			}
@@ -368,7 +365,12 @@ define([
 		instant: boolean
 			should the camera pan to the location or not
 		*/
-		setPosition: function ({ pos = { x: 0, y: 0 }, instant, staticPosition }) {
+		setPosition: function ({ pos = { x: 0, y: 0 }, centerOnObject, instant, staticPosition }) {
+			if (centerOnObject) {
+				pos.x = centerOnObject.x + ((centerOnObject.width ?? 1) / 2);
+				pos.y = centerOnObject.y + ((centerOnObject.height ?? 1) / 2);
+			}
+
 			let { x, y } = pos;
 
 			x = (x - (this.width / (scale * 2))) * scale;

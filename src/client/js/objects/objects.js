@@ -173,10 +173,7 @@ define([
 				sound.unload(obj.zoneId);
 
 				renderer.setPosition({
-					pos: {
-						x: obj.x,
-						y: obj.y
-					},
+					centerOnObject: obj,
 					instant: true
 				});
 			}
