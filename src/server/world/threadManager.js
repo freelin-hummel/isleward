@@ -54,9 +54,20 @@ const getPlayerCountInThread = async thread => {
 	return playerCount;
 };
 
+const killThread = thread => {
+	_.log(`Killing: ${thread.workerArgs.id}`);
+
+	thread.destroyed = true;
+	thread.worker.kill();
+	threads.spliceWhere(t => t === thread);
+};
+
 const untrackPlayerOnThread = (thread, obj) => {
 	thread.playersCurrent.spliceWhere(p => p === obj.id);
 	delete obj.threadId;
+
+	if (thread.playersCurrent.length === 0 && thread.destroyWhenEmptyForMs === 0)
+		killThread(thread);
 };
 
 const messageHandlers = {
@@ -199,7 +210,7 @@ const spawnThread = async ({
 		thread.sendArgsToWorker.map(a => [a, thread[a]])
 	);
 
-	_.log(`Spawning: ${JSON.stringify({ id: thread.id, name: thread.name }, null, '\t')}`);
+	_.log(`Spawning: ${thread.name} (${thread.id})`);
 	thread.worker = childProcess.fork('./world/worker', [JSON.stringify(thread.workerArgs)]);
 
 	thread.worker.on('message', onMessage.bind(null, thread));
@@ -287,13 +298,6 @@ const getThread = async ({ serverObj, zoneName, zoneId, obj }) => {
 	return result;
 };
 
-const killThread = thread => {
-	_.log(`Killing: ${thread.workerArgs.id}`);
-
-	thread.worker.kill();
-	threads.spliceWhere(t => t === thread);
-};
-
 const sendMessageToThread = ({ threadId, msg }) => {
 	const thread = threads.find(t => t.id === threadId);
 	if (thread)
@@ -350,9 +354,13 @@ const update = () => {
 	let tLen = threads.length;
 	for (let i = 0; i < tLen; i++) {
 		const t = threads[i];
-
 		if (!t.isReady || t.destroyWhenEmptyForMs === -1)
 			continue;
+
+		if (t.destroyed) {
+			tLen--;
+			i--;
+		}
 
 		if (!t.emptySinceEpoch && t.playersCurrent.length === 0)
 			t.emptySinceEpoch = +new Date();
