@@ -189,6 +189,8 @@ define([
 			this.titleScreen = true;
 			this.staticCamera = false;
 
+			this.layers.tileSprites.removeChildren();
+
 			renderLoginBackground(this);
 		},
 
