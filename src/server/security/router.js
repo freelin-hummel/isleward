@@ -76,7 +76,7 @@ module.exports = {
 			} else if (dataType === 'integerNullObjectOrString') {
 				const isCorrect = (
 					Number.isInteger(value) ||
-					typeof(dataType) === 'string' ||
+					typeof(value) === 'string' ||
 					value === null ||
 					(
 						typeof(value) === 'object' &&
