@@ -322,7 +322,7 @@ let types = {
 				castTimeMax: 0,
 				useWeaponRange: true,
 				random: {
-					damage: [1.47, 9.65]
+					damage: [1.47, 10.94]
 				}
 			},
 			implicitStat: {
@@ -341,7 +341,7 @@ let types = {
 				castTimeMax: 0,
 				useWeaponRange: true,
 				random: {
-					damage: [0.88, 5.79]
+					damage: [0.88, 6.57]
 				}
 			},
 			implicitStat: {
@@ -362,7 +362,7 @@ let types = {
 				manaCost: 0,
 				range: 9,
 				random: {
-					damage: [1.17, 7.72]
+					damage: [1.17, 8.75]
 				}
 			},
 			implicitStat: {
@@ -384,7 +384,7 @@ let types = {
 				castTimeMax: 0,
 				useWeaponRange: true,
 				random: {
-					damage: [2.64, 17.37]
+					damage: [2.64, 19.70]
 				}
 			},
 			implicitStat: {
@@ -406,7 +406,7 @@ let types = {
 				manaCost: 0,
 				range: 9,
 				random: {
-					damage: [1.65, 10.81]
+					damage: [1.65, 12.26]
 				}
 			},
 			implicitStat: {
@@ -427,7 +427,7 @@ let types = {
 				castTimeMax: 0,
 				useWeaponRange: true,
 				random: {
-					damage: [1.76, 11.58]
+					damage: [1.76, 13.13]
 				}
 			},
 			implicitStat: {

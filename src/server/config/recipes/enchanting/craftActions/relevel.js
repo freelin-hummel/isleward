@@ -4,7 +4,7 @@ module.exports = (obj, [item]) => {
 
 	let offset = 1 + ~~(Math.random() * 2);
 
-	const maxLevel = consts.maxLevel;
+	const maxLevel = balance.maxLevel;
 
 	if (!item.originalLevel)
 		item.level = Math.min(maxLevel, item.level + offset);

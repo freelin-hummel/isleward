@@ -28,6 +28,10 @@ let baseStats = {
 	regenHp: 0,
 	regenMana: 5,
 
+	addPhysical: 0,
+
+	accuracy: 60,
+
 	addCritChance: 0,
 	addCritMultiplier: 0,
 	addAttackCritChance: 0,
@@ -246,7 +250,7 @@ module.exports = {
 
 	calcHpMax: function () {
 		const spiritConfig = spirits.stats[this.obj.class];
-		
+
 		const initialHp = spiritConfig ? spiritConfig.values.hpMax : 32.7;
 		let increase = spiritConfig ? spiritConfig.values.hpPerLevel : 32.7;
 
@@ -258,7 +262,7 @@ module.exports = {
 	getXp: function (amount, source, target) {
 		const { obj, values } = this;
 
-		if (values.level === consts.maxLevel)
+		if (values.level === balance.maxLevel)
 			return;
 
 		const xpEvent = {
@@ -300,7 +304,7 @@ module.exports = {
 
 			obj.fireEvent('onLevelUp', this.values.level);
 
-			if (values.level === consts.maxLevel)
+			if (values.level === balance.maxLevel)
 				values.xp = 0;
 
 			this.calcHpMax();

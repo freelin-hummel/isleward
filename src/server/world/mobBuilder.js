@@ -1,6 +1,3 @@
-//Balance
-const { hpMults, dmgMults } = require('../config/consts');
-
 //Imports
 const animations = require('../config/animations');
 const itemGenerator = require('../items/generator');
@@ -50,7 +47,7 @@ const buildCpnStats = (mob, blueprint, typeDefinition) => {
 		hpMult: baseHpMult = typeDefinition.hpMult
 	} = blueprint;
 
-	const hpMax = ~~(level * 40 * hpMults[level - 1] * baseHpMult);
+	const hpMax = ~~(level * 40 * balance.hpMults[level - 1] * baseHpMult);
 
 	const cpnStats = mob.addComponent('stats', {
 		values: {
@@ -91,7 +88,7 @@ const buildCpnInventory = (mob, blueprint, { drops, hasNoItems = false }, prefer
 };
 
 const buildCpnSpells = (mob, blueprint, typeDefinition, preferStat) => {
-	const dmgMult = 4.5 * typeDefinition.dmgMult * dmgMults[blueprint.level - 1];
+	const dmgMult = 4.5 * typeDefinition.dmgMult * balance.dmgMults[blueprint.level - 1];
 
 	const spells = extend([], blueprint.spells);
 	spells.forEach(s => {

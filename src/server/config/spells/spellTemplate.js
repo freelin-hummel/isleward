@@ -280,7 +280,7 @@ module.exports = {
 		return values;
 	},
 
-	getDamage: function (target, noMitigate) {
+	getDamage: function (target, noMitigate, extraConfig) {
 		let config = {
 			source: this.obj,
 			target: target,
@@ -293,7 +293,8 @@ module.exports = {
 			noScale: this.noScale,
 			noMitigate: noMitigate,
 			spell: this,
-			scaleConfig: this.scaleConfig
+			scaleConfig: this.scaleConfig,
+			...extraConfig
 		};
 
 		if (this.obj.mob)

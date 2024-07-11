@@ -18,7 +18,7 @@ module.exports = (obj, [item]) => {
 				delete item.stats[p];
 
 			if (p === 'lvlRequire') {
-				item.level = Math.min(consts.maxLevel, item.level + value);
+				item.level = Math.min(balance.maxLevel, item.level + value);
 				delete item.originalLevel;
 			}
 		}

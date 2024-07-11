@@ -4,6 +4,7 @@ const server = require('./server/index');
 const components = require('./components/components');
 const mods = require('./misc/mods');
 const animations = require('./config/animations');
+const importedBalance = require('./config/balance');
 const skins = require('./config/skins');
 const factions = require('./config/factions');
 const classes = require('./config/spirits');
@@ -49,6 +50,7 @@ const startup = {
 	onComponentsReady: async function () {
 		skins.init();
 		factions.init();
+		importedBalance.initMainThread();
 
 		await clientConfig.init();
 

@@ -3,7 +3,7 @@ let statsFishingRod = require('./statsFishingRod');
 module.exports = {
 	generators: {
 		elementDmgPercent: function (item, level, blueprint, perfection, calcPerfection) {
-			let max = (level / 6.7);
+			let max = level * 0.31;
 
 			if (calcPerfection)
 				return (calcPerfection / max);
@@ -18,7 +18,7 @@ module.exports = {
 			if (item.slot === 'twoHanded')
 				div *= 2;
 
-			let max = (level * 15) * div;
+			let max = (level * 8.6) * div;
 
 			if (calcPerfection)
 				return (calcPerfection / max);
@@ -33,7 +33,7 @@ module.exports = {
 			if (item.slot === 'twoHanded')
 				div *= 2;
 
-			let max = (level - 3) * 50 * div;
+			let max = level * 27.5 * div;
 
 			if (calcPerfection)
 				return (calcPerfection / max);
@@ -64,7 +64,7 @@ module.exports = {
 				div *= 2;
 
 			let min = (level / 15) * div;
-			let max = (level * 5) * div;
+			let max = (level * 6) * div;
 
 			if (calcPerfection)
 				return ((calcPerfection - min) / (max - min));
@@ -122,7 +122,7 @@ module.exports = {
 		},
 		lifeOnHit: function (item, level, blueprint, perfection, calcPerfection, statBlueprint) {
 			const { min, max } = statBlueprint;
-			const scale = level / consts.maxLevel;
+			const scale = level / balance.maxLevel;
 			const maxRoll = scale * (max - min);
 
 			if (calcPerfection)
@@ -131,6 +131,17 @@ module.exports = {
 				return (min + random.norm(1, maxRoll)) * (blueprint.statMult.lifeOnHit || 1);
 
 			return (min + (maxRoll * perfection)) * (blueprint.statMult.lifeOnHit || 1);
+		},
+
+		addElement: function (item, level, blueprint, perfection, calcPerfection) {
+			let max = Math.pow(level / balance.maxLevel, 3) * level * 12.5;
+
+			if (calcPerfection)
+				return (calcPerfection / max);
+			else if (!perfection)
+				return random.norm(1, max) * (blueprint.statMult.addElement || 1);
+
+			return max * perfection * (blueprint.statMult.addElement || 1);
 		}
 	},
 
@@ -262,6 +273,12 @@ module.exports = {
 			ignore: true,
 			generator: 'elementDmgPercent'
 		},
+
+		addPhysical: {
+			generator: 'addElement',
+			aslots: ['neck', 'finger', 'trinket']
+		},
+
 		allAttributes: {
 			generator: 'mainStat',
 			ignore: true
@@ -590,7 +607,7 @@ module.exports = {
 
 		if (!value) {
 			if (statBlueprint.generator) {
-				let level = Math.min(consts.maxLevel, item.originalLevel || item.level);
+				let level = Math.min(balance.maxLevel, item.originalLevel || item.level);
 				value = Math.ceil(this.generators[statBlueprint.generator](item, level, blueprint, blueprint.perfection, null, statBlueprint));
 			} else if (!blueprint.perfection)
 				value = Math.ceil(random.norm(statBlueprint.min, statBlueprint.max));
@@ -675,7 +692,7 @@ module.exports = {
 						}
 					};
 
-					const itemLevel = Math.min(consts.maxLevel, item.level);
+					const itemLevel = Math.min(balance.maxLevel, item.level);
 					stat.value = Math.ceil(generator(item, itemLevel, blueprint));
 				} else
 					stat.value = Math.ceil(random.norm(statBlueprint.min, statBlueprint.max) * i.valueMult);		

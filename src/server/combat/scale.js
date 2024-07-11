@@ -3,12 +3,21 @@ const mathRandom = Math.random.bind(Math);
 const max = Math.max.bind(Math);
 
 //Helpers
+const scaleAddElement = (config, result) => {
+	const { isAttack, elementName, srcValues, scaleConfig } = config;
+	const { addPhysical } = srcValues;
+
+	let totalAdd = addPhysical;
+
+	result.amount += totalAdd;
+};
+
 const scaleStatType = (config, result) => {
 	const { statType, statMult = 1, srcValues, scaleConfig } = config;
 
 	if (!statType || scaleConfig?.statMult === false)
 		return;
-	
+
 	let statValue = 0;
 
 	if (!statType.push)
@@ -77,6 +86,7 @@ const scale = (config, result) => {
 		return;
 
 	scaleStatType(config, result);
+	scaleAddElement(config, result);
 	scalePercentMultipliers(config, result);
 	scaleCrit(config, result);
 };

@@ -45,7 +45,7 @@ module.exports = [{
 		withProps: ['slot'],
 		withoutProps: ['noAugment'],
 		checks: [
-			item => item.level && (item.originalLevel || item.level) < consts.maxLevel
+			item => item.level && (item.originalLevel || item.level) < balance.maxLevel
 		]
 	}],
 	craftAction: relevel
