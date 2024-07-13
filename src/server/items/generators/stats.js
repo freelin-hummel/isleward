@@ -3,7 +3,7 @@ let statsFishingRod = require('./statsFishingRod');
 module.exports = {
 	generators: {
 		elementDmgPercent: function (item, level, blueprint, perfection, calcPerfection) {
-			let max = level * 0.31;
+			let max = level * 0.34;
 
 			if (calcPerfection)
 				return (calcPerfection / max);
@@ -18,14 +18,15 @@ module.exports = {
 			if (item.slot === 'twoHanded')
 				div *= 2;
 
-			let max = (level * 8.6) * div;
+			const min = (level * 4.3) * div;
+			const max = (level * 8.6) * div;
 
 			if (calcPerfection)
 				return (calcPerfection / max);
 			else if (!perfection)
 				return random.norm(1, max) * (blueprint.statMult.addCritMultiplier || 1);
 
-			return max * perfection * (blueprint.statMult.addCritMultiplier || 1);
+			return (min + ((max - min) * perfection)) * (blueprint.statMult.addCritMultiplier || 1);
 		},
 
 		addCritChance: function (item, level, blueprint, perfection, calcPerfection) {
@@ -33,14 +34,15 @@ module.exports = {
 			if (item.slot === 'twoHanded')
 				div *= 2;
 
-			let max = level * 27.5 * div;
+			const min = level * 13.75 * div;
+			const max = level * 27.5 * div;
 
 			if (calcPerfection)
 				return (calcPerfection / max);
 			else if (!perfection)
 				return random.norm(1, max) * (blueprint.statMult.addCritChance || 1);
 
-			return max * perfection * (blueprint.statMult.addCritChance || 1);
+			return (min + ((max - min) * perfection)) * (blueprint.statMult.addCritChance || 1);
 		},
 
 		vit: function (item, level, blueprint, perfection, calcPerfection) {
@@ -134,7 +136,7 @@ module.exports = {
 		},
 
 		addElement: function (item, level, blueprint, perfection, calcPerfection) {
-			let max = Math.pow(level / balance.maxLevel, 3) * level * 12.5;
+			let max = Math.pow(level / balance.maxLevel, 3) * level * 15;
 
 			if (calcPerfection)
 				return (calcPerfection / max);
