@@ -106,7 +106,7 @@ module.exports = [{
 			manaCost: 0,
 			range: 9,
 			random: {
-				damage: [1.65, 12.26]
+				damage: [2.58, 16.8]
 			}
 		}
 	})
@@ -148,7 +148,7 @@ module.exports = [{
 			castTimeMax: 0,
 			useWeaponRange: true,
 			random: {
-				damage: [0.88, 6.57]
+				damage: [1.38, 9]
 			}
 		}
 	})

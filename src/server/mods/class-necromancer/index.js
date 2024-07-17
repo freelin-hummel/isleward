@@ -104,7 +104,7 @@ module.exports = {
 					castTimeMax: 0,
 					useWeaponRange: true,
 					random: {
-						damage: [1, 7.95]
+						damage: [1.6, 10.4]
 					}
 				},
 				implicitStat: {

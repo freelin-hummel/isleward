@@ -3,7 +3,9 @@ let statsFishingRod = require('./statsFishingRod');
 module.exports = {
 	generators: {
 		elementDmgPercent: function (item, level, blueprint, perfection, calcPerfection) {
-			let max = level * 0.34;
+			let max = level * 0.25;
+			if (item.slot === 'twoHanded')
+				max *= 2;
 
 			if (calcPerfection)
 				return (calcPerfection / max);
@@ -136,7 +138,9 @@ module.exports = {
 		},
 
 		addElement: function (item, level, blueprint, perfection, calcPerfection) {
-			let max = Math.pow(level / balance.maxLevel, 3) * level * 15;
+			let max = Math.pow(level / balance.maxLevel, 3) * level * 3;
+			if (item.slot === 'twoHanded')
+				max *= 1.85;
 
 			if (calcPerfection)
 				return (calcPerfection / max);
