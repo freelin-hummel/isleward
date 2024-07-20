@@ -28,7 +28,8 @@ let baseStats = {
 	regenHp: 0,
 	regenMana: 5,
 
-	addPhysical: 0,
+	addAttackDamage: 0,
+	addSpellDamage: 0,
 
 	accuracy: 60,
 

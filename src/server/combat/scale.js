@@ -4,10 +4,13 @@ const max = Math.max.bind(Math);
 
 //Helpers
 const scaleAddElement = (config, result) => {
-	const { isAttack, elementName, srcValues, scaleConfig, cd } = config;
-	const { addPhysical } = srcValues;
+	const { isAttack, srcValues, cd, duration } = config;
+	const { addAttackDamage, addSpellDamage } = srcValues;
 
-	let totalAdd = addPhysical * cd;
+	const addDamage = isAttack ? addAttackDamage : addSpellDamage;
+	let totalAdd = addDamage * cd;
+	if (duration !== undefined)
+		totalAdd /= duration;
 
 	result.amount += totalAdd;
 };

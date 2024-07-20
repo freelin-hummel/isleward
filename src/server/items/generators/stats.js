@@ -10,9 +10,9 @@ module.exports = {
 			if (calcPerfection)
 				return (calcPerfection / max);
 			else if (!perfection)
-				return random.norm(1, max) * (blueprint.statMult.elementDmgPercent || 1);
+				return random.norm(1, max) * (blueprint.statMult?.elementDmgPercent ?? 1);
 
-			return max * perfection * (blueprint.statMult.elementDmgPercent || 1);
+			return max * perfection * (blueprint.statMult?.elementDmgPercent ?? 1);
 		},
 
 		addCritMultiplier: function (item, level, blueprint, perfection, calcPerfection) {
@@ -26,9 +26,9 @@ module.exports = {
 			if (calcPerfection)
 				return (calcPerfection / max);
 			else if (!perfection)
-				return random.norm(1, max) * (blueprint.statMult.addCritMultiplier || 1);
+				return random.norm(1, max) * (blueprint.statMult?.addCritMultiplier ?? 1);
 
-			return (min + ((max - min) * perfection)) * (blueprint.statMult.addCritMultiplier || 1);
+			return (min + ((max - min) * perfection)) * (blueprint.statMult?.addCritMultiplier ?? 1);
 		},
 
 		addCritChance: function (item, level, blueprint, perfection, calcPerfection) {
@@ -42,9 +42,9 @@ module.exports = {
 			if (calcPerfection)
 				return (calcPerfection / max);
 			else if (!perfection)
-				return random.norm(1, max) * (blueprint.statMult.addCritChance || 1);
+				return random.norm(1, max) * (blueprint.statMult?.addCritChance ?? 1);
 
-			return (min + ((max - min) * perfection)) * (blueprint.statMult.addCritChance || 1);
+			return (min + ((max - min) * perfection)) * (blueprint.statMult?.addCritChance ?? 1);
 		},
 
 		vit: function (item, level, blueprint, perfection, calcPerfection) {
@@ -57,9 +57,9 @@ module.exports = {
 			if (calcPerfection)
 				return (calcPerfection / max);
 			else if (!perfection)
-				return random.norm(1, max) * (blueprint.statMult.vit || 1);
+				return random.norm(1, max) * (blueprint.statMult?.vit ?? 1);
 
-			return max * perfection * (blueprint.statMult.vit || 1);
+			return max * perfection * (blueprint.statMult?.vit ?? 1);
 		},
 
 		mainStat: function (item, level, blueprint, perfection, calcPerfection) {
@@ -73,9 +73,9 @@ module.exports = {
 			if (calcPerfection)
 				return ((calcPerfection - min) / (max - min));
 			else if (!perfection)
-				return random.norm(min, max) * (blueprint.statMult.mainStat || 1);
+				return random.norm(min, max) * (blueprint.statMult?.mainStat ?? 1);
 
-			return (min + ((max - min) * perfection)) * (blueprint.statMult.mainStat || 1);
+			return (min + ((max - min) * perfection)) * (blueprint.statMult?.mainStat ?? 1);
 		},
 		armor: function (item, level, blueprint, perfection, calcPerfection) {
 			let min = (level * 20);
@@ -84,9 +84,9 @@ module.exports = {
 			if (calcPerfection)
 				return ((calcPerfection - min) / (max - min));
 			else if (!perfection)
-				return random.norm(min, max) * blueprint.statMult.armor;
+				return random.norm(min, max) * blueprint.statMult?.armor;
 
-			return (min + ((max - min) * perfection)) * (blueprint.statMult.armor || 1);
+			return (min + ((max - min) * perfection)) * (blueprint.statMult?.armor ?? 1);
 		},
 		elementResist: function (item, level, blueprint, perfection, calcPerfection) {
 			let div = 1 / 11;
@@ -96,9 +96,9 @@ module.exports = {
 			if (calcPerfection)
 				return (calcPerfection / (100 * div));
 			else if (!perfection)
-				return random.norm(1, 100) * (blueprint.statMult.elementResist || 1) * div;
+				return random.norm(1, 100) * (blueprint.statMult?.elementResist ?? 1) * div;
 
-			return ~~((1 + (99 * perfection)) * (blueprint.statMult.elementResist || 1) * div);
+			return ~~((1 + (99 * perfection)) * (blueprint.statMult?.elementResist ?? 1) * div);
 		},
 		regenHp: function (item, level, blueprint, perfection, calcPerfection) {
 			let div = 1 / 11;
@@ -110,9 +110,9 @@ module.exports = {
 			if (calcPerfection)
 				return (calcPerfection / max);
 			else if (!perfection)
-				return random.norm(1, max) * (blueprint.statMult.regenHp || 1);
+				return random.norm(1, max) * (blueprint.statMult?.regenHp ?? 1);
 
-			return max * perfection * (blueprint.statMult.regenHp || 1);
+			return max * perfection * (blueprint.statMult?.regenHp ?? 1);
 		},
 		lvlRequire: function (item, level, blueprint, perfection, calcPerfection) {
 			let max = ~~(level / 2);
@@ -120,9 +120,9 @@ module.exports = {
 			if (calcPerfection)
 				return (calcPerfection / max);
 			else if (!perfection)
-				return random.norm(1, max) * (blueprint.statMult.lvlRequire || 1);
+				return random.norm(1, max) * (blueprint.statMult?.lvlRequire ?? 1);
 
-			return max * perfection * (blueprint.statMult.lvlRequire || 1);
+			return max * perfection * (blueprint.statMult?.lvlRequire ?? 1);
 		},
 		lifeOnHit: function (item, level, blueprint, perfection, calcPerfection, statBlueprint) {
 			const { min, max } = statBlueprint;
@@ -132,12 +132,12 @@ module.exports = {
 			if (calcPerfection)
 				return ((calcPerfection - min) / maxRoll);
 			else if (!perfection)
-				return (min + random.norm(1, maxRoll)) * (blueprint.statMult.lifeOnHit || 1);
+				return (min + random.norm(1, maxRoll)) * (blueprint.statMult?.lifeOnHit ?? 1);
 
-			return (min + (maxRoll * perfection)) * (blueprint.statMult.lifeOnHit || 1);
+			return (min + (maxRoll * perfection)) * (blueprint.statMult?.lifeOnHit ?? 1);
 		},
 
-		addElement: function (item, level, blueprint, perfection, calcPerfection) {
+		addDamage: function (item, level, blueprint, perfection, calcPerfection) {
 			let max = Math.pow(level / balance.maxLevel, 3) * level * 3;
 			if (item.slot === 'twoHanded')
 				max *= 1.85;
@@ -145,9 +145,9 @@ module.exports = {
 			if (calcPerfection)
 				return (calcPerfection / max);
 			else if (!perfection)
-				return random.norm(1, max) * (blueprint.statMult.addElement || 1);
+				return random.norm(1, max) * (blueprint.statMult?.addDamage ?? 1);
 
-			return max * perfection * (blueprint.statMult.addElement || 1);
+			return max * perfection * (blueprint.statMult?.addDamage ?? 1);
 		}
 	},
 
@@ -188,124 +188,95 @@ module.exports = {
 
 		elementArcaneResist: {
 			level: {
-				min: 15
+				min: 7
 			},
 			generator: 'elementResist'
 		},
 		elementFrostResist: {
 			level: {
-				min: 15
+				min: 7
 			},
 			generator: 'elementResist'
 		},
 		elementFireResist: {
 			level: {
-				min: 15
+				min: 7
 			},
 			generator: 'elementResist'
 		},
 		elementHolyResist: {
 			level: {
-				min: 15
+				min: 7
 			},
 			generator: 'elementResist'
 		},
 		elementPoisonResist: {
 			level: {
-				min: 15
+				min: 7
 			},
 			generator: 'elementResist'
 		},
 		elementAllResist: {
 			level: {
-				min: 15
+				min: 7
 			},
 			generator: 'elementResist'
 		},
 
 		elementArcanePercent: {
-			level: {
-				min: 10
-			},
-			ignore: true,
 			generator: 'elementDmgPercent'
 		},
 		elementFrostPercent: {
-			level: {
-				min: 10
-			},
-			ignore: true,
 			generator: 'elementDmgPercent'
 		},
 		elementFirePercent: {
-			level: {
-				min: 10
-			},
-			ignore: true,
 			generator: 'elementDmgPercent'
 		},
 		elementHolyPercent: {
-			level: {
-				min: 10
-			},
-			ignore: true,
 			generator: 'elementDmgPercent'
 		},
 		elementPoisonPercent: {
-			level: {
-				min: 10
-			},
-			ignore: true,
 			generator: 'elementDmgPercent'
 		},
 		physicalPercent: {
-			level: {
-				min: 10
-			},
-			ignore: true,
 			generator: 'elementDmgPercent'
 		},
 		elementPercent: {
-			level: {
-				min: 10
-			},
-			ignore: true,
 			generator: 'elementDmgPercent'
 		},
 		spellPercent: {
-			level: {
-				min: 10
-			},
-			ignore: true,
 			generator: 'elementDmgPercent'
 		},
 
-		addPhysical: {
-			generator: 'addElement',
-			aslots: ['neck', 'finger', 'trinket']
+		addAttackDamage: {
+			generator: 'addDamage'
+		},
+
+		addSpellDamage: {
+			generator: 'addDamage'
 		},
 
 		allAttributes: {
 			generator: 'mainStat',
-			ignore: true
+			slots: ['finger', 'neck']
 		},
 
 		attackSpeed: {
 			min: 1,
-			max: 8.75,
-			ignore: true
+			max: 4,
+			slots: ['neck', 'finger', 'trinket']
 		},
 
 		castSpeed: {
 			min: 1,
-			max: 8.75,
-			ignore: true
+			max: 4,
+			slots: ['neck', 'finger', 'trinket']
 		},
 
 		lifeOnHit: {
 			min: 1,
 			max: 10,
-			ignore: true,
+			slots: ['offHand', 'trinket'],
 			generator: 'lifeOnHit'
 		},
 
@@ -329,52 +300,34 @@ module.exports = {
 		dodgeAttackChance: {
 			min: 1,
 			max: 10,
-			ignore: true
+			slots: ['feet']
 		},
 
 		dodgeSpellChance: {
 			min: 1,
 			max: 10,
-			ignore: true
+			slots: ['feet']
 		},
 
 		addCritChance: {
-			generator: 'addCritChance',
-			level: {
-				min: 7
-			}
+			generator: 'addCritChance'
 		},
 		addCritMultiplier: {
-			generator: 'addCritMultiplier',
-			level: {
-				min: 12
-			}
+			generator: 'addCritMultiplier'
 		},
 
 		addAttackCritChance: {
-			generator: 'addCritChance',
-			level: {
-				min: 7
-			}
+			generator: 'addCritChance'
 		},
 		addAttackCritMultiplier: {
-			generator: 'addCritMultiplier',
-			level: {
-				min: 12
-			}
+			generator: 'addCritMultiplier'
 		},
 
 		addSpellCritChance: {
-			generator: 'addCritChance',
-			level: {
-				min: 7
-			}
+			generator: 'addCritChance'
 		},
 		addSpellCritMultiplier: {
-			generator: 'addCritMultiplier',
-			level: {
-				min: 12
-			}
+			generator: 'addCritMultiplier'
 		},
 
 		magicFind: {
@@ -395,130 +348,38 @@ module.exports = {
 		sprintChance: {
 			min: 1,
 			max: 20,
-			ignore: true
+			slots: ['feet']
 		}
 	},
 
-	slots: {
-		feet: {
-			sprintChance: {
-				min: 1,
-				max: 20
-			},
+	getPossibleStats: function (item) {
+		const res = Object.keys(this.stats).filter(s => {
+			const bpt = this.stats[s];
 
-			dodgeAttackChance: {
-				min: 1,
-				max: 10
-			},
+			return true;
 
-			dodgeSpellChance: {
-				min: 1,
-				max: 10
-			}
-		},
+			return (
+				(
+					bpt.level === undefined ||
+					(
+						(bpt.level.min ?? 1) <= item.level &&
+						(bpt.level.max ?? balance.maxLevel) >= item.level
+					)
+				) &&
+				(
+					bpt.slots === undefined ||
+					bpt.slots.includes(item.slot)
+				)
+			);
+		});
 
-		offHand: {
-			lifeOnHit: {
-				min: 1,
-				max: 10
-			}
-		},
-
-		trinket: {
-			attackSpeed: {
-				min: 1,
-				max: 8.75
-			},
-			castSpeed: {
-				min: 1,
-				max: 8.75
-			},
-			lifeOnHit: {
-				min: 1,
-				max: 10
-			}
-		},
-
-		finger: {
-			elementArcanePercent: {
-				generator: 'elementDmgPercent'
-			},
-			elementFrostPercent: {
-				generator: 'elementDmgPercent'
-			},
-			elementFirePercent: {
-				generator: 'elementDmgPercent'
-			},
-			elementHolyPercent: {
-				generator: 'elementDmgPercent'
-			},
-			elementPoisonPercent: {
-				generator: 'elementDmgPercent'
-			},
-			elementPercent: {
-				generator: 'elementDmgPercent'
-			},
-			physicalPercent: {
-				generator: 'elementDmgPercent'
-			},
-			spellPercent: {
-				generator: 'elementDmgPercent'
-			},
-			allAttributes: {
-				generator: 'mainStat'
-			},
-			attackSpeed: {
-				min: 1,
-				max: 8.75
-			},
-			castSpeed: {
-				min: 1,
-				max: 8.75
-			}
-		},
-
-		neck: {
-			elementArcanePercent: {
-				generator: 'elementDmgPercent'
-			},
-			elementFrostPercent: {
-				generator: 'elementDmgPercent'
-			},
-			elementFirePercent: {
-				generator: 'elementDmgPercent'
-			},
-			elementHolyPercent: {
-				generator: 'elementDmgPercent'
-			},
-			elementPoisonPercent: {
-				generator: 'elementDmgPercent'
-			},
-			physicalPercent: {
-				generator: 'elementDmgPercent'
-			},
-			elementPercent: {
-				generator: 'elementDmgPercent'
-			},
-			spellPercent: {
-				generator: 'elementDmgPercent'
-			},
-			allAttributes: {
-				generator: 'mainStat'
-			},
-			attackSpeed: {
-				min: 1,
-				max: 8.75
-			},
-			castSpeed: {
-				min: 1,
-				max: 8.75
-			}
-		}
+		return res;
 	},
 
 	generate: function (item, blueprint, result) {
 		if (item.slot === 'tool') {
 			statsFishingRod.generate(item, blueprint, result);
+
 			return;
 		}
 
@@ -528,39 +389,56 @@ module.exports = {
 		if (blueprint.noStats)
 			return;
 
-		//If we enchant something we don't add armor
-		if (!blueprint.statMult)
-			blueprint.statMult = {};
-		for (let s in blueprint.statMult) {
-			if (blueprint.statMult[s] > 0)
-				this.buildStat(item, blueprint, s);
-		}
+		let statCount = blueprint.statCount ?? (item.quality + 1);
 
-		let statCount = blueprint.statCount || (item.quality + 1);
-
+		//Force stats should always be rolled on an item, even if said stat should be ignored or can't occur on a slot
 		if (blueprint.forceStats) {
-			for (let i = 0; i < Math.min(statCount, blueprint.forceStats.length); i++) {
-				let choice = blueprint.forceStats[i];
+			const clonedStats = extend([], blueprint.stats);
+			let len = Math.min(statCount, clonedStats.length);
+			for (let i = 0; i < len; i++) {
+				const choice = clonedStats[~~(Math.random() * clonedStats.length)];
+				clonedStats.spliceFirstWhere(s => s === choice);
+
 				this.buildStat(item, blueprint, choice, result);
+
 				statCount--;
 			}
 		}
 
-		this.buildImplicitStats(item, blueprint.implicitStat);
+		if (blueprint.implicitStat !== undefined)
+			this.buildImplicitStats(item, blueprint.implicitStat);
 
-		if (blueprint.stats) {
-			let useStats = extend([], blueprint.stats);
-			let addStats = Math.min(statCount, blueprint.stats.length);
-			for (let i = 0; i < addStats; i++) {
-				let choice = useStats[~~(Math.random() * useStats.length)];
+		const possibleStats = this.getPossibleStats(item);
+
+		//If we send an array of stats, they can only be rolled if they may occur naturally on a slot
+		if (blueprint.stats) {		
+			const useStats = blueprint.stats.filter(s => (
+				possibleStats.includes(s) ||
+				(
+					s.includes('|') &&
+					possibleStats.includes(s.split[0])
+				)
+			));
+
+			let len = Math.min(statCount, blueprint.stats.length);
+
+			for (let i = 0; i < len; i++) {
+				const choice = useStats[~~(Math.random() * useStats.length)];
 				useStats.spliceFirstWhere(s => s === choice);
+				if (!choice)
+					break;
+
 				this.buildStat(item, blueprint, choice, result);
+
 				statCount--;
 			}
 		}
 
-		for (let i = 0; i < statCount; i++) 
-			this.buildStat(item, blueprint, null, result);
+		for (let i = 0; i < statCount; i++) {
+			const choice = possibleStats[~~(Math.random() * possibleStats.length)];
+
+			this.buildStat(item, blueprint, choice, result);
+		}
 
 		for (let s in item.stats) {
 			item.stats[s] = Math.ceil(item.stats[s]);
@@ -569,57 +447,26 @@ module.exports = {
 		}
 	},
 
-	buildStat: function (item, blueprint, stat, result, isImplicit) {
-		let slotStats = this.slots[item.slot] || {};
-		let statOptions = extend({}, this.stats, slotStats || {});
+	chooseStat: function (item) {
 
-		for (let p in statOptions) {
-			if ((!slotStats[p]) || (slotStats[p].ignore))
-				continue;
+	},
 
-			delete statOptions[p].ignore;
-		}
-
-		let statBlueprint = null;
+	buildStat: function (item, blueprint, stat, result) {
+		const statBlueprint = this.stats[stat];
 
 		let value = null;
-		if ((stat) && (stat.indexOf('|') > -1)) {
-			let split = stat.split('|');
+
+		if (stat.includes('|')) {
+			const split = stat.split('|');
 			stat = split[0];
 			value = ~~split[1];
-		}
-
-		if (
-			!stat || 
-			!statOptions[stat] ||
-			(
-				blueprint.limitSlotStats &&
-				statOptions[stat].ignore
-			)
-		) {
-			let options = Object.keys(statOptions).filter(function (s) {
-				let o = statOptions[s];
-				if (o.ignore)
-					return false;
-				else if ((o.level) && (o.level.min) && (item.level < o.level.min))
-					return false;
-				return true;
-			});
-
-			stat = options[~~(Math.random() * options.length)];
-			statBlueprint = statOptions[stat];
-		} else
-			statBlueprint = statOptions[stat];
-
-		if (!value) {
-			if (statBlueprint.generator) {
-				let level = Math.min(balance.maxLevel, item.originalLevel || item.level);
-				value = Math.ceil(this.generators[statBlueprint.generator](item, level, blueprint, blueprint.perfection, null, statBlueprint));
-			} else if (!blueprint.perfection)
-				value = Math.ceil(random.norm(statBlueprint.min, statBlueprint.max));
-			else
-				value = statBlueprint.min + ((statBlueprint.max - statBlueprint.min) * blueprint.perfection);
-		}
+		} else if (statBlueprint.generator !== undefined) {
+			const level = Math.min(balance.maxLevel, item.originalLevel || item.level);
+			value = Math.ceil(this.generators[statBlueprint.generator](item, level, blueprint, blueprint.perfection, null, statBlueprint));
+		} else if (blueprint.perfection === undefined)
+			value = Math.ceil(random.norm(statBlueprint.min, statBlueprint.max));
+		else
+			value = statBlueprint.min + ((statBlueprint.max - statBlueprint.min) * blueprint.perfection);
 
 		if ((result) && (result.addStatMsgs)) {
 			result.addStatMsgs.push({
@@ -644,10 +491,10 @@ module.exports = {
 				item.level = 1;
 		}
 
-		if (item.stats[stat])
-			value += item.stats[stat];
-
-		item.stats[stat] = value;
+		if (item.stats[stat] === undefined)
+			item.stats[stat] = value;
+		else
+			item.stats[stat] += value;
 	},
 
 	rescale: function (item, level) {
@@ -674,9 +521,6 @@ module.exports = {
 	},
 
 	buildImplicitStats: function (item, implicits) {
-		if (!implicits)
-			return;
-
 		implicits = implicits.push ? implicits : [ implicits ];
 		implicits.forEach(i => {
 			let stat = {

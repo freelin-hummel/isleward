@@ -50,9 +50,10 @@ const startup = {
 	onComponentsReady: async function () {
 		skins.init();
 		factions.init();
-		importedBalance.initMainThread();
 
 		await clientConfig.init();
+
+		importedBalance.initMainThread();
 
 		await server.init();
 
