@@ -308,7 +308,7 @@ module.exports = {
 			noMitigate: noMitigate,
 			spell: this,
 			scaleConfig: this.scaleConfig,
-			duration: this.values.duration,
+			duration: this.values?.duration,
 			...extraConfig
 		};
 

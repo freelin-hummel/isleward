@@ -177,6 +177,8 @@ module.exports = {
 		else
 			regenHp = values.regenHp * 0.2;
 
+		console.log(regenHp, isInCombat, values.regenHp, !!this.obj.player);
+
 		if (values.hp < values.hpMax) {
 			values.hp += regenHp;
 			this.obj.syncer.setObject(false, 'stats', 'values', 'hp', values.hp);
@@ -252,10 +254,10 @@ module.exports = {
 	calcHpMax: function () {
 		const spiritConfig = spirits.stats[this.obj.class];
 
-		const initialHp = spiritConfig ? spiritConfig.values.hpMax : 32.7;
-		let increase = spiritConfig ? spiritConfig.values.hpPerLevel : 32.7;
+		const initialHp = spiritConfig.values.hpMax;
+		let increase = spiritConfig.values.hpPerLevel;
 
-		this.values.hpMax = initialHp + (((this.values.level || 1) - 1) * increase);
+		this.values.hpMax = initialHp + (((this.values.level ?? 1) - 1) * increase);
 	},
 
 	//Source is the object that caused you to gain xp (mostly yourself)

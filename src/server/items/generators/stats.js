@@ -52,7 +52,7 @@ module.exports = {
 			if (item.slot === 'twoHanded')
 				div *= 2;
 
-			let max = ((-0.6340155 + (13.68923 * level) - (0.34383 * Math.pow(level, 2)) + (0.06754871 * Math.pow(level, 3)) + (0.000174046 * Math.pow(level, 4)) + (0.000007675887 * Math.pow(level, 5))) / 10) * div;
+			const max = 0.039 * Math.pow(level, 1.8);
 
 			if (calcPerfection)
 				return (calcPerfection / max);
@@ -105,7 +105,7 @@ module.exports = {
 			if (item.slot === 'twoHanded')
 				div *= 2;
 
-			let max = (-0.05426729 + (3.477385 * level) - (0.03890282 * Math.pow(level, 2)) + (0.009244822 * Math.pow(level, 3)) + (0.0001700915 * Math.pow(level, 4)) - (0.00000138085 * Math.pow(level, 5))) * div;
+			const max = (0.416 * Math.pow(level, 1.967)) * div;
 
 			if (calcPerfection)
 				return (calcPerfection / max);
@@ -352,13 +352,15 @@ module.exports = {
 		}
 	},
 
-	getPossibleStats: function (item) {
+	getPossibleStats: function (item, blueprint) {
 		const res = Object.keys(this.stats).filter(s => {
 			const bpt = this.stats[s];
 
-			return true;
-
 			return (
+				(
+					blueprint.ignoreStats === undefined ||
+					!blueprint.ignoreStats.includes(s)
+				) &&
 				(
 					bpt.level === undefined ||
 					(
@@ -406,9 +408,9 @@ module.exports = {
 		}
 
 		if (blueprint.implicitStat !== undefined)
-			this.buildImplicitStats(item, blueprint.implicitStat);
+			this.buildImplicitStats(item, blueprint);
 
-		const possibleStats = this.getPossibleStats(item);
+		const possibleStats = this.getPossibleStats(item, blueprint);
 
 		//If we send an array of stats, they can only be rolled if they may occur naturally on a slot
 		if (blueprint.stats) {		
@@ -445,10 +447,6 @@ module.exports = {
 			if (item.stats[s] === 0)
 				delete item.stats[s];
 		}
-	},
-
-	chooseStat: function (item) {
-
 	},
 
 	buildStat: function (item, blueprint, stat, result) {
@@ -520,7 +518,7 @@ module.exports = {
 		return nStats;
 	},
 
-	buildImplicitStats: function (item, implicits) {
+	buildImplicitStats: function (item, { implicitStat: implicits, perfection }) {
 		implicits = implicits.push ? implicits : [ implicits ];
 		implicits.forEach(i => {
 			let stat = {
@@ -529,7 +527,11 @@ module.exports = {
 
 			if (i.value) {
 				const [min, max] = i.value;
-				stat.value = Math.ceil(random.expNorm(min, max));
+
+				if (perfection === undefined)
+					stat.value = Math.ceil(random.expNorm(min, max));
+				else
+					stat.value = Math.ceil(min + ((max - min) * perfection));
 			} else if (i.valueMult) {
 				let statBlueprint = this.stats[i.stat];
 
@@ -543,9 +545,9 @@ module.exports = {
 					};
 
 					const itemLevel = Math.min(balance.maxLevel, item.level);
-					stat.value = Math.ceil(generator(item, itemLevel, blueprint));
+					stat.value = Math.ceil(generator(item, itemLevel, blueprint, perfection));
 				} else
-					stat.value = Math.ceil(random.norm(statBlueprint.min, statBlueprint.max) * i.valueMult);		
+					stat.value = Math.ceil(random.norm(statBlueprint.min, statBlueprint.max) * i.valueMult);
 			}
 				
 			if (!item.implicitStats)

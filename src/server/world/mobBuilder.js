@@ -49,18 +49,16 @@ const buildCpnStats = (mob, blueprint, typeDefinition) => {
 
 	const hpMax = ~~(level * 40 * balance.hpMults[level - 1] * baseHpMult);
 
-	const cpnStats = mob.addComponent('stats', {
+	mob.addComponent('stats', {
 		values: {
 			level,
 			hpMax
 		}
 	});
-
-	//Hack to disallow low level mobs from having any lifeOnHit
-	// since that makes it very difficult (and confusing) for low level players
-	if (level <= 3)
-		cpnStats.values.lifeOnHit = 0;
 };
+
+const ignoreStatsHigh = ['addAttackDamage', 'addSpellDamage'];
+const ignoreStatsLow = ['regenHp', 'lifeOnHit', 'addAttackDamage', 'addSpellDamage'];
 
 const buildCpnInventory = (mob, blueprint, { drops, hasNoItems = false }, preferStat) => {
 	const { level } = blueprint;
@@ -77,7 +75,11 @@ const buildCpnInventory = (mob, blueprint, { drops, hasNoItems = false }, prefer
 				level,
 				slot,
 				quality: 4,
-				forceStats: [preferStat]
+				stats: blueprint.itemStats,
+				perfection: blueprint.itemPerfection,
+				spellPerfection: blueprint.spellPerfection,
+				forceStats: [preferStat],
+				ignoreStats: level > 3 ? ignoreStatsHigh : ignoreStatsLow
 			});
 			delete item.spell;
 			item.eq = true;
@@ -88,7 +90,7 @@ const buildCpnInventory = (mob, blueprint, { drops, hasNoItems = false }, prefer
 };
 
 const buildCpnSpells = (mob, blueprint, typeDefinition, preferStat) => {
-	const dmgMult = 4.5 * typeDefinition.dmgMult * balance.dmgMults[blueprint.level - 1];
+	const dmgMult = 4.5 * typeDefinition.dmgMult * 1;//balance.dmgMults[blueprint.level - 1];
 
 	const spells = extend([], blueprint.spells);
 	spells.forEach(s => {
@@ -152,7 +154,7 @@ const build = (mob, blueprint, type, zoneName) => {
 
 	mob.addComponent('equipment');
 
-	const preferStat = statSelector[~~(Math.random() * 3)];
+	const preferStat = blueprint.preferStat ?? statSelector[~~(Math.random() * 3)];
 
 	fnComponentGenerators.forEach(fn => fn(mob, blueprint, typeDefinition, preferStat));
 
