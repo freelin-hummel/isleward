@@ -164,6 +164,14 @@ module.exports = {
 		else {
 			let noMitigate = !target;
 
+			let cdMax = this.cdMax;
+
+			//If a spell has no cast time, attack/cast speed start influencing its cooldown
+			if (this.castTimeMax === 0) {
+				const _speedModifier = this.obj.stats.values[this.isAttack ? 'attackSpeed' : 'castSpeed'];
+				cdMax = Math.max(1, Math.ceil(cdMax * (1 - (_speedModifier / 100))));
+			}
+
 			let dmg = combat.getDamage({
 				source: this.obj,
 				target: (target || {
@@ -171,8 +179,8 @@ module.exports = {
 						values: {}
 					}
 				}),
-				damage: (this.damage || this.healing) * (this.dmgMult || 1),
-				cd: this.cdMax,
+				damage: (this.healing ?? this.damage) * (this.dmgMult ?? 1),
+				cd: cdMax,
 				element: this.element,
 				statType: this.statType,
 				statMult: this.statMult,
@@ -294,11 +302,11 @@ module.exports = {
 			const speedModifier = this.obj.stats.values[this.isAttack ? 'attackSpeed' : 'castSpeed'];
 			cdMax = Math.max(1, Math.ceil(cdMax * (1 - (speedModifier / 100))));
 		}
-		
-		let config = {
+
+		const config = {
 			source: this.obj,
 			target: target,
-			damage: (this.damage || this.healing) * (this.dmgMult || 1),
+			damage: (this.healing ?? this.damage) * (this.dmgMult ?? 1),
 			cd: cdMax,
 			element: this.element,
 			statType: this.statType,

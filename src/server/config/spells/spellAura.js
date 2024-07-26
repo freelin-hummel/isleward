@@ -43,7 +43,7 @@ module.exports = {
 		let o = this.obj;
 		let amount = 0;
 		if (this.name === 'Innervation')
-			amount = ~~((o.stats.values.hpMax / 100) * this.values.regenPercentage);
+			amount = Math.ceil(((o.stats.values.hpMax / 100) * this.values.regenPercentage) * 20);
 		else
 			amount = this.values.regenPercentage || this.values.chance;
 
@@ -75,15 +75,24 @@ module.exports = {
 				return;
 			}
 
-			if (effect)
+			if (effect !== undefined)
 				return;
 
-			if (!obj.effects)
+			if (obj.effects === undefined)
 				return;
+
+			//If an effect exists, check if ours is stronger
+			const existingEffect = obj.effects.getEffectByType(this.effect);
+			if (existingEffect !== undefined) {
+				if (existingEffect.amount < amount)
+					obj.effects.removeEffect(existingEffect.id);
+				else
+					return;
+			}
 
 			effects[obj.serverId] = obj.effects.addEffect({
 				type: this.effect,
-				amount: amount,
+				amount,
 				caster: this.obj,
 				ttl: -1
 			});

@@ -82,8 +82,8 @@ let spells = {
 		range: 9,
 		radius: 3,
 		random: {
-			healing: [0.3, 0.5],
-			i_duration: [7, 13]
+			healing: [0.3, 0.53],
+			i_duration: [7, 12]
 		}
 	},
 
@@ -91,12 +91,12 @@ let spells = {
 		statType: 'int',
 		statMult: 1,
 		element: 'holy',
-		cdMax: 5,
-		castTimeMax: 3,
+		cdMax: 6,
+		castTimeMax: 4,
 		manaCost: 8,
 		range: 9,
 		random: {
-			healing: [1, 3]
+			healing: [1, 3.5]
 		}
 	},
 
@@ -201,7 +201,7 @@ let spells = {
 		auraRange: 9,
 		effect: 'regenHp',
 		random: {
-			regenPercentage: [0.3, 1.5]
+			regenPercentage: [0.2, 0.5]
 		}
 	},
 	tranquility: {

@@ -48,11 +48,10 @@ module.exports = {
 		},
 
 		vit: function (item, level, blueprint, perfection, calcPerfection) {
-			let div = 1 / 11;
-			if (item.slot === 'twoHanded')
-				div *= 2;
+			let max = level / 2;
 
-			const max = 0.039 * Math.pow(level, 1.8);
+			if (item.slot === 'twoHanded')
+				max *= 2;
 
 			if (calcPerfection)
 				return (calcPerfection / max);
@@ -67,7 +66,7 @@ module.exports = {
 			if (item.slot === 'twoHanded')
 				div *= 2;
 
-			let min = (level / 15) * div;
+			let min = (level / 3) * div;
 			let max = (level * 6) * div;
 
 			if (calcPerfection)
@@ -98,14 +97,17 @@ module.exports = {
 			else if (!perfection)
 				return random.norm(1, 100) * (blueprint.statMult?.elementResist ?? 1) * div;
 
-			return ~~((1 + (99 * perfection)) * (blueprint.statMult?.elementResist ?? 1) * div);
+			return (1 + (99 * perfection)) * (blueprint.statMult?.elementResist ?? 1) * div;
 		},
 		regenHp: function (item, level, blueprint, perfection, calcPerfection) {
-			let div = 1 / 11;
-			if (item.slot === 'twoHanded')
-				div *= 2;
+			let max = [
+				1, 2, 2, 4, 4, 4, 5, 6, 7, 7,
+				7, 10, 11, 11, 11, 12, 13, 13, 13, 14,
+				14, 14, 15
+			][level - 1];
 
-			const max = (0.416 * Math.pow(level, 1.967)) * div;
+			if (item.slot === 'twoHanded')
+				max *= 2;
 
 			if (calcPerfection)
 				return (calcPerfection / max);
@@ -115,7 +117,7 @@ module.exports = {
 			return max * perfection * (blueprint.statMult?.regenHp ?? 1);
 		},
 		lvlRequire: function (item, level, blueprint, perfection, calcPerfection) {
-			let max = ~~(level / 2);
+			let max = level / 2;
 
 			if (calcPerfection)
 				return (calcPerfection / max);
@@ -125,16 +127,22 @@ module.exports = {
 			return max * perfection * (blueprint.statMult?.lvlRequire ?? 1);
 		},
 		lifeOnHit: function (item, level, blueprint, perfection, calcPerfection, statBlueprint) {
-			const { min, max } = statBlueprint;
-			const scale = level / balance.maxLevel;
-			const maxRoll = scale * (max - min);
+			let max = [
+				0.5, 0.5, 1, 5, 5, 5, 5, 8, 8, 8,
+				9, 13, 13, 13, 13, 17, 17, 17, 17, 21,
+				21, 22, 22
+			][level - 1];
+			const min = 1;
+
+			if (item.slot === 'twoHanded')
+				max *= 2;
 
 			if (calcPerfection)
-				return ((calcPerfection - min) / maxRoll);
+				return ((calcPerfection - min) / max);
 			else if (!perfection)
-				return (min + random.norm(1, maxRoll)) * (blueprint.statMult?.lifeOnHit ?? 1);
+				return (min + random.norm(1, max)) * (blueprint.statMult?.lifeOnHit ?? 1);
 
-			return (min + (maxRoll * perfection)) * (blueprint.statMult?.lifeOnHit ?? 1);
+			return (min + (max * perfection)) * (blueprint.statMult?.lifeOnHit ?? 1);
 		},
 
 		addDamage: function (item, level, blueprint, perfection, calcPerfection) {
@@ -274,8 +282,6 @@ module.exports = {
 		},
 
 		lifeOnHit: {
-			min: 1,
-			max: 10,
 			slots: ['offHand', 'trinket'],
 			generator: 'lifeOnHit'
 		},
@@ -460,9 +466,9 @@ module.exports = {
 			value = ~~split[1];
 		} else if (statBlueprint.generator !== undefined) {
 			const level = Math.min(balance.maxLevel, item.originalLevel || item.level);
-			value = Math.ceil(this.generators[statBlueprint.generator](item, level, blueprint, blueprint.perfection, null, statBlueprint));
+			value = this.generators[statBlueprint.generator](item, level, blueprint, blueprint.perfection, null, statBlueprint);
 		} else if (blueprint.perfection === undefined)
-			value = Math.ceil(random.norm(statBlueprint.min, statBlueprint.max));
+			value = random.norm(statBlueprint.min, statBlueprint.max);
 		else
 			value = statBlueprint.min + ((statBlueprint.max - statBlueprint.min) * blueprint.perfection);
 
@@ -493,29 +499,6 @@ module.exports = {
 			item.stats[stat] = value;
 		else
 			item.stats[stat] += value;
-	},
-
-	rescale: function (item, level) {
-		let stats = item.stats;
-		let nStats = extend({}, stats);
-		let bpt = {
-			statMult: {}
-		};
-
-		for (let p in stats) {
-			let generator = this.stats[p].generator;
-			if (!generator)
-				continue;
-			else if (['lvlRequire'].indexOf(p) > -1)
-				continue;
-
-			generator = this.generators[generator];
-
-			let perfection = generator(item, item.originalLevel || item.level, bpt, null, stats[p]);
-			nStats[p] = Math.ceil(generator(item, level, bpt, perfection));
-		}
-
-		return nStats;
 	},
 
 	buildImplicitStats: function (item, { implicitStat: implicits, perfection }) {

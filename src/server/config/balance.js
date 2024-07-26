@@ -6,7 +6,11 @@ const serverBalance = {
 	maxLevel: 23,
 
 	//Rune damage is multiplied by nth entry from this array where n = level - 1
-	dmgMults: [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1, 1.125, 1.25, 1.375, 1.5, 1.625, 1.75, 1.875, 2, 2.125, 2.25, 2.375, 2.5, 2.625, 2.75, 2.875, 3],
+	dmgMults: [
+		0.643, 0.554, 0.754, 0.675, 0.655, 0.788, 0.764, 0.768, 0.764, 0.877,
+		0.897, 1.010, 1.034, 1.076, 1.219, 1.256, 1.330, 1.379, 1.576, 1.724,
+		1.946, 2.167, 2.399
+	],
 
 	//Mob HP is multiplied by nth entry from this array where n = level - 1
 	// y = 0.1 * ⋅x^1.471

@@ -173,11 +173,9 @@ module.exports = {
 		regenMana = values.regenMana / 50;
 
 		if (!isInCombat)
-			regenHp = Math.max(values.hpMax / 112, values.regenHp * 0.2);
+			regenHp = Math.ceil(Math.max(values.hpMax / 112, values.regenHp / 20));
 		else
-			regenHp = values.regenHp * 0.2;
-
-		console.log(regenHp, isInCombat, values.regenHp, !!this.obj.player);
+			regenHp = Math.ceil(values.regenHp / 20);
 
 		if (values.hp < values.hpMax) {
 			values.hp += regenHp;
@@ -724,16 +722,16 @@ module.exports = {
 		},
 
 		afterDealDamage: function ({ damage, target }) {
-			if (damage.element)
-				return;
-
 			const { obj, values: { lifeOnHit } } = this;
+			const { element, cd = 1 } = damage;
 
-			if (target === obj || !lifeOnHit)
+			if (target === obj || lifeOnHit <= 0 || element !== undefined)
 				return;
+
+			const amount = lifeOnHit * (cd / 20);
 
 			this.getHp({
-				heal: { amount: lifeOnHit },
+				heal: { amount },
 				source: obj,
 				target: obj
 			});

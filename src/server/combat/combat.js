@@ -5,7 +5,7 @@ const mitigate = require('./mitigate');
 
 //Method
 const getDamage = config => {
-	const { damage, element } = config;
+	const { damage, element, cd } = config;
 
 	//Add convenience properties
 	config.srcValues = config.source.stats.values;
@@ -18,7 +18,8 @@ const getDamage = config => {
 		blocked: false,
 		dodged: false,
 		crit: false,
-		element
+		element,
+		cd
 	};
 
 	avoid(config, result);

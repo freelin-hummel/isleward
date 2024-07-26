@@ -109,7 +109,7 @@ module.exports = {
 				},
 				implicitStat: {
 					stat: 'lifeOnHit',
-					value: [1, 30]
+					valueMult: 3
 				}
 			};
 		}, this);

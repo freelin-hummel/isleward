@@ -12,12 +12,10 @@ const generateSlots = [
 	'legs',
 	'feet',
 	'finger',
+	'finger',
 	'trinket',
 	'twoHanded'
 ];
-
-//Mobs will pick one of these stats to be force rolles onto their items
-const statSelector = ['str', 'dex', 'int'];
 
 //These stat values are synced to players
 const syncStats = ['hp', 'hpMax', 'mana', 'manaMax', 'level'];
@@ -60,7 +58,19 @@ const buildCpnStats = (mob, blueprint, typeDefinition) => {
 const ignoreStatsHigh = ['addAttackDamage', 'addSpellDamage'];
 const ignoreStatsLow = ['regenHp', 'lifeOnHit', 'addAttackDamage', 'addSpellDamage'];
 
-const buildCpnInventory = (mob, blueprint, { drops, hasNoItems = false }, preferStat) => {
+const buildCpnInventory = (
+	mob,
+	blueprint,
+	{
+		drops,
+		hasNoItems = false,
+		itemQuality = 4,
+		itemPerfection = 0.2,
+		itemStats = ['str', 'str', 'str', 'str', 'str'],
+		spellPerfection
+	},
+	preferStat
+) => {
 	const { level } = blueprint;
 
 	const cpnInventory = mob.addComponent('inventory', drops);
@@ -74,10 +84,10 @@ const buildCpnInventory = (mob, blueprint, { drops, hasNoItems = false }, prefer
 				noSpell: true,
 				level,
 				slot,
-				quality: 4,
-				stats: blueprint.itemStats,
-				perfection: blueprint.itemPerfection,
-				spellPerfection: blueprint.spellPerfection,
+				quality: itemQuality,
+				stats: itemStats,
+				perfection: itemPerfection,
+				spellPerfection,
 				forceStats: [preferStat],
 				ignoreStats: level > 3 ? ignoreStatsHigh : ignoreStatsLow
 			});
@@ -90,8 +100,6 @@ const buildCpnInventory = (mob, blueprint, { drops, hasNoItems = false }, prefer
 };
 
 const buildCpnSpells = (mob, blueprint, typeDefinition, preferStat) => {
-	const dmgMult = 4.5 * typeDefinition.dmgMult * 1;//balance.dmgMults[blueprint.level - 1];
-
 	const spells = extend([], blueprint.spells);
 	spells.forEach(s => {
 		if (!s.animation && mob.sheetName === 'mobs' && animations.mobs[mob.cell])
@@ -111,8 +119,10 @@ const buildCpnSpells = (mob, blueprint, typeDefinition, preferStat) => {
 		mob.inventory.getItem(rune);
 	}
 
-	mob.spellbook.spells.forEach(s => {
-		s.dmgMult = s.name ? dmgMult / 3 : dmgMult;
+	mob.spellbook.spells.forEach((s, i) => {
+		if (i === 0)
+			s.cdMax = 2;
+
 		s.statType = preferStat;
 		s.manaCost = 0;
 	});
@@ -154,7 +164,7 @@ const build = (mob, blueprint, type, zoneName) => {
 
 	mob.addComponent('equipment');
 
-	const preferStat = blueprint.preferStat ?? statSelector[~~(Math.random() * 3)];
+	const preferStat = 'str';
 
 	fnComponentGenerators.forEach(fn => fn(mob, blueprint, typeDefinition, preferStat));
 
