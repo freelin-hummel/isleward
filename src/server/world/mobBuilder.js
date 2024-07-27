@@ -17,6 +17,19 @@ const generateSlots = [
 	'twoHanded'
 ];
 
+const generateTypes = {
+	twoHanded: 'Axe',
+	head: 'Helmet',
+	chest: 'Breastplate',
+	hands: 'Gauntlets',
+	waist: 'Belt',
+	legs: 'Legplates',
+	feet: 'Steel Boots',
+	neck: 'Pendant',
+	finger: 'Viridian Band',
+	trinket: 'Dragon Fang'
+};
+
 //These stat values are synced to players
 const syncStats = ['hp', 'hpMax', 'mana', 'manaMax', 'level'];
 
@@ -84,6 +97,7 @@ const buildCpnInventory = (
 				noSpell: true,
 				level,
 				slot,
+				type: generateTypes[slot],
 				quality: itemQuality,
 				stats: itemStats,
 				perfection: itemPerfection,
@@ -93,6 +107,9 @@ const buildCpnInventory = (
 			});
 			delete item.spell;
 			item.eq = true;
+			const implicitArmor = item.implicitStats.find(s => s.stat === 'armor');
+			if (implicitArmor !== undefined)
+				implicitArmor.value = 0;
 
 			cpnInventory.getItem(item);
 		});
@@ -119,9 +136,14 @@ const buildCpnSpells = (mob, blueprint, typeDefinition, preferStat) => {
 		mob.inventory.getItem(rune);
 	}
 
+	const dmgMult = balance.dmgMults[blueprint.level - 1];
+
 	mob.spellbook.spells.forEach((s, i) => {
 		if (i === 0)
 			s.cdMax = 2;
+
+		if (s.healing === undefined)
+			s.damage *= dmgMult;
 
 		s.statType = preferStat;
 		s.manaCost = 0;

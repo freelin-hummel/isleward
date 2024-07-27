@@ -31,8 +31,6 @@ let baseStats = {
 	addAttackDamage: 0,
 	addSpellDamage: 0,
 
-	accuracy: 60,
-
 	addCritChance: 0,
 	addCritMultiplier: 0,
 	addAttackCritChance: 0,

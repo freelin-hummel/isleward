@@ -7,9 +7,9 @@ const serverBalance = {
 
 	//Rune damage is multiplied by nth entry from this array where n = level - 1
 	dmgMults: [
-		0.643, 0.554, 0.754, 0.675, 0.655, 0.788, 0.764, 0.768, 0.764, 0.877,
-		0.897, 1.010, 1.034, 1.076, 1.219, 1.256, 1.330, 1.379, 1.576, 1.724,
-		1.946, 2.167, 2.399
+		0.23, 0.335, 0.48, 0.45, 0.445, 0.53, 0.63, 0.525, 0.615, 0.695,
+		0.8, 0.705, 0.805, 0.9, 1.02, 0.95, 1.1, 1.22, 1.4, 1.39,
+		1.6, 1.85, 2.23
 	],
 
 	//Mob HP is multiplied by nth entry from this array where n = level - 1

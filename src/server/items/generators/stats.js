@@ -120,11 +120,11 @@ module.exports = {
 			let max = level / 2;
 
 			if (calcPerfection)
-				return (calcPerfection / max);
+				return Math.round(calcPerfection / max);
 			else if (!perfection)
-				return random.norm(1, max) * (blueprint.statMult?.lvlRequire ?? 1);
+				return Math.round(random.norm(1, max) * (blueprint.statMult?.lvlRequire ?? 1));
 
-			return max * perfection * (blueprint.statMult?.lvlRequire ?? 1);
+			return Math.round(max * perfection * (blueprint.statMult?.lvlRequire ?? 1));
 		},
 		lifeOnHit: function (item, level, blueprint, perfection, calcPerfection, statBlueprint) {
 			let max = [
@@ -288,19 +288,19 @@ module.exports = {
 
 		armor: {
 			generator: 'armor',
-			ignore: true
+			slots: []
 		},
 
 		blockAttackChance: {
 			min: 1,
 			max: 10,
-			ignore: true
+			slots: []
 		},
 
 		blockSpellChance: {
 			min: 1,
 			max: 10,
-			ignore: true
+			slots: []
 		},
 
 		dodgeAttackChance: {
@@ -449,7 +449,7 @@ module.exports = {
 		}
 
 		for (let s in item.stats) {
-			item.stats[s] = Math.ceil(item.stats[s]);
+			item.stats[s] = Math.round(item.stats[s]);
 			if (item.stats[s] === 0)
 				delete item.stats[s];
 		}
