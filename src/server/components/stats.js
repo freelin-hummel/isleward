@@ -719,11 +719,11 @@ module.exports = {
 			}
 		},
 
-		afterDealDamage: function ({ damage, target }) {
+		afterDealDamage: function ({ damage, target, effectName }) {
 			const { obj, values: { lifeOnHit } } = this;
 			const { element, cd = 1 } = damage;
 
-			if (target === obj || lifeOnHit <= 0 || element !== undefined)
+			if (target === obj || lifeOnHit <= 0 || element !== undefined || effectName !== undefined)
 				return;
 
 			const amount = lifeOnHit * (cd / 20);
