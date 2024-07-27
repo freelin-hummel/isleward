@@ -45,7 +45,7 @@ module.exports = {
 		if (mod.disabled)
 			return;
 
-		const isMapThread = !!global.instancer;
+		const isMapThread = !global.cons;
 		mod.isMapThread = isMapThread;
 
 		mod.events = events;

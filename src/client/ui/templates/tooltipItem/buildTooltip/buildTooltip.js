@@ -39,7 +39,7 @@ define([
 		return html;
 	};
 
-	const buildTooltip = (ui, item, pos, canCompare, bottomAlign) => {
+	const buildTooltip = (ui, { item, pos, canCompare, bottomAlign, customLineBuilders }) => {
 		let shiftDown = input.isKeyDown('shift', true);
 		const equipErrors = window.player.inventory.equipItemErrors(item);
 
@@ -55,7 +55,7 @@ define([
 
 		const compare = canCompare ? msg.compare : null;
 
-		initLineBuilders(item, compare, shiftDown, equipErrors);
+		initLineBuilders(item, compare, shiftDown, equipErrors, customLineBuilders);
 
 		const contents = buildTooltipHtml(item);
 

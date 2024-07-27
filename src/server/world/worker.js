@@ -7,6 +7,8 @@ global.instancer = require('./instancer');
 global.eventManager = require('../events/events');
 global.clientConfig = require('../config/clientConfig');
 global.rezoneManager = require('./rezoneManager');
+const importedBalance = require('../config/balance');
+global.balance = importedBalance.balance;
 
 //Imports
 const components = require('../components/components');
@@ -54,6 +56,7 @@ const onCpnsReady = async function () {
 
 const onModsReady = function () {
 	consts.init(threadArgs);
+	importedBalance.initMapThread(threadArgs);
 	components.init(onCpnsReady);
 };
 

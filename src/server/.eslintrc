@@ -52,6 +52,7 @@
 		"clientConfig": false,
 		"random": false,
 		"consts": false,
+		"balance": false,
 		"rezoneManager": false,
 		"eventManager": false
 	},

@@ -104,12 +104,12 @@ module.exports = {
 					castTimeMax: 0,
 					useWeaponRange: true,
 					random: {
-						damage: [1, 7]
+						damage: [1.6, 10.4]
 					}
 				},
 				implicitStat: {
 					stat: 'lifeOnHit',
-					value: [1, 30]
+					valueMult: 3
 				}
 			};
 		}, this);

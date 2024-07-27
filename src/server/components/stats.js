@@ -28,6 +28,9 @@ let baseStats = {
 	regenHp: 0,
 	regenMana: 5,
 
+	addAttackDamage: 0,
+	addSpellDamage: 0,
+
 	addCritChance: 0,
 	addCritMultiplier: 0,
 	addAttackCritChance: 0,
@@ -168,9 +171,9 @@ module.exports = {
 		regenMana = values.regenMana / 50;
 
 		if (!isInCombat)
-			regenHp = Math.max(values.hpMax / 112, values.regenHp * 0.2);
+			regenHp = Math.ceil(Math.max(values.hpMax / 112, values.regenHp / 20));
 		else
-			regenHp = values.regenHp * 0.2;
+			regenHp = Math.ceil(values.regenHp / 20);
 
 		if (values.hp < values.hpMax) {
 			values.hp += regenHp;
@@ -246,11 +249,11 @@ module.exports = {
 
 	calcHpMax: function () {
 		const spiritConfig = spirits.stats[this.obj.class];
-		
-		const initialHp = spiritConfig ? spiritConfig.values.hpMax : 32.7;
-		let increase = spiritConfig ? spiritConfig.values.hpPerLevel : 32.7;
 
-		this.values.hpMax = initialHp + (((this.values.level || 1) - 1) * increase);
+		const initialHp = spiritConfig.values.hpMax;
+		let increase = spiritConfig.values.hpPerLevel;
+
+		this.values.hpMax = initialHp + (((this.values.level ?? 1) - 1) * increase);
 	},
 
 	//Source is the object that caused you to gain xp (mostly yourself)
@@ -258,7 +261,7 @@ module.exports = {
 	getXp: function (amount, source, target) {
 		const { obj, values } = this;
 
-		if (values.level === consts.maxLevel)
+		if (values.level === balance.maxLevel)
 			return;
 
 		const xpEvent = {
@@ -300,7 +303,7 @@ module.exports = {
 
 			obj.fireEvent('onLevelUp', this.values.level);
 
-			if (values.level === consts.maxLevel)
+			if (values.level === balance.maxLevel)
 				values.xp = 0;
 
 			this.calcHpMax();
@@ -716,17 +719,17 @@ module.exports = {
 			}
 		},
 
-		afterDealDamage: function ({ damage, target }) {
-			if (damage.element)
-				return;
-
+		afterDealDamage: function ({ damage, target, effectName }) {
 			const { obj, values: { lifeOnHit } } = this;
+			const { element, cd = 1 } = damage;
 
-			if (target === obj || !lifeOnHit)
+			if (target === obj || lifeOnHit <= 0 || element !== undefined || effectName !== undefined)
 				return;
+
+			const amount = lifeOnHit * (cd / 20);
 
 			this.getHp({
-				heal: { amount: lifeOnHit },
+				heal: { amount },
 				source: obj,
 				target: obj
 			});

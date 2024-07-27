@@ -30,7 +30,7 @@ let spells = {
 		manaCost: 5,
 		range: 9,
 		random: {
-			damage: [4, 32]
+			damage: [4, 75]
 		}
 	},
 	'ice spear': {
@@ -42,7 +42,7 @@ let spells = {
 		manaCost: 4,
 		range: 9,
 		random: {
-			damage: [2, 15],
+			damage: [2, 47],
 			i_freezeDuration: [6, 10]
 		}
 	},
@@ -54,7 +54,7 @@ let spells = {
 		castTimeMax: 2,
 		manaCost: 5,
 		random: {
-			damage: [2, 10],
+			damage: [2, 35],
 			i_radius: [1, 2.2],
 			i_pushback: [2, 5]
 		}
@@ -68,7 +68,7 @@ let spells = {
 		range: 9,
 		manaCost: 7,
 		random: {
-			damage: [4, 14],
+			damage: [4, 35],
 			i_stunDuration: [6, 10]
 		}
 	},
@@ -82,8 +82,8 @@ let spells = {
 		range: 9,
 		radius: 3,
 		random: {
-			healing: [0.3, 0.5],
-			i_duration: [7, 13]
+			healing: [0.3, 0.53],
+			i_duration: [7, 12]
 		}
 	},
 
@@ -91,12 +91,12 @@ let spells = {
 		statType: 'int',
 		statMult: 1,
 		element: 'holy',
-		cdMax: 5,
-		castTimeMax: 3,
+		cdMax: 6,
+		castTimeMax: 4,
 		manaCost: 8,
 		range: 9,
 		random: {
-			healing: [1, 3]
+			healing: [1, 3.5]
 		}
 	},
 
@@ -109,7 +109,7 @@ let spells = {
 		manaCost: 4,
 		useWeaponRange: true,
 		random: {
-			damage: [6, 23]
+			damage: [6, 55]
 		}
 	},
 	charge: {
@@ -121,7 +121,7 @@ let spells = {
 		range: 10,
 		manaCost: 3,
 		random: {
-			damage: [2, 11],
+			damage: [2, 42],
 			i_stunDuration: [6, 10]
 		}
 	},
@@ -145,7 +145,7 @@ let spells = {
 		manaCost: 7,
 		random: {
 			i_range: [1, 2.5],
-			damage: [4, 18]
+			damage: [4, 59]
 		}
 	},
 	smokebomb: {
@@ -156,7 +156,7 @@ let spells = {
 		castTimeMax: 0,
 		manaCost: 6,
 		random: {
-			damage: [0.25, 1.2],
+			damage: [0.25, 4.4],
 			i_radius: [1, 3],
 			i_duration: [7, 13]
 		}
@@ -169,7 +169,7 @@ let spells = {
 		range: 10,
 		manaCost: 7,
 		random: {
-			damage: [8, 35],
+			damage: [8, 79],
 			i_stunDuration: [4, 7]
 		}
 	},
@@ -183,7 +183,7 @@ let spells = {
 		range: 9,
 		isAttack: true,
 		random: {
-			damage: [3, 18],
+			damage: [3, 66],
 			i_delay: [1, 4]
 		},
 		negativeStats: [
@@ -201,7 +201,7 @@ let spells = {
 		auraRange: 9,
 		effect: 'regenHp',
 		random: {
-			regenPercentage: [0.3, 1.5]
+			regenPercentage: [0.2, 0.5]
 		}
 	},
 	tranquility: {

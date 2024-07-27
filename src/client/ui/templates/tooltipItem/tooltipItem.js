@@ -2,12 +2,14 @@ define([
 	'ui/templates/tooltipItem/buildTooltip/buildTooltip',
 	'css!ui/templates/tooltipItem/styles',
 	'html!ui/templates/tooltipItem/template',
-	'js/system/events'
+	'js/system/events',
+	'js/system/globals'
 ], function (
 	buildTooltip,
 	styles,
 	template,
-	events
+	events,
+	globals
 ) {
 	return {
 		tpl: template,
@@ -33,7 +35,16 @@ define([
 		onShowItemTooltip: function (item, pos, canCompare, bottomAlign) {
 			this.removeButton();
 
-			const html = buildTooltip(this, item, pos, canCompare, bottomAlign);
+			const emBeforeBuildItemTooltip = {
+				item,
+				pos,
+				canCompare,
+				bottomAlign,
+				customLineBuilders: {}
+			};
+			events.emit('beforeBuildItemTooltip', emBeforeBuildItemTooltip);
+
+			const html = buildTooltip(this, emBeforeBuildItemTooltip);
 
 			this.item = item;
 

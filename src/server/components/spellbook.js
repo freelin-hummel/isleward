@@ -158,7 +158,6 @@ module.exports = {
 		//Mobs don't get abilities put on CD when they learn them
 		if (!this.obj.mob && builtSpell.cdMax)
 			builtSpell.cd = builtSpell.cdMax;
-
 		this.spells.push(builtSpell);
 		this.spells.sort(function (a, b) {
 			return (a.id - b.id);

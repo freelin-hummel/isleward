@@ -11,11 +11,12 @@ module.exports = {
 
 			spells: [{
 				type: 'melee',
-				statMult: 0.1356
+				statMult: 1
 			}],
 
 			regular: {
-				hpMult: 1,
+				itemPerfection: 0.02,
+				hpMult: 2,
 				dmgMult: 1,
 
 				drops: {
@@ -28,8 +29,9 @@ module.exports = {
 				count: 1,
 				chance: 0.4,
 
-				hpMult: 3,
-				dmgMult: 1.5,
+				itemPerfection: 0.2,
+				hpMult: 5,
+				dmgMult: 1,
 
 				drops: {
 					chance: 100,
