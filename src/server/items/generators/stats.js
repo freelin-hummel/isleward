@@ -122,10 +122,12 @@ module.exports = {
 		else
 			value = statBlueprint.min + ((statBlueprint.max - statBlueprint.min) * blueprint.perfection);
 
-		if ((result) && (result.addStatMsgs)) {
+		if (result?.addStatMsgs) {
+			value = Math.round(value);
+
 			result.addStatMsgs.push({
-				stat: stat,
-				value: value
+				stat,
+				value
 			});
 
 			if (!item.enchantedStats)

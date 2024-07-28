@@ -71,7 +71,7 @@ const stackExistingItem = (items, item) => {
 		return null;
 
 	const existItem = items.find(i => i.name === name);
-	if (!existItem)
+	if (!existItem || !isItemStackable(existItem))
 		return null;
 
 	existItem.quantity = ~~(existItem.quantity ?? 1) + ~~quantity;
@@ -154,17 +154,17 @@ module.exports = (cpnInv, item, hideMessage, noStack, hideAlert, createBagIfFull
 			obj.equipment.equip({ itemId: item.id });
 	}
 
-	if (item.has('quickSlot')) {
-		obj.equipment.setQuickSlot({
-			itemId: item.id,
-			slot: item.quickSlot
-		});
-	}
-
 	if (item.effects) 
 		cpnInv.hookItemEvents([item]);
 
 	if (obj.player) {
+		if (item.has('quickSlot')) {
+			obj.equipment.setQuickSlot({
+				itemId: item.id,
+				slot: item.quickSlot
+			});
+		}
+
 		if (item.fromMob) {
 			delete item.fromMob;
 
@@ -173,12 +173,12 @@ module.exports = (cpnInv, item, hideMessage, noStack, hideAlert, createBagIfFull
 		}
 
 		notifyPlayer(obj, item, item.quantity, hideAlert, hideMessage);
-	}
 
-	//Some handlers will sync the item to the player themselves
-	if (!item.eq && !item.has('quickSlot') && !item.effects) {
-		obj.syncer.deleteFromArray(true, 'inventory', 'getItems', i => i.id === item.id);
-		obj.syncer.setArray(true, 'inventory', 'getItems', cpnInv.simplifyItem(item), true);
+		//Some handlers will sync the item to the player themselves
+		if (!item.eq && !item.has('quickSlot') && !item.effects) {
+			obj.syncer.deleteFromArray(true, 'inventory', 'getItems', i => i.id === item.id);
+			obj.syncer.setArray(true, 'inventory', 'getItems', cpnInv.simplifyItem(item), true);
+		}
 	}
 
 	return item;
