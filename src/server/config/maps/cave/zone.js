@@ -46,7 +46,6 @@ module.exports = {
 				randomPos: true,
 				range: 2,
 				selfCast: 0.2,
-				statMult: 1,
 				damage: 0.125,
 				element: 'arcane',
 				cdMax: 5,
@@ -120,7 +119,6 @@ module.exports = {
 				randomPos: true,
 				range: 2,
 				selfCast: 0.2,
-				statMult: 1,
 				damage: 0.25,
 				element: 'arcane',
 				cdMax: 5,
@@ -171,8 +169,9 @@ module.exports = {
 			spawnCd: 1714,
 
 			regular: {
-				hpMult: 90,
-				dmgMult: 2,
+				itemPerfection: 0.075,
+				hpMult: 45,
+				dmgMult: 1,
 
 				drops: {
 					chance: 100,
@@ -223,7 +222,6 @@ module.exports = {
 				randomPos: true,
 				range: 6,
 				selfCast: 0.25,
-				statMult: 1,
 				damage: 0.05,
 				element: 'arcane',
 				cdMax: 8,
@@ -307,8 +305,9 @@ module.exports = {
 			deathRep: -15,
 
 			regular: {
-				hpMult: 100,
-				dmgMult: 2
+				itemPerfection: 0.075,
+				hpMult: 50,
+				dmgMult: 1
 			},
 
 			rare: {

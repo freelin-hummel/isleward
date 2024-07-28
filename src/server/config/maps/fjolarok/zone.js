@@ -95,8 +95,9 @@ module.exports = {
 			cron: '0 * * * *',
 
 			regular: {
-				hpMult: 3,
-				dmgMult: 3,
+				itemPerfection: 0.04,
+				hpMult: 5,
+				dmgMult: 1,
 
 				drops: {
 					chance: 100,
@@ -257,7 +258,8 @@ module.exports = {
 			cron: '0 */2 * * *',
 
 			regular: {
-				hpMult: 10,
+				itemPerfection: 0.04,
+				hpMult: 5,
 				dmgMult: 1,
 
 				drops: {
@@ -276,7 +278,6 @@ module.exports = {
 				range: 8,
 				delay: 9,
 				damage: 0.8,
-				statMult: 1,
 				cdMax: 7,
 				targetRandom: true,
 				particles: {
@@ -296,7 +297,6 @@ module.exports = {
 			}, {
 				type: 'projectile',
 				damage: 0.4,
-				statMult: 1,
 				cdMax: 5,
 				targetRandom: true,
 				row: 2,

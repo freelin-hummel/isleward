@@ -316,7 +316,6 @@ let types = {
 			spellName: 'melee',
 			spellConfig: {
 				statType: 'str',
-				statMult: 1,
 				threatMult: 4,
 				cdMax: 5,
 				castTimeMax: 0,
@@ -336,7 +335,6 @@ let types = {
 			spellName: 'melee',
 			spellConfig: {
 				statType: 'dex',
-				statMult: 1,
 				cdMax: 3,
 				castTimeMax: 0,
 				useWeaponRange: true,
@@ -355,7 +353,6 @@ let types = {
 			spellName: 'projectile',
 			spellConfig: {
 				statType: 'int',
-				statMult: 1,
 				element: 'holy',
 				cdMax: 5,
 				castTimeMax: 0,
@@ -378,7 +375,6 @@ let types = {
 			spellName: 'melee',
 			spellConfig: {
 				statType: 'str',
-				statMult: 1,
 				threatMult: 4,
 				cdMax: 9,
 				castTimeMax: 0,
@@ -398,7 +394,6 @@ let types = {
 			spellName: 'projectile',
 			spellConfig: {
 				statType: 'int',
-				statMult: 1,
 				element: 'arcane',
 				auto: true,
 				cdMax: 7,
@@ -421,7 +416,6 @@ let types = {
 			range: 2,
 			spellConfig: {
 				statType: 'dex',
-				statMult: 1,
 				threatMult: 4,
 				cdMax: 6,
 				castTimeMax: 0,

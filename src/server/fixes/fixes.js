@@ -147,7 +147,6 @@ module.exports = {
 							damage: effect.rolls.damage,
 							range: 1,
 							statType: 'str',
-							statMult: 1,
 							isAttack: true
 						},
 						castTarget: 'none',
@@ -185,7 +184,6 @@ module.exports = {
 							range: 1,
 							element: 'poison',
 							statType: 'dex',
-							statMult: 1,
 							duration: 5,
 							isAttack: true
 						}

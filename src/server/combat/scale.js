@@ -16,7 +16,7 @@ const scaleAddElement = (config, result) => {
 };
 
 const scaleStatType = (config, result) => {
-	const { statType, statMult = 1, srcValues, scaleConfig } = config;
+	const { statType, srcValues, scaleConfig } = config;
 
 	if (!statType || scaleConfig?.statMult === false)
 		return;
@@ -33,7 +33,7 @@ const scaleStatType = (config, result) => {
 
 	statValue = max(1, statValue);
 
-	result.amount *= statValue * statMult;
+	result.amount *= statValue;
 };
 
 const scalePercentMultipliers = ({ isAttack, elementName, srcValues, scaleConfig }, result) => {

@@ -23,7 +23,6 @@ let spells = {
 
 	'magic missile': {
 		statType: 'int',
-		statMult: 1,
 		element: 'arcane',
 		cdMax: 7,
 		castTimeMax: 6,
@@ -35,7 +34,6 @@ let spells = {
 	},
 	'ice spear': {
 		statType: 'int',
-		statMult: 1,
 		element: 'frost',
 		cdMax: 10,
 		castTimeMax: 2,
@@ -48,7 +46,6 @@ let spells = {
 	},
 	fireblast: {
 		statType: 'int',
-		statMult: 1,
 		element: 'fire',
 		cdMax: 4,
 		castTimeMax: 2,
@@ -61,7 +58,6 @@ let spells = {
 	},
 	smite: {
 		statType: 'int',
-		statMult: 1,
 		element: 'holy',
 		cdMax: 6,
 		castTimeMax: 3,
@@ -74,7 +70,6 @@ let spells = {
 	},
 	consecrate: {
 		statType: 'int',
-		statMult: 1,
 		element: 'holy',
 		cdMax: 15,
 		castTimeMax: 4,
@@ -89,7 +84,6 @@ let spells = {
 
 	'healing touch': {
 		statType: 'int',
-		statMult: 1,
 		element: 'holy',
 		cdMax: 6,
 		castTimeMax: 4,
@@ -102,7 +96,6 @@ let spells = {
 
 	slash: {
 		statType: 'str',
-		statMult: 1,
 		threatMult: 4,
 		cdMax: 9,
 		castTimeMax: 1,
@@ -114,7 +107,6 @@ let spells = {
 	},
 	charge: {
 		statType: 'str',
-		statMult: 1,
 		threatMult: 3,
 		cdMax: 14,
 		castTimeMax: 1,
@@ -127,7 +119,6 @@ let spells = {
 	},
 	flurry: {
 		statType: 'dex',
-		statMult: 1,
 		cdMax: 20,
 		castTimeMax: 0,
 		manaCost: 10,
@@ -138,7 +129,6 @@ let spells = {
 	},
 	whirlwind: {
 		statType: 'str',
-		statMult: 1,
 		threatMult: 6,
 		cdMax: 12,
 		castTimeMax: 2,
@@ -150,7 +140,6 @@ let spells = {
 	},
 	smokebomb: {
 		statType: 'dex',
-		statMult: 1,
 		element: 'poison',
 		cdMax: 7,
 		castTimeMax: 0,
@@ -163,7 +152,6 @@ let spells = {
 	},
 	ambush: {
 		statType: 'dex',
-		statMult: 1,
 		cdMax: 15,
 		castTimeMax: 3,
 		range: 10,
@@ -175,7 +163,6 @@ let spells = {
 	},
 	'crystal spikes': {
 		statType: ['dex', 'int'],
-		statMult: 1,
 		manaCost: 14,
 		needLos: true,
 		cdMax: 15,
@@ -192,7 +179,6 @@ let spells = {
 	},
 	innervation: {
 		statType: ['str'],
-		statMult: 1,
 		manaReserve: {
 			percentage: 0.25
 		},
@@ -206,7 +192,6 @@ let spells = {
 	},
 	tranquility: {
 		statType: ['int'],
-		statMult: 1,
 		element: 'holy',
 		manaReserve: {
 			percentage: 0.25
@@ -221,7 +206,6 @@ let spells = {
 	},
 	swiftness: {
 		statType: ['dex'],
-		statMult: 1,
 		element: 'fire',
 		manaReserve: {
 			percentage: 0.4

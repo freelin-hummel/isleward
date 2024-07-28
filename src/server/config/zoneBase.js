@@ -10,8 +10,7 @@ module.exports = {
 			walkDistance: 1,
 
 			spells: [{
-				type: 'melee',
-				statMult: 1
+				type: 'melee'
 			}],
 
 			regular: {
@@ -29,7 +28,7 @@ module.exports = {
 				count: 1,
 				chance: 0.4,
 
-				itemPerfection: 0.2,
+				itemPerfection: 0.04,
 				hpMult: 5,
 				dmgMult: 1,
 

@@ -98,7 +98,6 @@ module.exports = [{
 		spellName: 'projectile',
 		spellConfig: {
 			statType: 'int',
-			statMult: 1,
 			element: 'arcane',
 			auto: true,
 			cdMax: 7,
@@ -143,7 +142,6 @@ module.exports = [{
 		spellName: 'melee',
 		spellConfig: {
 			statType: 'dex',
-			statMult: 1,
 			cdMax: 3,
 			castTimeMax: 0,
 			useWeaponRange: true,
