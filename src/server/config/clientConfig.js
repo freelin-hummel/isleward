@@ -171,7 +171,6 @@ const config = {
 		'menu',
 		'spells',
 		'messages',
-		'online',
 		'mainMenu',
 		'context',
 		'party',
