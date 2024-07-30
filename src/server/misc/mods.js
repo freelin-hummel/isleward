@@ -6,7 +6,6 @@ module.exports = {
 
 	init: async function () {
 		const modList = fileLister.getFolderList('mods');
-		return;
 
 		//Load all mods
 		let loadList = modList.map(m => {
