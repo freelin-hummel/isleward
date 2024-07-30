@@ -10,7 +10,7 @@ module.exports = {
 	//Options:
 	// sqlite
 	// rethink
-	db: process.env.IWD_DB || 'rethink',
+	db: process.env.IWD_DB || 'sqlite',
 	dbHost: process.env.IWD_DB_HOST || 'localhost',
 	dbPort: process.env.IWD_DB_PORT || 28015,
 	dbName: process.env.IWD_DB_NAME || 'live',

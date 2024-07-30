@@ -57,7 +57,6 @@ const init = async () => {
 		app.get(/^(.*)$/, appFile);
 
 		socketServer.on('connection', onConnection);
-
 		server.listen(port, () => {
 			_.log(startupMessage);
 

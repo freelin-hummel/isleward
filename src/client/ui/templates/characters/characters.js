@@ -124,25 +124,19 @@ define([
 				.empty();
 
 			this.characters
-				.sort(function (a, b) {
-					return (b.level - a.level);
-				})
-				.forEach(function (c, i) {
-					let charName = c.name;
-					if (c.level !== null)
-						charName += '<font class="color-yellowB">&nbsp;(' + c.level + ')</font>';
-
-					let html = templateListItem
+				.sort((a, b) => b.level - a.level)
+				.forEach((charName, i) => {
+					const html = templateListItem
 						.replace('$NAME$', charName);
 
 					let li = $(html)
 						.appendTo(list);
 
-					li.on('click', this.onCharacterClick.bind(this, c.name, i));
+					li.on('click', this.onCharacterClick.bind(this, charName, i));
 
 					if (i === 0)
 						li.click();
-				}, this);
+				});
 		},
 		onCharacterClick: function (charName, charIndex, e) {
 			this.selectedIndex = charIndex;

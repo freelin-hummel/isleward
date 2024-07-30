@@ -170,7 +170,6 @@ const config = {
 		'menu',
 		'spells',
 		'messages',
-		'online',
 		'mainMenu',
 		'context',
 		'party',
@@ -240,7 +239,7 @@ module.exports = {
 			path: 'server/clientComponents/effects/auras.js'
 		});
 
-		events.emit('onBeforeGetClientConfig', config);
+		await events.emit('onBeforeGetClientConfig', config);
 
 		//Deprecated
 		events.emit('onBeforeGetResourceList', config.resourceList);
@@ -258,7 +257,7 @@ module.exports = {
 
 		for (const tex of atlasTextures) {
 			if (atlasTextureDimensions[tex])
-				return;
+				continue;
 
 			const path = tex.includes('.png') ? `../${tex}` : `../client/images/${tex}.png`;
 			const dimensions = await imageSize(path);

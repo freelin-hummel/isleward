@@ -6,6 +6,7 @@ module.exports = {
 
 	init: async function () {
 		const modList = fileLister.getFolderList('mods');
+		return;
 
 		//Load all mods
 		let loadList = modList.map(m => {
@@ -45,7 +46,7 @@ module.exports = {
 		if (mod.disabled)
 			return;
 
-		const isMapThread = !!global.instancer;
+		const isMapThread = !global.cons;
 		mod.isMapThread = isMapThread;
 
 		mod.events = events;
