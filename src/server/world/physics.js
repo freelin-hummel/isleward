@@ -124,6 +124,10 @@ module.exports = {
 		for (let i = 0; i < cLen; i++) {
 			let c = cell[i];
 
+			//Maybe something was removed from the cell while we were running
+			if (!c)
+				continue;
+
 			//If we have fromX and fromY, check if the target cell doesn't contain the same obj (like a notice area)
 			if ((c.width) && (fromX)) {
 				if (c.area) {
