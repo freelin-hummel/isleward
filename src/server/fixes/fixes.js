@@ -26,9 +26,13 @@ module.exports = {
 	},
 
 	fixCharacter: function (player) {
-		let inv = player.components.find(c => (c.type === 'inventory'));
-		if ((inv) && (inv.items))
-			this.fixItems(inv.items);
+		const inventory = player.components.find(c => c.type === 'inventory');
+		if (inventory?.items)
+			this.fixItems(inventory.items);
+
+		const stats = player.components.find(c => c.type === 'stats');
+		if (stats?.values?.level > consts.maxLevel)
+			stats.values.level = consts.maxLevel;
 	},
 
 	fixCustomChannels: function (customChannels) {

@@ -8,7 +8,7 @@ const fixPosition = (obj, toPos, toRelativePos, invokingObj) => {
 	}
 };
 
-const sendObjToZone = async ({ obj, invokingObj, zoneName, toPos, toRelativePos }) => {
+const sendObjToZone = async ({ obj, invokingObj, zoneName, toPos, toRelativePos, threadArgs }) => {
 	const { serverId, instance: { syncer: globalSyncer, physics } } = obj;
 
 	if (obj.zoneName === zoneName) {
@@ -67,7 +67,8 @@ const sendObjToZone = async ({ obj, invokingObj, zoneName, toPos, toRelativePos 
 	rezoneManager.stageRezone({
 		simplifiedObj,
 		targetZone: zoneName,
-		keepPos: !!toPos
+		keepPos: !!toPos,
+		threadArgs
 	});
 
 	process.send({

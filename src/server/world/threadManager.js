@@ -111,7 +111,7 @@ const messageHandlers = {
 	},
 
 	rezone: async function (thread, message) {
-		const { args: { obj, newZone, keepPos = true } } = message;
+		const { args: { obj, newZone, keepPos = true, threadArgs } } = message;
 
 		untrackPlayerOnThread(thread, obj);
 
@@ -136,7 +136,7 @@ const messageHandlers = {
 		delete obj.zoneId;
 
 		const isRezone = true;
-		await atlas.addObject(obj, keepPos, isRezone);
+		await atlas.addObject(obj, keepPos, isRezone, threadArgs);
 	},
 
 	onZoneIdle: function (thread) {
@@ -170,6 +170,7 @@ const spawnThread = async ({
 		instanced,
 		destroyWhenEmptyForMs = consts.destroyThreadWhenEmptyForMs
 	},
+	threadArgs,
 	obj
 }) => {
 	let cbOnInitialized;
@@ -206,6 +207,11 @@ const spawnThread = async ({
 	};
 	eventEmitter.emit('beforeSpawnThread', emBeforeSpawnThread);
 
+	if (threadArgs !== undefined) {
+		thread.sendArgsToWorker.push('extraThreadArgs');
+		thread.extraThreadArgs = threadArgs;
+	}
+
 	thread.workerArgs = Object.fromEntries(
 		thread.sendArgsToWorker.map(a => [a, thread[a]])
 	);
@@ -228,7 +234,7 @@ const notifyWaitForThread = serverObj => {
 	});
 };
 
-const getThread = async ({ serverObj, zoneName, zoneId, obj }) => {
+const getThread = async ({ serverObj, zoneName, zoneId, obj, threadArgs }) => {
 	const result = {
 		resetObjPosition: false,
 		thread: null
@@ -255,12 +261,16 @@ const getThread = async ({ serverObj, zoneName, zoneId, obj }) => {
 		zoneId,
 		zoneName,
 		chosenThread: thread,
-		threads
+		threads,
+		threadArgs
 	};
 	eventEmitter.emit('beforeChooseThread', emBeforeChooseThread);
 	thread = emBeforeChooseThread.chosenThread;
 
 	if (!thread) {
+		if (emBeforeChooseThread.zoneName !== map.name)
+			map = mapList.find(m => m.name === emBeforeChooseThread.zoneName);
+
 		if (map.instanced)
 			result.resetObjPosition = true;
 
@@ -268,7 +278,8 @@ const getThread = async ({ serverObj, zoneName, zoneId, obj }) => {
 
 		thread = await spawnThread({
 			map,
-			obj
+			obj,
+			threadArgs
 		});
 	}
 
