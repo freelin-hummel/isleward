@@ -24,6 +24,20 @@ module.exports = {
 		maxDistance: 12
 	},
 
+	connectionConstraints: {
+		maxConnectionsPerRoom: 1000
+	},
+
+	preferDirection: undefined,
+	preferDirectionChance: 1,
+	denyDirection: undefined,
+
+	hallwayChance: 1,
+
+	allowRoomCollision: false,
+
+	mobSpawnCount: -1,
+
 	bounds: [0, 0, 0, 0],
 
 	init: function (instance) {
@@ -77,12 +91,40 @@ module.exports = {
 		return true;
 	},
 
-	loadMapProperties: function ({ leafConstraints, endConstraints }) {
-		if (leafConstraints)
-			this.leafConstraints = JSON.parse(leafConstraints);
+	loadMapProperties: function (mapProperties) {
+		const keysParse = [
+			'leafConstraints',
+			'endConstraints',
+			'connectionConstraints'
+		];
 
-		if (endConstraints)
-			this.endConstraints = JSON.parse(endConstraints);
+		const keysRemoveSpaces = [
+			'preferDirection',
+			'denyDirection'
+		];
+
+		[
+			'leafConstraints',
+			'endConstraints',
+			'connectionConstraints',
+			'preferDirection',
+			'allowRoomCollision',
+			'denyDirection',
+			'hallwayChance',
+			'preferDirectionChance',
+			'mobSpawnCount'
+		].forEach(p => {
+			let value = mapProperties[p];
+
+			if (value !== undefined) {
+				if (keysParse.includes(p))
+					value = JSON.parse(value);
+				else if (keysRemoveSpaces.includes(p))
+					value = value.replaceAll(' ', '');
+
+				this[p] = value;
+			}
+		});
 	},
 
 	randomizeTile: function (tile, floorTile) {
@@ -123,5 +165,9 @@ module.exports = {
 
 	randInt: function (min, max) {
 		return ~~(Math.random() * (max - min)) + min;
+	},
+
+	randFloat: function (min, max) {
+		return (Math.random() * (max - min)) + min;
 	}
 };

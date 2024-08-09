@@ -141,6 +141,10 @@ const messageHandlers = {
 
 	onZoneIdle: function (thread) {
 		listenersOnZoneIdle.forEach(l => l(thread));
+	},
+
+	killThread: function (thread) {
+		killThread(thread);
 	}
 };
 

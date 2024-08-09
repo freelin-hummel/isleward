@@ -1,10 +1,18 @@
 module.exports = (scope, fromRoom, isHallway, buildRoom) => {
-	const { templates, rooms, leafConstraints, randInt } = scope;
+	const { templates, rooms, leafConstraints, randInt, randFloat } = scope;
 
 	if (!fromRoom.template.exits.length)
 		return true;
 
-	let fromExit = fromRoom.template.exits.splice(randInt(0, fromRoom.template.exits.length), 1)[0];
+	let exitOptions = fromRoom.template.exits;
+	if (scope.denyDirection)
+		exitOptions.spliceWhere(o => o.properties.exit === scope.denyDirection);
+
+	if (scope.preferDirection && randFloat(0, 1) < scope.preferDirectionChance)
+		exitOptions.spliceWhere(o => o.properties.exit !== scope.preferDirection);
+
+	const fromExit = exitOptions[randInt(0, exitOptions.length)];
+
 	let exitDirection = JSON.parse(fromExit.properties.exit);
 	let allowedTemplates = templates.filter(t => {
 		if (

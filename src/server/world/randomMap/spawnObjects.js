@@ -9,6 +9,8 @@ const spawnObjects = (scope, instance, room) => {
 			o.x = o.x - template.x + room.x;
 			o.y = o.y - template.y + room.y;
 
+			o.amount = scope.mobSpawnCount;
+
 			spawners.register(o, spawnCd);
 		} else {
 			o.x += room.x;

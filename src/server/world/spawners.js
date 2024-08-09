@@ -23,7 +23,7 @@ module.exports = {
 			cron: blueprint.cron,
 			lifetime: blueprint.lifetime,
 			blueprint: blueprint,
-			amountLeft: blueprint.amount || -1
+			amountLeft: blueprint.amount ?? -1
 		});
 
 		this.list.push(spawner);

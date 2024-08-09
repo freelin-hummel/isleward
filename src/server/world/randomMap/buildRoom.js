@@ -2,13 +2,13 @@ const setupConnection = require('./setupConnection');
 const doesCollide = require('./doesCollide');
 
 const buildRoom = (scope, template, connectTo, templateExit, connectToExit, isHallway) => {
-	const { rooms, leafConstraints, randInt } = scope;
+	const { rooms, leafConstraints, randInt, randFloat, connectionConstraints, hallwayChance } = scope;
 
 	let room = {
 		x: 0,
 		y: 0,
 		distance: 0,
-		isHallway: isHallway,
+		isHallway,
 		template: extend({}, template),
 		connections: []
 	};
@@ -20,7 +20,11 @@ const buildRoom = (scope, template, connectTo, templateExit, connectToExit, isHa
 		room.parent = connectTo;
 	}
 
-	if (doesCollide(scope, room, connectTo))
+	const isOk = (
+		scope.allowRoomCollision ||
+		!doesCollide(scope, room, connectTo)
+	);
+	if (!isOk)
 		return false;
 
 	if (connectTo)
@@ -34,10 +38,15 @@ const buildRoom = (scope, template, connectTo, templateExit, connectToExit, isHa
 		const maxExits = room.template.exits.length;
 		const minExits = Math.min(maxExits, 2);
 
-		const count = randInt(minExits, maxExits + 1);
+		const count = Math.min(randInt(minExits, maxExits + 1), connectionConstraints.maxConnectionsPerRoom);
 
-		for (let i = 0; i < count; i++) 
-			setupConnection(scope, room, !isHallway, buildRoom);
+		for (let i = 0; i < count; i++) {
+			let buildHallwayNext = !isHallway;
+			if (buildHallwayNext && hallwayChance < 1)
+				buildHallwayNext = randFloat(0, 1) < hallwayChance;
+
+			setupConnection(scope, room, buildHallwayNext, buildRoom);
+		}
 	}
 
 	if ((isHallway) && (room.connections.length === 0)) {
