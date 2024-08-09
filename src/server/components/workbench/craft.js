@@ -1,3 +1,4 @@
+const eventEmitter = require('../../misc/events');
 const recipes = require('../../config/recipes/recipes');
 const generator = require('../../items/generator');
 
@@ -88,9 +89,17 @@ module.exports = (cpnWorkbench, msg) => {
 		});
 	}
 
-	const result = {
+	const emAfterCraft = {
 		resultMsg,
-		recipe: buildRecipe(craftType, crafter, msg)
+		recipe: buildRecipe(craftType, crafter, msg),
+		craftingStation: cpnWorkbench.obj,
+		crafter
+	};
+	eventEmitter.emit('afterCraft', emAfterCraft);
+
+	const result = {
+		resultMsg: emAfterCraft.resultMsg,
+		recipe: emAfterCraft.recipe
 	};
 
 	return result;
