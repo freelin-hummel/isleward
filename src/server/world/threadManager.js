@@ -246,8 +246,12 @@ const getThread = async ({ serverObj, zoneName, zoneId, obj, threadArgs }) => {
 
 	let map = mapList.find(m => m.name === zoneName);
 
-	if (!map) 
+	if (!map) {
 		map = mapList.find(m => m.name === clientConfig.config.defaultZone);
+
+		zoneName = map.name;
+		zoneId = null;
+	}
 
 	let thread = threads.find(t => 
 		(
@@ -274,9 +278,6 @@ const getThread = async ({ serverObj, zoneName, zoneId, obj, threadArgs }) => {
 	if (!thread) {
 		if (emBeforeChooseThread.zoneName !== map.name)
 			map = mapList.find(m => m.name === emBeforeChooseThread.zoneName);
-
-		if (!map)
-			console.log('No map found for', zoneId, zoneName, emBeforeChooseThread.zoneName);
 
 		if (map.instanced)
 			result.resetObjPosition = true;
