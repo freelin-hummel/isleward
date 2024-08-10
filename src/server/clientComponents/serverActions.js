@@ -38,27 +38,27 @@ define([
 
 		extend: function (blueprint) {
 			if (blueprint.addActions) {
-				blueprint.addActions.forEach(function (a) {
+				blueprint.addActions.forEach(a => {
 					this.actions.spliceWhere(f => f.key === a.key);
 
-					let exists = this.actions.some(function (ta) {
-						return ((ta.targetId === a.targetId) && (ta.cpn === a.cpn) && (ta.method === a.method));
+					let exists = this.actions.some(ta => {
+						return (ta.action.data.targetId === a.action.data.targetId && ta.action.cpn === a.action.cpn && ta.action.method === a.action.method);
 					});
 					if (exists)
 						return;
 
 					this.actions.push(a);
-				}, this);
+				});
 
 				delete blueprint.addActions;
 			}
 
 			if (blueprint.removeActions) {
-				blueprint.removeActions.forEach(function (a) {
-					this.actions.spliceWhere(function (ta) {
-						return ((ta.targetId === a.targetId) && (ta.cpn === a.cpn) && (ta.method === a.method));
+				blueprint.removeActions.forEach(a => {
+					this.actions.spliceWhere(ta => {
+						return (ta.action.data.targetId === a.action.data.targetId && ta.action.cpn === a.action.cpn && ta.action.method === a.action.method);
 					});
-				}, this);
+				});
 
 				delete blueprint.removeActions;
 			}

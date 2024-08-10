@@ -45,7 +45,7 @@ module.exports = {
 				}]
 			});
 
-			//If the player doesn't have a 'social' component, they are no longer in a threat
+			//If the player doesn't have a 'social' component, they are no longer in a thread
 			// Likely due to unzoning (character select screen)
 			// Also, rezoning is set to true while rezoning so we don't try to remove objects
 			// from zones if they are currently rezoning
@@ -109,11 +109,12 @@ module.exports = {
 		//If we don't do this, the atlas will try to remove it from the thread
 		delete player.zoneName;
 		delete player.name;
+		delete player.zoneId;
 
 		//A hack to allow us to actually call methods again (like retrieve the player list)
 		player.dead = false;
-		player.permadead = false;
 		delete player.auth.charname;
+		player.id = objects.getNextId();
 
 		this.modifyPlayerCount(-1);
 
@@ -131,7 +132,7 @@ module.exports = {
 				continue;
 			else if (p.auth.username === exclude.auth.username) {
 				if (p.name && p.zoneId)
-					await atlas.forceSavePlayer(p.id, p.zoneId);
+					await atlas.forceSavePlayer(p);
 
 				if (p.socket?.connected)
 					p.socket.emit('dc', {});
@@ -166,6 +167,10 @@ module.exports = {
 
 	emit: function (event, msg) {
 		this.sockets.emit(event, msg);
+	},
+
+	emitFromThreadMessage: function ({ msg: { event, data } }) {
+		this.sockets.emit(event, data);
 	},
 
 	getCharacterList: function () {

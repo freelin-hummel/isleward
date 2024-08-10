@@ -15,9 +15,18 @@ define([
 
 			if (isMobile) {
 				this.onEvent('onGetServerActions', this.onGetServerActions.bind(this));
-
 				this.find('.btnGather').on('click', this.gather.bind(this));
 			}
+
+			this.find('.casting').css({
+				width: `${scale}px`,
+				height: `${scaleMult}px`,
+				marginTop: `calc((${scale}px / 2) + ${scaleMult}px)`
+			});
+
+			this.find('.btnGather').css({
+				marginTop: `calc(${scale}px`
+			});
 		},
 
 		onGetCasting: function (casting) {

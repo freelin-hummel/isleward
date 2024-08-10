@@ -14,10 +14,6 @@ const route = function (socket, msg) {
 
 	if (
 		(
-			(source.permadead) &&
-			(['getCharacterList', 'getCharacter', 'deleteCharacter'].indexOf(msg.method) === -1)
-		) ||
-		(
 			source.dead &&
 			!(
 				(msg.method === 'performAction' && ['respawn'].includes(msg.data.method)) ||

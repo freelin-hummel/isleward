@@ -6,6 +6,10 @@ module.exports = (scope, map) => {
 		if (r.properties.mapping)
 			return;
 
+		r.exits.forEach(e => {
+			e.properties.exit = e.properties.exit.replaceAll(' ', '');
+		});
+
 		r.typeId = typeId;
 
 		let { noRotate = false, canFlipX = true, canFlipY = true } = r.properties;

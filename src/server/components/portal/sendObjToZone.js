@@ -8,7 +8,7 @@ const fixPosition = (obj, toPos, toRelativePos, invokingObj) => {
 	}
 };
 
-const sendObjToZone = async ({ obj, invokingObj, zoneName, toPos, toRelativePos }) => {
+const sendObjToZone = async ({ obj, invokingObj, zoneName, toPos, toRelativePos, threadArgs, cbSuccess }) => {
 	const { serverId, instance: { syncer: globalSyncer, physics } } = obj;
 
 	if (obj.zoneName === zoneName) {
@@ -32,6 +32,9 @@ const sendObjToZone = async ({ obj, invokingObj, zoneName, toPos, toRelativePos 
 			x: obj.x,
 			y: obj.y
 		}, [obj.serverId]);
+
+		if (cbSuccess)
+			cbSuccess();
 
 		return;
 	}
@@ -60,11 +63,17 @@ const sendObjToZone = async ({ obj, invokingObj, zoneName, toPos, toRelativePos 
 	// So physics will carry on and allow the obj to move onto the next tile (changing the position while we save above)
 	fixPosition(obj, toPos, toRelativePos, invokingObj);
 
-	const simpleObj = obj.getSimple(true, false, true);
-	simpleObj.destroyed = false;
-	simpleObj.forceDestroy = false;
+	const simplifiedObj = obj.getSimple(true, false, true);
+	simplifiedObj.destroyed = false;
+	simplifiedObj.forceDestroy = false;
 
-	rezoneManager.stageRezone(simpleObj, zoneName);
+	rezoneManager.stageRezone({
+		simplifiedObj,
+		targetZone: zoneName,
+		keepPos: !!toPos,
+		threadArgs,
+		cbSuccess
+	});
 
 	process.send({
 		method: 'events',

@@ -12,6 +12,7 @@ module.exports = (scope, room, ignore) => {
 				(room.x >= r.x + r.template.width) ||
 				(room.y >= r.y + r.template.height)
 		));
+
 		if (collides)
 			return true;
 	}

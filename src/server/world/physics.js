@@ -25,7 +25,7 @@ module.exports = {
 		});
 	},
 
-	addRegion: function (obj) {
+	addRegion: function (obj, oldPosition) {
 		let lowX = obj.x;
 		let lowY = obj.y;
 		let highX = lowX + obj.width;
@@ -44,8 +44,19 @@ module.exports = {
 				for (let k = 0; k < cLen; k++) {
 					let c = cell[k];
 
-					c.collisionEnter(obj);
-					obj.collisionEnter(c);
+					//Only remove if the old position didn't contain the object
+					if (
+						!oldPosition ||
+						(
+							oldPosition.x + oldPosition.width <= c.x ||
+							oldPosition.x > c.x ||
+							oldPosition.y + oldPosition.height <= c.y ||
+							oldPosition.y > c.y
+						)
+					) {
+						c.collisionEnter(obj);
+						obj.collisionEnter(c);
+					}
 				}
 
 				cell.push(obj);
@@ -53,7 +64,7 @@ module.exports = {
 		}
 	},
 
-	removeRegion: function (obj) {
+	removeRegion: function (obj, newPosition) {
 		let oId = obj.id;
 
 		let lowX = obj.x;
@@ -75,8 +86,19 @@ module.exports = {
 					let c = cell[k];
 
 					if (c.id !== oId) {
-						c.collisionExit(obj);
-						obj.collisionExit(c);
+						//Only remove if the new position won't still contain the object
+						if (
+							!newPosition ||
+							(
+								newPosition.x + newPosition.width <= c.x ||
+								newPosition.x > c.x ||
+								newPosition.y + newPosition.height <= c.y ||
+								newPosition.y > c.y
+							)
+						) {
+							c.collisionExit(obj);
+							obj.collisionExit(c);
+						}
 					} else {
 						cell.splice(k, 1);
 						k--;
@@ -116,6 +138,9 @@ module.exports = {
 				} else if ((fromX < c.x) || (fromY < c.y) || (fromX >= c.x + c.width) || (fromY >= c.y + c.height)) {
 					c.collisionEnter(obj);
 					obj.collisionEnter(c);
+				} else if ((fromX >= c.x) && (fromY >= c.y) && (fromX < c.x + c.width) && (fromY < c.y + c.height)) {
+					c.collisionStay(obj);
+					obj.collisionStay(c);
 				}
 			} else {
 				//If a callback returns true, it means we collide

@@ -17,7 +17,6 @@ define([
 
 		postRender: function () {
 			this.onEvent('onDeath', this.onDeath.bind(this));
-			this.onEvent('onPermadeath', this.onPermadeath.bind(this));
 
 			this.find('.btn-logout').on('click', this.onLogout.bind(this));
 			this.find('.btn-respawn').on('click', this.performRespawn.bind(this));
@@ -57,9 +56,10 @@ define([
 
 		onDeath: function (eventObj) {
 			if (!eventObj.source) 
-				this.find('.msg').html('you are dead');
+				this.find('.msg').html('You are dead.');
 			else
-				this.find('.msg').html('you were killed by [ <div class="inner">' + eventObj.source + '</div> ]');
+				this.find('.msg').html(`You were killed by [ <div class="inner">${eventObj.source}</div> ].`);
+
 			this.find('.penalty')
 				.html('you lost ' + eventObj.xpLoss + ' experience')
 				.show();
@@ -67,13 +67,6 @@ define([
 			if (!eventObj.xpLoss)
 				this.find('.penalty').hide();
 
-			this.el.removeClass('permadeath');
-			this.doShow();
-		},
-
-		onPermadeath: function (eventObj) {
-			this.find('.msg').html('you were killed by [ <div class="inner">' + eventObj.source + '</div> ]');
-			this.el.addClass('permadeath');
 			this.doShow();
 		}
 	};

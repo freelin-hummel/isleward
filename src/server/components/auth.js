@@ -63,8 +63,6 @@ module.exports = {
 		let character = this.characters[data.data.name];
 		if (!character)
 			return;
-		else if (character.permadead)
-			return;
 
 		character.stash = this.stash;
 		character.account = this.username;
@@ -86,9 +84,6 @@ module.exports = {
 
 		this.obj.player.sessionStart = +new Date();
 		this.obj.player.spawn(character, data.callback);
-
-		let prophecies = this.obj.prophecies ? this.obj.prophecies.simplify().list : [];
-		await leaderboard.setLevel(character.name, this.obj.stats.values.level, prophecies);
 	},
 
 	doSave: async function (callback) {
@@ -163,17 +158,23 @@ module.exports = {
 			isArray: true
 		});
 
-		let res = this.characterList.map(c => ({
-			name: c.name ? c.name : c,
-			level: leaderboard.getLevel(c.name ? c.name : c)
-		}));
+		fixes.fixCharacterList(this.username, this.characterList);
 
-		data.callback(res);
+		let listToSendToClient = [...this.characterList];
+
+		const emBeforeSendClientCharacterList = {
+			obj: this.obj,
+			characterList: listToSendToClient
+		};
+		await eventEmitter.emit('beforeSendClientCharacterList', emBeforeSendClientCharacterList);
+		listToSendToClient = emBeforeSendClientCharacterList.characterList;
+
+		data.callback(listToSendToClient);
 	},
 
 	getCharacter: async function (data) {
 		let charName = data.data.name;
-		if (!this.characterList.some(c => (c.name === charName || c === charName)))
+		if (!this.characterList.some(c => c === charName))
 			return;
 
 		let character = await io.getAsync({
@@ -401,8 +402,38 @@ module.exports = {
 	},
 
 	onHashGenerated: async function (msg, err, hashedPassword) {
+		const emBeforeFinalizeAccount = {
+			obj: this.obj,
+			success: true,
+			email: msg.data.username,
+			hashedPassword,
+			msg
+		};
+
+		await eventEmitter.emit('beforeFinalizeAccount', emBeforeFinalizeAccount);
+
+		if (!emBeforeFinalizeAccount.success) {
+			msg.callback(emBeforeFinalizeAccount.msg);
+
+			return;
+		}
+
+		await this.finalizeAccount({
+			username: msg.data.username,
+			hashedPassword,
+			callback: msg.callback
+		});
+
+		this.username = msg.data.username;
+		cons.logOut(this.obj);
+
+		if (msg.callback)
+			msg.callback();
+	},
+
+	finalizeAccount: async function ({ username, hashedPassword }) {
 		await io.setAsync({
-			key: msg.data.username,
+			key: username,
 			table: 'login',
 			value: hashedPassword
 		});
@@ -413,21 +444,16 @@ module.exports = {
 		};
 
 		await io.setAsync({
-			key: msg.data.username,
+			key: username,
 			table: 'characterList',
 			value: [],
 			serialize: true
 		});
-
-		this.username = msg.data.username;
-		cons.logOut(this.obj);
-
-		msg.callback();
 	},
 
 	createCharacter: async function (msg) {
-		let data = msg.data;
-		let name = data.name;
+		const data = msg.data;
+		const name = data.name;
 
 		let error = null;
 
@@ -460,7 +486,7 @@ module.exports = {
 
 		const releaseCreateLock = await getCreateLock();
 
-		let exists = await io.getAsync({
+		const exists = await io.getAsync({
 			key: name,
 			ignoreCase: true,
 			table: 'character',
@@ -474,28 +500,19 @@ module.exports = {
 			return;
 		}
 
-		let obj = this.obj;
+		const simple = this.obj.getSimple(true);
 
-		extend(obj, {
-			name: name,
-			skinId: data.skinId,
+		Object.assign(simple, {
+			name,
 			class: data.class,
+			skinId: data.skinId,
 			cell: skins.getCell(data.skinId),
-			sheetName: skins.getSpritesheet(data.skinId),
-			x: null,
-			y: null
+			sheetName: skins.getSpritesheet(data.skinId)
 		});
-
-		let simple = this.obj.getSimple(true);
 
 		await this.verifySkin(simple);
 		
-		let prophecies = (data.prophecies || []).filter(p => p);
-		
 		simple.components.push({
-			type: 'prophecies',
-			list: prophecies
-		}, {
 			type: 'social',
 			customChannels: this.customChannels
 		});
@@ -537,19 +554,20 @@ module.exports = {
 	},
 
 	deleteCharacter: async function (msg) {
-		let data = msg.data;
+		const { callback, data: { name } } = msg;
 
-		if ((!data.name) || (!this.username))
+		if (!this.username)
 			return;
 
-		if (!this.characterList.some(c => ((c.name === data.name) || (c === data.name)))) {
-			msg.callback([]);
+		if (!this.characterList.some(c => c === name)) {
+			callback([]);
+
 			return;
 		}
 
 		const msgBeforeDeleteCharacter = {
 			obj: this,
-			name: data.name,
+			name: name,
 			success: true,
 			msg: null
 		};
@@ -566,53 +584,29 @@ module.exports = {
 		}
 
 		await io.deleteAsync({
-			key: data.name,
+			key: name,
 			table: 'character'
 		});
 
-		let name = data.name;
-
-		this.characterList.spliceWhere(c => (c.name === name || c === name));
-		let characterList = this.characterList
-			.map(c => ({
-				name: c.name ? c.name : c,
-				level: leaderboard.getLevel(c.name ? c.name : c)
-			}));
+		this.characterList.spliceWhere(c => c === name);
 
 		await io.setAsync({
 			key: this.username,
 			table: 'characterList',
-			value: characterList,
+			value: this.characterList,
 			serialize: true
 		});
 
-		await leaderboard.deleteCharacter(name);
+		let listToSendToClient = [...this.characterList];
 
-		let result = this.characterList
-			.map(c => ({
-				name: c.name ? c.name : c,
-				level: leaderboard.getLevel(c.name ? c.name : c)
-			}));
+		const emBeforeSendClientCharacterList = {
+			obj: this.obj,
+			characterList: listToSendToClient
+		};
+		await eventEmitter.emit('beforeSendClientCharacterList', emBeforeSendClientCharacterList);
+		listToSendToClient = emBeforeSendClientCharacterList.characterList;
 
-		msg.callback({
-			success: true,
-			characterList: result
-		});
-	},
-
-	permadie: function () {
-		this.obj.permadead = true;
-		this.doSave(this.onPermadie.bind(this));
-	},
-
-	onPermadie: function () {
-		process.send({
-			method: 'object',
-			serverId: this.obj.serverId,
-			obj: {
-				dead: true
-			}
-		});
+		callback(listToSendToClient);
 	},
 
 	getAccountLevel: function () {

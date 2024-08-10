@@ -12,7 +12,7 @@ const rest = require('../security/rest');
 
 const {
 	port = 4000,
-	startupMessage = 'Server: Ready',
+	startupMessage = 'Ready: Server',
 	nodeEnv
 } = require('../config/serverConfig');
 
@@ -57,7 +57,6 @@ const init = async () => {
 		app.get(/^(.*)$/, appFile);
 
 		socketServer.on('connection', onConnection);
-
 		server.listen(port, () => {
 			_.log(startupMessage);
 

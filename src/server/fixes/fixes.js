@@ -4,17 +4,35 @@ const itemTypes = require('../items/config/types');
 const spellGenerator = require('../items/generators/spellbook');
 
 module.exports = {
-	fixDb: async function () {
-		await io.deleteAsync({
-			key: 'list',
-			table: 'leaderboard'
+	fixCharacterList: function (username, characterList) {
+		let didChange = false;
+
+		characterList.forEach((l, i) => {
+			if (typeof(l) === 'object') {
+				characterList[i] = l.name;
+				didChange = true;
+			}
+		});
+
+		if (!didChange)
+			return;
+
+		io.setAsync({
+			table: 'characterList',
+			key: username,
+			value: characterList,
+			serialize: true
 		});
 	},
 
 	fixCharacter: function (player) {
-		let inv = player.components.find(c => (c.type === 'inventory'));
-		if ((inv) && (inv.items))
-			this.fixItems(inv.items);
+		const inventory = player.components.find(c => c.type === 'inventory');
+		if (inventory?.items)
+			this.fixItems(inventory.items);
+
+		const stats = player.components.find(c => c.type === 'stats');
+		if (stats?.values?.level > consts.maxLevel)
+			stats.values.level = consts.maxLevel;
 	},
 
 	fixCustomChannels: function (customChannels) {

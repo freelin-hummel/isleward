@@ -170,7 +170,6 @@ const config = {
 		'menu',
 		'spells',
 		'messages',
-		'online',
 		'mainMenu',
 		'context',
 		'party',
@@ -188,14 +187,25 @@ const config = {
 		'trade',
 		'overlay',
 		'death',
-		'leaderboard',
 		'reputation',
 		'wardrobe',
 		'passives',
 		'workbench',
 		'middleHud',
 		'options',
-		'announcements'
+		'announcements',
+		{
+			type: 'createCharacter',
+			autoLoadOnPlay: false
+		},
+		{
+			type: 'characters',
+			autoLoadOnPlay: false
+		},
+		{
+			type: 'terms',
+			autoLoadOnPlay: false
+		}
 	],
 	contextMenuActions: {
 		player: [],
@@ -229,7 +239,7 @@ module.exports = {
 			path: 'server/clientComponents/effects/auras.js'
 		});
 
-		events.emit('onBeforeGetClientConfig', config);
+		await events.emit('onBeforeGetClientConfig', config);
 
 		//Deprecated
 		events.emit('onBeforeGetResourceList', config.resourceList);
@@ -247,7 +257,7 @@ module.exports = {
 
 		for (const tex of atlasTextures) {
 			if (atlasTextureDimensions[tex])
-				return;
+				continue;
 
 			const path = tex.includes('.png') ? `../${tex}` : `../client/images/${tex}.png`;
 			const dimensions = await imageSize(path);

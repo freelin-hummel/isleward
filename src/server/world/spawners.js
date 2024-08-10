@@ -23,7 +23,7 @@ module.exports = {
 			cron: blueprint.cron,
 			lifetime: blueprint.lifetime,
 			blueprint: blueprint,
-			amountLeft: blueprint.amount || -1
+			amountLeft: blueprint.amount ?? -1
 		});
 
 		this.list.push(spawner);
@@ -37,7 +37,7 @@ module.exports = {
 		else
 			this.mobTypes[name]++;
 
-		spawner.zonePrint = extend({}, this.zoneConfig.mobs.default, this.zoneConfig.mobs[name] || {});
+		spawner.zonePrint = extend({}, this.zoneConfig.mobs.default, this.zoneConfig.mobs[(blueprint.objZoneName ?? blueprint.name).toLowerCase()] || {});
 	},
 
 	spawn: function (spawner) {

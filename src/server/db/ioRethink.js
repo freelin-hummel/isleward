@@ -57,6 +57,29 @@ module.exports = {
 		}
 	},
 
+	indexCreate: async function ({ table, key }) {
+		try {
+			await r.table(table).indexCreate(key);
+		} catch (e) {
+			if (!e.message.includes('already exists'))
+				_.log(e);
+		}
+	},
+
+	getRecordCount: async function ({
+		table,
+		filter
+	}) {
+		let res = null;
+
+		res = await r.table(table)
+			.filter(filter)
+			.count()
+			.run();
+
+		return res;
+	},
+
 	getAsyncIgnoreCase: async function (table, key) {
 		const res = await r.table(table)
 			.getAll(key.toLowerCase(), { index: 'idLowerCase' })
@@ -86,6 +109,19 @@ module.exports = {
 			return res.value;
 		else if (isArray && !noDefault)
 			return [];
+
+		return res;
+	},
+
+	getFlat: async function ({
+		table,
+		key
+	}) {
+		let res = null;
+
+		res = await r.table(table)
+			.get(key)
+			.run();
 
 		return res;
 	},

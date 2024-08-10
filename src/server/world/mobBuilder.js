@@ -131,6 +131,13 @@ const fnComponentGenerators = [
 	zoneName = the name of the zone
 */
 const build = (mob, blueprint, type, zoneName) => {
+	mob.instance.eventEmitter.emit('beforeBuildMob', {
+		mob,
+		blueprint,
+		type,
+		zoneName
+	});
+	//Deprecated
 	mob.instance.eventEmitter.emit('onBeforeBuildMob', zoneName, mob.name.toLowerCase(), blueprint);
 
 	const typeDefinition = blueprint[type] || blueprint;

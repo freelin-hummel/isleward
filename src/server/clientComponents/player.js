@@ -69,13 +69,20 @@ define([
 
 		positionCamera: function (x, y, instant) {
 			renderer.setPosition({
-				x: (x - (renderer.width / (scale * 2))) * scale,
-				y: (y - (renderer.height / (scale * 2))) * scale
-			}, instant);
+				centerOnObject: this.obj,
+				instant
+			});
 		},
 
 		teleportToPosition: function ({ x, y }) {
-			this.positionCamera(x, y, true);
+			renderer.setPosition({
+				centerOnObject: {
+					x,
+					y
+				},
+				instant: true
+			});
+
 			sound.update(x, y);
 		},
 

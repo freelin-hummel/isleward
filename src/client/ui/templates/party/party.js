@@ -45,8 +45,11 @@ define([
 			const { party } = this;
 			const { player: { serverId: playerId } } = window;
 
-			const player = list.find(l => l.id === playerId);
-			const { zoneId: playerZone } = player;
+			const playerInList = list.find(l => l.id === playerId);
+			if (!playerInList)
+				return;
+
+			const { zoneId: playerZone } = playerInList;
 
 			if (!party)
 				return;

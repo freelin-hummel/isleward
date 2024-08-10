@@ -27,7 +27,7 @@ module.exports = {
 				const { id, folderName, mod } = m;
 				const { dependsOn = [] } = mod;
 
-				const wait = dependsOn.some(d => loadList.some(l => l.id === d));
+				const wait = dependsOn.find(d => loadList.some(l => l.id === d));
 
 				if (wait)
 					continue;
@@ -45,7 +45,7 @@ module.exports = {
 		if (mod.disabled)
 			return;
 
-		const isMapThread = !!global.instancer;
+		const isMapThread = !global.cons;
 		mod.isMapThread = isMapThread;
 
 		mod.events = events;
