@@ -52,7 +52,6 @@ define([
 			const originalEvent = e.event ? e.event : e;
 
 			let target = this.target;
-			//TODO: How do we know if this is a player?
 			if (!target || !target.dialogue || target === window.player || target.class !== undefined) {
 				if (target.class !== undefined) {
 					const inspectContext = [
