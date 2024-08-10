@@ -86,6 +86,7 @@ define([
 		},
 
 		buildFromConfig: async function (config) {
+			console.log('Starting build for', config);
 			const { type, path } = config;
 
 			let className = 'ui' + type[0].toUpperCase() + type.substr(1);
@@ -96,8 +97,11 @@ define([
 			const fullPath = `${path}/${type}`;
 
 			const template = await new Promise(res => {
+				console.log('require-ing', fullPath);
 				require([fullPath], res);
 			});
+
+			console.log('got', fullPath);
 
 			let ui = $.extend(true, { type }, uiBase, template);
 		
