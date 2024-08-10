@@ -604,6 +604,7 @@ module.exports = {
 					ttl: 1710
 				},
 				cpnInventory: {
+					inventorySize: items.length,
 					items: extend([], items)
 				}
 			}
