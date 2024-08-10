@@ -63,7 +63,7 @@ const killThread = thread => {
 };
 
 const untrackPlayerOnThread = (thread, obj) => {
-	thread.playersCurrent.spliceWhere(p => p === obj.id);
+	thread.playersCurrent.spliceWhere(p => p === obj.serverId);
 	delete obj.threadId;
 
 	if (thread.playersCurrent.length === 0 && thread.destroyWhenEmptyForMs === 0)
