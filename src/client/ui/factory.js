@@ -21,10 +21,9 @@ define([
 					path: `ui/templates/${l}`,
 					autoLoadOnPlay: true
 				};
-			} else if (l.type === undefined) {
-				console.log(l.path.split('/').pop());
+			} else if (l.type === undefined)
 				l.type = l.path.split('/').pop();
-			} else if (l.path === undefined)
+			else if (l.path === undefined)
 				l.path = `ui/templates/${l.type}`;
 		});
 	};
@@ -40,11 +39,13 @@ define([
 
 			console.log('building login list');
 			setUiTypes(globals.clientConfig.uiLoginList);
-			console.log('building ui list');
+			console.log('login list is', globals.clientConfig.uiLoginList);
 			setUiTypes(globals.clientConfig.uiList);
-			console.log('login list is', globals.clientConfig.uiList);
 
-			globals.clientConfig.uiLoginList.forEach(u => this.buildFromConfig(u));
+			globals.clientConfig.uiLoginList.forEach(u => {
+				console.log('ok so', u);
+				this.buildFromConfig(u);
+			});
 		},
 
 		onBuildIngameUis: async function () {
