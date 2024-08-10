@@ -13,6 +13,7 @@ define([
 ) {
 	//Some UIs are strings. In these cases, the path should default to the client/ui/templates folder
 	const setUiTypes = list => {
+		console.log(list);
 		list.forEach((l, i) => {
 			if (typeof(l) === 'string') {
 				list[i] = {
@@ -20,9 +21,10 @@ define([
 					path: `ui/templates/${l}`,
 					autoLoadOnPlay: true
 				};
-			} else if (l.type === undefined)
+			} else if (l.type === undefined) {
+				console.log(l.path.split('/').pop());
 				l.type = l.path.split('/').pop();
-			else if (l.path === undefined)
+			} else if (l.path === undefined)
 				l.path = `ui/templates/${l.type}`;
 		});
 	};
@@ -36,8 +38,11 @@ define([
 			events.on('onUiKeyDown', this.onUiKeyDown.bind(this));
 			events.on('onResize', this.onResize.bind(this));
 
+			console.log('building login list');
 			setUiTypes(globals.clientConfig.uiLoginList);
+			console.log('building ui list');
 			setUiTypes(globals.clientConfig.uiList);
+			console.log('login list is', globals.clientConfig.uiList);
 
 			globals.clientConfig.uiLoginList.forEach(u => this.buildFromConfig(u));
 		},
@@ -86,7 +91,6 @@ define([
 		},
 
 		buildFromConfig: async function (config) {
-			console.log('Starting build for', config);
 			const { type, path } = config;
 
 			let className = 'ui' + type[0].toUpperCase() + type.substr(1);
@@ -97,11 +101,8 @@ define([
 			const fullPath = `${path}/${type}`;
 
 			const template = await new Promise(res => {
-				console.log('require-ing', fullPath);
 				require([fullPath], res);
 			});
-
-			console.log('got', fullPath);
 
 			let ui = $.extend(true, { type }, uiBase, template);
 		
