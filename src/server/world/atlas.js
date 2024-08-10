@@ -10,7 +10,7 @@ const { registerCallback, removeCallback } = require('./atlas/registerCallback')
 module.exports = {
 	nextId: 0,
 
-	addObject: async function (obj, keepPos, transfer, threadArgs) {
+	addObject: async function (obj, keepPos, transfer, threadArgs, forceNewThread = false) {
 		const serverObj = objects.objects.find(o => o.id === obj.id);
 		if (!serverObj)
 			return;
@@ -45,6 +45,7 @@ module.exports = {
 			zoneName,
 			zoneId,
 			threadArgs,
+			forceNew: forceNewThread,
 			obj
 		};
 
