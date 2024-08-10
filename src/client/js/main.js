@@ -58,7 +58,7 @@ define([
 			client.init(this.onClientReady.bind(this));
 		},
 
-		onClientReady: function () {
+		p: function () {
 			client.request({
 				module: 'clientConfig',
 				method: 'getClientConfig',
@@ -86,7 +86,7 @@ define([
 			sound.init();
 
 			objects.init();
-			renderer.init();
+			//renderer.init();
 			input.init();
 
 			numbers.init();
