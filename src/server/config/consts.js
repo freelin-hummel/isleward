@@ -22,7 +22,7 @@ module.exports = {
 	viewDistanceY: 17,
 
 	//How many milliseconds to wait to kill a thread after it's been empty
-	destroyThreadWhenEmptyForMs: 10000,
+	destroyThreadWhenEmptyForMs: 60 * 10 * 1000,
 
 	init: function (threadArgs) {
 		const emBeforeGetConsts = {
