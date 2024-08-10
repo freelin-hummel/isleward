@@ -54,6 +54,10 @@ const clientAck = msg => {
 	doRezone(staged);
 };
 
+const stagedRezonesExist = () => {
+	return stagedRezones.length > 0;
+};
+
 const init = () => {
 	eventEmitter.on('removeObject', unstageRezone);
 };
@@ -62,5 +66,6 @@ const init = () => {
 module.exports = {
 	init,
 	stageRezone,
-	clientAck
+	clientAck,
+	stagedRezonesExist
 };
