@@ -8,7 +8,7 @@ const fixPosition = (obj, toPos, toRelativePos, invokingObj) => {
 	}
 };
 
-const sendObjToZone = async ({ obj, invokingObj, zoneName, toPos, toRelativePos, threadArgs, cbSuccess }) => {
+const sendObjToZone = async ({ obj, invokingObj, zoneName, toPos, toRelativePos, threadArgs, cbSuccess, forceNew }) => {
 	const { serverId, instance: { syncer: globalSyncer, physics } } = obj;
 
 	if (obj.zoneName === zoneName) {
@@ -72,7 +72,8 @@ const sendObjToZone = async ({ obj, invokingObj, zoneName, toPos, toRelativePos,
 		targetZone: zoneName,
 		keepPos: !!toPos,
 		threadArgs,
-		cbSuccess
+		cbSuccess,
+		forceNew
 	});
 
 	process.send({

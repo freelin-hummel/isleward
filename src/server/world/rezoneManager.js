@@ -12,7 +12,7 @@ const unstageRezone = msg => {
 	stagedRezones.spliceWhere(s => s.simplifiedObj.serverId === msg.obj.id);
 };
 
-const stageRezone = ({ simplifiedObj, targetZone, keepPos = false, threadArgs, cbSuccess }) => {
+const stageRezone = ({ simplifiedObj, targetZone, keepPos = false, threadArgs, cbSuccess, forceNew = false }) => {
 	const { serverId } = simplifiedObj;
 
 	stagedRezones.spliceWhere(o => o.simplifiedObj.serverId === serverId);
@@ -22,12 +22,13 @@ const stageRezone = ({ simplifiedObj, targetZone, keepPos = false, threadArgs, c
 		targetZone,
 		keepPos,
 		threadArgs,
-		cbSuccess
+		cbSuccess,
+		forceNew
 	});
 };
 
 const doRezone = stagedRezone => {
-	const { simplifiedObj, targetZone, keepPos, threadArgs, cbSuccess } = stagedRezone;
+	const { simplifiedObj, targetZone, keepPos, threadArgs, cbSuccess, forceNew } = stagedRezone;
 
 	process.send({
 		method: 'rezone',
@@ -36,7 +37,8 @@ const doRezone = stagedRezone => {
 			obj: simplifiedObj,
 			newZone: targetZone,
 			keepPos,
-			threadArgs
+			threadArgs,
+			forceNew
 		}
 	});
 

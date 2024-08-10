@@ -111,7 +111,7 @@ const messageHandlers = {
 	},
 
 	rezone: async function (thread, message) {
-		const { args: { obj, newZone, keepPos = true, threadArgs } } = message;
+		const { args: { obj, newZone, keepPos = true, threadArgs, forceNew } } = message;
 
 		untrackPlayerOnThread(thread, obj);
 
@@ -136,7 +136,7 @@ const messageHandlers = {
 		delete obj.zoneId;
 
 		const isRezone = true;
-		await atlas.addObject(obj, keepPos, isRezone, threadArgs);
+		await atlas.addObject(obj, keepPos, isRezone, threadArgs, forceNew);
 	},
 
 	onZoneIdle: function (thread) {
@@ -238,7 +238,7 @@ const notifyWaitForThread = serverObj => {
 	});
 };
 
-const getThread = async ({ serverObj, zoneName, zoneId, obj, threadArgs }) => {
+const getThread = async ({ serverObj, zoneName, zoneId, obj, threadArgs, forceNew }) => {
 	const result = {
 		resetObjPosition: false,
 		thread: null
@@ -253,16 +253,19 @@ const getThread = async ({ serverObj, zoneName, zoneId, obj, threadArgs }) => {
 		zoneId = null;
 	}
 
-	let thread = threads.find(t => 
-		(
-			zoneId === null ||
-			t.id === zoneId
-		) && t.name === zoneName
-	);
+	let thread;
+	if (!forceNew) {
+		thread = threads.find(t =>
+			(
+				zoneId === null ||
+				t.id === zoneId
+			) && t.name === zoneName
+		);
 
-	//Maybe this player has been in a thread for this map before
-	if (!thread)
-		thread = threads.find(t => t.name === zoneName && t.players.includes(obj.id));
+		//Maybe this player has been in a thread for this map before
+		if (!thread)
+			thread = threads.find(t => t.name === zoneName && t.players.includes(obj.id));
+	}
 
 	const emBeforeChooseThread = {
 		chooseForObject: obj,
@@ -270,7 +273,8 @@ const getThread = async ({ serverObj, zoneName, zoneId, obj, threadArgs }) => {
 		zoneName,
 		chosenThread: thread,
 		threads,
-		threadArgs
+		threadArgs,
+		forceNew
 	};
 	eventEmitter.emit('beforeChooseThread', emBeforeChooseThread);
 	thread = emBeforeChooseThread.chosenThread;
