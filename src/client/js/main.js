@@ -58,7 +58,7 @@ define([
 			client.init(this.onClientReady.bind(this));
 		},
 
-		p: function () {
+		onClientReady: function () {
 			client.request({
 				module: 'clientConfig',
 				method: 'getClientConfig',
