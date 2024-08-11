@@ -127,8 +127,16 @@ module.exports = {
 		if (!stash.changed)
 			return;
 
+		const emBeforeSaveStash = {
+			table: 'stash',
+			obj: this.obj,
+			saveAsKey: username,
+			stashComponent: stash
+		};
+		eventEmitter.emit('beforeSaveStash', emBeforeSaveStash);
+
 		await io.setAsync({
-			key: username,
+			key: emBeforeSaveStash.saveAsKey,
 			table: 'stash',
 			value: stash.serialize(),
 			clean: true,
