@@ -24,12 +24,24 @@ module.exports = {
 	getItemsFromDb: async function () {
 		const { obj } = this;
 
-		this.items = await io.getAsync({
-			key: obj.account,
+		const emBeforeLoadStash = {
 			table: 'stash',
-			isArray: true,
-			clean: true
-		});
+			loadForKey: obj.account,
+			obj,
+			stashComponent: this,
+			stashContents: undefined
+		};
+		await eventEmitter.emit('beforeLoadStash', emBeforeLoadStash);
+
+		if (!emBeforeLoadStash.stashContents) {
+			this.items = await io.getAsync({
+				key: emBeforeLoadStash.loadForKey,
+				table: 'stash',
+				isArray: true,
+				clean: true
+			});
+		} else
+			this.items = emBeforeLoadStash.stashContents;
 
 		fixes.fixStash(this.items);
 
