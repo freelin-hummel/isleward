@@ -88,8 +88,8 @@ define([
 		buildFromConfig: async function (config) {
 			const { type, path } = config;
 
-			let className = 'ui' + type[0].toUpperCase() + type.substr(1);
-			let el = $('.' + className);
+			const className = `ui${type[0].toUpperCase()}${type.substr(1)}`;
+			const el = $('.' + className);
 			if (el.length > 0)
 				return;
 
@@ -99,7 +99,7 @@ define([
 				require([fullPath], res);
 			});
 
-			let ui = $.extend(true, { type }, uiBase, template);
+			const ui = $.extend(true, { type }, uiBase, template);
 		
 			requestAnimationFrame(this.renderUi.bind(this, ui));
 		},
