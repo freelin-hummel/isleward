@@ -63,7 +63,7 @@ const killThread = thread => {
 };
 
 const untrackPlayerOnThread = (thread, obj) => {
-	thread.playersCurrent.spliceWhere(p => p === obj.serverId);
+	thread.playersCurrent.spliceWhere(p => p === (obj.serverId ?? obj.id));
 	delete obj.threadId;
 
 	if (thread.playersCurrent.length === 0 && thread.destroyWhenEmptyForMs === 0)
@@ -412,7 +412,6 @@ const init = async () => {
 module.exports = {
 	init,
 	getThread,
-	killThread,
 	getThreadFromId,
 	spawnMapThreads,
 	messageAllThreads,
