@@ -4,6 +4,7 @@ const eventEmitter = require('../misc/events');
 
 //Helpers
 const { route, routeGlobal } = require('./connections/route');
+const { getThreadFromId } = require('../world/threadManager');
 
 //Module
 module.exports = {
@@ -50,9 +51,18 @@ module.exports = {
 			// Also, rezoning is set to true while rezoning so we don't try to remove objects
 			// from zones if they are currently rezoning
 			if (player.components.some(c => c.type === 'social') && player.rezoning !== true) {
+				let interval;
+
 				await new Promise(res => {
+					//The thread might be deleted while we're waiting
+					interval = setInterval(() => {
+						if (!getThreadFromId(player.zoneId))
+							res();
+					}, 1000);
 					atlas.removeObject(player, false, res);
 				});
+
+				clearInterval(interval);
 			}
 		}
 

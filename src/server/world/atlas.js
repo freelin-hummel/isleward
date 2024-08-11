@@ -108,7 +108,7 @@ module.exports = {
 				method: 'removeObject',
 				args: {
 					obj: obj.getSimple(true),
-					callbackId: callbackId
+					callbackId
 				}
 			}
 		});
