@@ -13,7 +13,6 @@ define([
 ) {
 	//Some UIs are strings. In these cases, the path should default to the client/ui/templates folder
 	const setUiTypes = list => {
-		console.log(list);
 		list.forEach((l, i) => {
 			if (typeof(l) === 'string') {
 				list[i] = {
@@ -37,15 +36,10 @@ define([
 			events.on('onUiKeyDown', this.onUiKeyDown.bind(this));
 			events.on('onResize', this.onResize.bind(this));
 
-			console.log('building login list');
 			setUiTypes(globals.clientConfig.uiLoginList);
-			console.log('login list is', globals.clientConfig.uiLoginList);
 			setUiTypes(globals.clientConfig.uiList);
 
-			globals.clientConfig.uiLoginList.forEach(u => {
-				console.log('ok so', u);
-				this.buildFromConfig(u);
-			});
+			globals.clientConfig.uiLoginList.forEach(u => this.buildFromConfig(u));
 		},
 
 		onBuildIngameUis: async function () {
@@ -94,8 +88,8 @@ define([
 		buildFromConfig: async function (config) {
 			const { type, path } = config;
 
-			let className = 'ui' + type[0].toUpperCase() + type.substr(1);
-			let el = $('.' + className);
+			const className = `ui${type[0].toUpperCase()}${type.substr(1)}`;
+			const el = $('.' + className);
 			if (el.length > 0)
 				return;
 
@@ -105,7 +99,7 @@ define([
 				require([fullPath], res);
 			});
 
-			let ui = $.extend(true, { type }, uiBase, template);
+			const ui = $.extend(true, { type }, uiBase, template);
 		
 			requestAnimationFrame(this.renderUi.bind(this, ui));
 		},

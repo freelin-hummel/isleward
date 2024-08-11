@@ -86,7 +86,7 @@ define([
 			sound.init();
 
 			objects.init();
-			//renderer.init();
+			renderer.init();
 			input.init();
 
 			numbers.init();

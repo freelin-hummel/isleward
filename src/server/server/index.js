@@ -5,7 +5,6 @@ const socketIo = require('socket.io');
 
 const express = require('express');
 const compression = require('compression');
-const minify = require('express-minify');
 const lessMiddleware = require('less-middleware');
 
 const rest = require('../security/rest');
@@ -33,7 +32,6 @@ const init = async () => {
 		global.cons.sockets = socketServer.sockets;
 
 		app.use(compression());
-		app.use(minify());
 
 		app.use((req, res, next) => {
 			if (
