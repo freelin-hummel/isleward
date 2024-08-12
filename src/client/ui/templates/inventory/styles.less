@@ -7,6 +7,7 @@
 	width: 818px;
 	border: 5px solid @blackB;
 	text-align: center;
+	position: relative;
 
 	> .heading {
 		color: @blueA;
@@ -22,16 +23,16 @@
 
 	}
 
-	position: relative;
-
 	.grid {
 		float: left;
 		width: 808px;
-		height: 408px;
+		min-height: 408px;
 		overflow: hidden;
 		padding: 4px;
 		position: relative;
 		background-color: @blackC;
+		max-height: calc(100vh - 110px);
+		overflow-y: auto;
 
 		.item {
 			width: 72px;

@@ -76,10 +76,6 @@ define([
 
 			let iLen = Math.max(items.length, inventorySize);
 
-			el.removeClass('scrolls');
-			if (inventorySize > 50)
-				el.addClass('scrolls');
-
 			let rendered = [];
 
 			for (let i = 0; i < iLen; i++) {
@@ -120,6 +116,10 @@ define([
 					.find('.icon')
 					.on('contextmenu', this.showContext.bind(this, item));
 			}
+
+			el.removeClass('scrolls');
+			if (container[0].scrollHeight > container[0].clientHeight)
+				el.addClass('scrolls');
 		},
 
 		onToggleQualityIndicators: function (state) {
