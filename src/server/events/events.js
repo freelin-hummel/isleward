@@ -8,7 +8,7 @@ const { mapList } = require('../world/mapManager');
 //Internals
 const phasePaths = [{
 	type: 'end',
-	path: './phases/phaseEnd'
+	path: 'events/phases/phaseEnd'
 }];
 
 //Helpers
