@@ -95,14 +95,14 @@ module.exports = {
 			cron: '0 * * * *',
 
 			regular: {
-				itemPerfection: 0.04,
-				hpMult: 5,
+				itemPerfection: 0.055,
+				hpMult: 15,
 				dmgMult: 1,
 
 				drops: {
 					chance: 100,
-					rolls: 2,
-					magicFind: [1300]
+					rolls: 3,
+					magicFind: [2000]
 				}
 			},
 			rare: {
@@ -258,8 +258,8 @@ module.exports = {
 			cron: '0 */2 * * *',
 
 			regular: {
-				itemPerfection: 0.04,
-				hpMult: 5,
+				itemPerfection: 0.055,
+				hpMult: 15,
 				dmgMult: 1,
 
 				drops: {

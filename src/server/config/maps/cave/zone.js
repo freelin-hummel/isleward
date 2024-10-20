@@ -170,15 +170,15 @@ module.exports = {
 
 			regular: {
 				itemPerfection: 0.075,
-				hpMult: 45,
+				hpMult: 50,
 				dmgMult: 1,
 
 				drops: {
 					chance: 100,
-					rolls: 5,
+					rolls: 3,
 					noRandom: true,
 					alsoRandom: true,
-					magicFind: [2000, 200],
+					magicFind: [2000, 125],
 					blueprints: [{
 						chance: 100,
 						name: 'Digested Crystal',
