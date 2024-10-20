@@ -98,7 +98,6 @@ module.exports = [{
 		spellName: 'projectile',
 		spellConfig: {
 			statType: 'int',
-			statMult: 1,
 			element: 'arcane',
 			auto: true,
 			cdMax: 7,
@@ -106,7 +105,7 @@ module.exports = [{
 			manaCost: 0,
 			range: 9,
 			random: {
-				damage: [1.65, 10.81]
+				damage: [2.58, 16.8]
 			}
 		}
 	})
@@ -143,12 +142,11 @@ module.exports = [{
 		spellName: 'melee',
 		spellConfig: {
 			statType: 'dex',
-			statMult: 1,
 			cdMax: 3,
 			castTimeMax: 0,
 			useWeaponRange: true,
 			random: {
-				damage: [0.88, 5.79]
+				damage: [1.38, 9]
 			}
 		}
 	})

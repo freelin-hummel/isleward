@@ -1,6 +1,3 @@
-//Balance
-const { hpMults, dmgMults } = require('../config/consts');
-
 //Imports
 const animations = require('../config/animations');
 const itemGenerator = require('../items/generator');
@@ -15,12 +12,23 @@ const generateSlots = [
 	'legs',
 	'feet',
 	'finger',
+	'finger',
 	'trinket',
 	'twoHanded'
 ];
 
-//Mobs will pick one of these stats to be force rolles onto their items
-const statSelector = ['str', 'dex', 'int'];
+const generateTypes = {
+	twoHanded: 'Axe',
+	head: 'Helmet',
+	chest: 'Breastplate',
+	hands: 'Gauntlets',
+	waist: 'Belt',
+	legs: 'Legplates',
+	feet: 'Steel Boots',
+	neck: 'Pendant',
+	finger: 'Viridian Band',
+	trinket: 'Dragon Fang'
+};
 
 //These stat values are synced to players
 const syncStats = ['hp', 'hpMax', 'mana', 'manaMax', 'level'];
@@ -50,22 +58,32 @@ const buildCpnStats = (mob, blueprint, typeDefinition) => {
 		hpMult: baseHpMult = typeDefinition.hpMult
 	} = blueprint;
 
-	const hpMax = ~~(level * 40 * hpMults[level - 1] * baseHpMult);
+	const hpMax = ~~(level * 40 * balance.hpMults[level - 1] * baseHpMult);
 
-	const cpnStats = mob.addComponent('stats', {
+	mob.addComponent('stats', {
 		values: {
 			level,
 			hpMax
 		}
 	});
-
-	//Hack to disallow low level mobs from having any lifeOnHit
-	// since that makes it very difficult (and confusing) for low level players
-	if (level <= 3)
-		cpnStats.values.lifeOnHit = 0;
 };
 
-const buildCpnInventory = (mob, blueprint, { drops, hasNoItems = false }, preferStat) => {
+const ignoreStatsHigh = ['addAttackDamage', 'addSpellDamage'];
+const ignoreStatsLow = ['regenHp', 'lifeOnHit', 'addAttackDamage', 'addSpellDamage'];
+
+const buildCpnInventory = (
+	mob,
+	blueprint,
+	{
+		drops,
+		hasNoItems = false,
+		itemQuality = 4,
+		itemPerfection = 0.2,
+		itemStats = ['str', 'str', 'str', 'str', 'str'],
+		spellPerfection
+	},
+	preferStat
+) => {
 	const { level } = blueprint;
 
 	const cpnInventory = mob.addComponent('inventory', drops);
@@ -79,11 +97,19 @@ const buildCpnInventory = (mob, blueprint, { drops, hasNoItems = false }, prefer
 				noSpell: true,
 				level,
 				slot,
-				quality: 4,
-				forceStats: [preferStat]
+				type: generateTypes[slot],
+				quality: itemQuality,
+				stats: itemStats,
+				perfection: itemPerfection,
+				spellPerfection,
+				forceStats: [preferStat],
+				ignoreStats: level > 3 ? ignoreStatsHigh : ignoreStatsLow
 			});
 			delete item.spell;
 			item.eq = true;
+			const implicitArmor = item.implicitStats.find(s => s.stat === 'armor');
+			if (implicitArmor !== undefined)
+				implicitArmor.value = 0;
 
 			cpnInventory.getItem(item);
 		});
@@ -91,8 +117,6 @@ const buildCpnInventory = (mob, blueprint, { drops, hasNoItems = false }, prefer
 };
 
 const buildCpnSpells = (mob, blueprint, typeDefinition, preferStat) => {
-	const dmgMult = 4.5 * typeDefinition.dmgMult * dmgMults[blueprint.level - 1];
-
 	const spells = extend([], blueprint.spells);
 	spells.forEach(s => {
 		if (!s.animation && mob.sheetName === 'mobs' && animations.mobs[mob.cell])
@@ -112,8 +136,15 @@ const buildCpnSpells = (mob, blueprint, typeDefinition, preferStat) => {
 		mob.inventory.getItem(rune);
 	}
 
-	mob.spellbook.spells.forEach(s => {
-		s.dmgMult = s.name ? dmgMult / 3 : dmgMult;
+	const dmgMult = balance.dmgMults[blueprint.level - 1];
+
+	mob.spellbook.spells.forEach((s, i) => {
+		if (i === 0)
+			s.cdMax = 2;
+
+		if (s.healing === undefined)
+			s.damage *= dmgMult;
+
 		s.statType = preferStat;
 		s.manaCost = 0;
 	});
@@ -162,7 +193,7 @@ const build = (mob, blueprint, type, zoneName) => {
 
 	mob.addComponent('equipment');
 
-	const preferStat = statSelector[~~(Math.random() * 3)];
+	const preferStat = 'str';
 
 	fnComponentGenerators.forEach(fn => fn(mob, blueprint, typeDefinition, preferStat));
 

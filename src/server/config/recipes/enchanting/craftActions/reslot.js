@@ -16,8 +16,7 @@ module.exports = (obj, [item]) => {
 		slot: configSlots.getRandomSlot(item.slot),
 		level: item.level,
 		quality: item.quality,
-		stats: possibleStats,
-		limitSlotStats: true
+		stats: possibleStats
 	});
 
 	delete item.spritesheet;

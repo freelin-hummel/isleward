@@ -3,12 +3,24 @@ const mathRandom = Math.random.bind(Math);
 const max = Math.max.bind(Math);
 
 //Helpers
+const scaleAddElement = (config, result) => {
+	const { isAttack, srcValues, cd, duration } = config;
+	const { addAttackDamage, addSpellDamage } = srcValues;
+
+	const addDamage = isAttack ? addAttackDamage : addSpellDamage;
+	let totalAdd = addDamage * cd;
+	if (duration !== undefined)
+		totalAdd /= duration;
+
+	result.amount += totalAdd;
+};
+
 const scaleStatType = (config, result) => {
-	const { statType, statMult = 1, srcValues, scaleConfig } = config;
+	const { statType, srcValues, scaleConfig } = config;
 
 	if (!statType || scaleConfig?.statMult === false)
 		return;
-	
+
 	let statValue = 0;
 
 	if (!statType.push)
@@ -21,7 +33,7 @@ const scaleStatType = (config, result) => {
 
 	statValue = max(1, statValue);
 
-	result.amount *= statValue * statMult;
+	result.amount *= statValue;
 };
 
 const scalePercentMultipliers = ({ isAttack, elementName, srcValues, scaleConfig }, result) => {
@@ -77,6 +89,7 @@ const scale = (config, result) => {
 		return;
 
 	scaleStatType(config, result);
+	scaleAddElement(config, result);
 	scalePercentMultipliers(config, result);
 	scaleCrit(config, result);
 };

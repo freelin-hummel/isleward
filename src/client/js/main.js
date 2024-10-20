@@ -10,6 +10,7 @@ define([
 	'js/resources',
 	'js/sound/sound',
 	'js/system/globals',
+	'js/system/extraClientModules',
 	'js/components/components',
 	'ui/templates/tooltips/tooltips'
 ], function (
@@ -24,6 +25,7 @@ define([
 	resources,
 	sound,
 	globals,
+	extraClientModules,
 	components
 ) {
 	let fnQueueTick = null;
@@ -69,9 +71,12 @@ define([
 		onGetClientConfig: async function (config) {
 			globals.clientConfig = config;
 
-			await resources.init();
-			await components.init();
-			
+			await Promise.all([
+				resources.init(),
+				components.init(),
+				extraClientModules.init()
+			]);
+
 			events.emit('onResourcesLoaded');
 
 			this.start();

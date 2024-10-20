@@ -41,7 +41,7 @@ module.exports = {
 		let level = this.obj.stats.values.level;
 		let points = level - this.selected.length + 1;
 
-		if (level < consts.maxLevel)
+		if (level < balance.maxLevel)
 			points--;
 
 		return points;

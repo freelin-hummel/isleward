@@ -28,7 +28,7 @@ module.exports = {
 
 		let statValue = tempItem.stats[Object.keys(tempItem.stats)[0]];
 		statValue += ~~(item.level * (this.minLevelMult + ~~(Math.random() * (this.maxLevelMult - this.minLevelMult))));
-		statValue = Math.ceil(((item.level - 1) / consts.maxLevel) * statValue);
+		statValue = Math.ceil(((item.level - 1) / balance.maxLevel) * statValue);
 		if (statValue <= 0) {
 			item.requires = null;
 			return;

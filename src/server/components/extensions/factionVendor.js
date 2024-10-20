@@ -74,7 +74,7 @@ module.exports = {
 		for (let i = 0; i < itemCount; i++) {
 			let minLevel = blueprint.items.minLevel || Math.max(1, list.level * 0.75);
 			let maxLevel = blueprint.items.maxLevel || (list.level * 1.25);
-			let level = Math.min(consts.maxLevel, ~~(minLevel + (Math.random() * (maxLevel - minLevel))));
+			let level = Math.min(balance.maxLevel, ~~(minLevel + (Math.random() * (maxLevel - minLevel))));
 
 			let item = generator.generate({
 				noSpell: true,
