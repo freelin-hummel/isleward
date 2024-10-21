@@ -31,8 +31,8 @@ module.exports = {
 			this.fixItems(inventory.items);
 
 		const stats = player.components.find(c => c.type === 'stats');
-		if (stats?.values?.level > consts.maxLevel)
-			stats.values.level = consts.maxLevel;
+		if (stats?.values?.level > balance.maxLevel)
+			stats.values.level = balance.maxLevel;
 	},
 
 	fixCustomChannels: function (customChannels) {
