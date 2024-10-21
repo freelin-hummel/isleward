@@ -4,7 +4,7 @@ const max = Math.max.bind(Math);
 
 //Helpers
 const scaleAddElement = (config, result) => {
-	const { isAttack, srcValues, cd, duration } = config;
+	const { isAttack, srcValues, cd = 1, duration } = config;
 	const { addAttackDamage, addSpellDamage } = srcValues;
 
 	const addDamage = isAttack ? addAttackDamage : addSpellDamage;
