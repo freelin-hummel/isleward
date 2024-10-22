@@ -65,6 +65,33 @@ fn server_router() -> Router {
 
 fn mods_router() -> Router {
     Router::new()
+        .route("/*file", get(serve_png_file))
         .nest_service("/ui", ServeDir::new("../../server/mods/ui"))
         .nest_service("/audio", ServeDir::new("../../server/mods/audio"))
+}
+
+async fn serve_png_file(uri: Uri) -> impl IntoResponse {
+    // Extract the path from the URI
+    let path = uri.path().trim_start_matches('/');
+
+    // Construct the full path
+    let mut full_path = PathBuf::from("../../server/mods");
+    full_path.push(path);
+
+    // Check if the file has a .png extension
+    if full_path.extension().and_then(|ext| ext.to_str()) == Some("png") {
+        // Serve the file if it's a PNG
+        match tokio::fs::read(full_path).await {
+            Ok(file_content) => (
+                StatusCode::OK,
+                [("Content-Type", "image/png")],
+                file_content,
+            )
+                .into_response(),
+            Err(_) => (StatusCode::NOT_FOUND, "File not found".to_string()).into_response(),
+        }
+    } else {
+        // If the file is not a PNG, return 404
+        (StatusCode::NOT_FOUND, "Not a PNG file".to_string()).into_response()
+    }
 }
