@@ -1,13 +1,23 @@
-use axum::Router;
-
+use axum::routing::get;
+use axum::{
+    http::{StatusCode, Uri},
+    response::IntoResponse,
+    Router,
+};
 use std::net::SocketAddr;
+use std::path::PathBuf;
 use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
+#[cfg(feature = "ws-proxy")]
+use ws_proxy::websocket_router;
 
 use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
 use tower_http::{compression::CompressionLayer, services::ServeDir};
+
+#[cfg(feature = "ws-proxy")]
+mod ws_proxy;
 
 #[tokio::main]
 async fn main() {
@@ -18,7 +28,12 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let app = Router::new()
+    #[cfg(feature = "ws-proxy")]
+    let app = Router::new().nest("/socket.io/", websocket_router());
+    #[cfg(not(feature = "ws-proxy"))]
+    let app = Router::new();
+
+    let app = app
         .nest_service("/", ServeDir::new("../../client"))
         .nest("/server", server_router())
         .layer(
