@@ -3,10 +3,10 @@ const events = require('../misc/events');
 
 //Internals
 const mapList = [
-	// {
-	// 	name: 'cave',
-	// 	path: 'config/maps'
-	// },
+	{
+		name: 'cave',
+		path: 'config/maps'
+	},
 	{
 		name: 'fjolarok',
 		path: 'config/maps'
