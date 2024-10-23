@@ -90,6 +90,8 @@ module.exports = {
 
 	isValid: function (x, y) {
 		const isInvalid = (
+			x === undefined || 
+			y === undefined ||
 			x < 0 ||
 			x >= this.width ||
 			y < 0 ||
