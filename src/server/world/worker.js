@@ -6,9 +6,13 @@ global.consts = require('../config/consts');
 global.instancer = require('./instancer');
 global.eventManager = require('../events/events');
 global.clientConfig = require('../config/clientConfig');
-global.rezoneManager = require('./rezoneManager');
 const importedBalance = require('../config/balance');
+global.rezoneManager = require('./rezoneManager');
 global.balance = importedBalance.balance;
+
+const rm = require('../../rust-modules');
+//eslint-disable-next-line no-new
+new rm.logging.LogInstance();
 
 //Imports
 const components = require('../components/components');

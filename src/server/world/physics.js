@@ -1,4 +1,6 @@
+const objects = require('../objects/objects');
 let pathfinder = require('../misc/pathfinder');
+const rm = require('../../rust-modules');
 
 let sqrt = Math.sqrt.bind(Math);
 let ceil = Math.ceil.bind(Math);
@@ -17,6 +19,7 @@ module.exports = {
 
 		this.width = collisionMap.length;
 		this.height = collisionMap[0].length;
+		this.ph = new rm.physics.Physics(collisionMap, this.width, this.height);
 
 		this.cells = _.get2dArray(this.width, this.height, 'array');
 
@@ -25,295 +28,124 @@ module.exports = {
 		});
 	},
 
-	addRegion: function (obj, oldPosition) {
-		let lowX = obj.x;
-		let lowY = obj.y;
-		let highX = lowX + obj.width;
-		let highY = lowY + obj.height;
-		let cells = this.cells;
+	addRegion: function (obj, fromX, fromY, fromWidth, fromHeight) {
+		const idsOfCollidingObjects = this.ph.addRegion(obj, fromX, fromY, fromWidth, fromHeight);
+		
+		for (let id of idsOfCollidingObjects) {
+			const f = objects.objects.find(o => o.id + '' === id);
 
-		for (let i = lowX; i < highX; i++) {
-			let row = cells[i];
-			for (let j = lowY; j < highY; j++) {
-				let cell = row[j];
-
-				if (!cell)
-					continue;
-
-				let cLen = cell.length;
-				for (let k = 0; k < cLen; k++) {
-					let c = cell[k];
-
-					//Only remove if the old position didn't contain the object
-					if (
-						!oldPosition ||
-						(
-							oldPosition.x + oldPosition.width <= c.x ||
-							oldPosition.x > c.x ||
-							oldPosition.y + oldPosition.height <= c.y ||
-							oldPosition.y > c.y
-						)
-					) {
-						c.collisionEnter(obj);
-						obj.collisionEnter(c);
-					}
-				}
-
-				cell.push(obj);
-			}
+			f.collisionEnter(obj);
+			obj.collisionEnter(f);
 		}
 	},
 
-	removeRegion: function (obj, newPosition) {
-		let oId = obj.id;
+	removeRegion: function (obj, toX, toY, toWidth, toHeight) {
+		const idsOfCollidingObjects = this.ph.removeRegion(obj, toX, toY, toWidth, toHeight);
 
-		let lowX = obj.x;
-		let lowY = obj.y;
-		let highX = lowX + obj.width;
-		let highY = lowY + obj.height;
-		let cells = this.cells;
+		for (let id of idsOfCollidingObjects) {
+			const f = objects.objects.find(o => o.id + '' === id);
 
-		for (let i = lowX; i < highX; i++) {
-			let row = cells[i];
-			for (let j = lowY; j < highY; j++) {
-				let cell = row[j];
-
-				if (!cell)
-					continue;
-
-				let cLen = cell.length;
-				for (let k = 0; k < cLen; k++) {
-					let c = cell[k];
-
-					if (c.id !== oId) {
-						//Only remove if the new position won't still contain the object
-						if (
-							!newPosition ||
-							(
-								newPosition.x + newPosition.width <= c.x ||
-								newPosition.x > c.x ||
-								newPosition.y + newPosition.height <= c.y ||
-								newPosition.y > c.y
-							)
-						) {
-							c.collisionExit(obj);
-							obj.collisionExit(c);
-						}
-					} else {
-						cell.splice(k, 1);
-						k--;
-						cLen--;
-					}
-				}
-			}
+			f.collisionExit(obj);
+			obj.collisionExit(f);
 		}
 	},
 
 	addObject: function (obj, x, y, fromX, fromY) {
-		let row = this.cells[x];
+		const idsOfCollidingObjects = this.ph.beforeAddObject(x, y, fromX, fromY);
 
-		if (!row)
-			return;
+		for (let entry of idsOfCollidingObjects) {
+			const [typeOfEvent, id] = entry.split('|');
 
-		let cell = row[y];
+			const checkObj = objects.objects.find(f => f.id + '' === id);
 
-		if (!cell)
-			return;
-
-		let cLen = cell.length;
-		for (let i = 0; i < cLen; i++) {
-			let c = cell[i];
-
-			//Maybe something was removed from the cell while we were running
-			if (!c)
+			// TODO: Ensure these can be ignored. Possible the object has already been deleted from the world
+			if (!checkObj)
 				continue;
-
-			//If we have fromX and fromY, check if the target cell doesn't contain the same obj (like a notice area)
-			if ((c.width) && (fromX)) {
-				if (c.area) {
-					if ((this.isInPolygon(x, y, c.area)) && (!this.isInPolygon(fromX, fromY, c.area))) {
-						c.collisionEnter(obj);
-						obj.collisionEnter(c);
-					}
-				} else if ((fromX < c.x) || (fromY < c.y) || (fromX >= c.x + c.width) || (fromY >= c.y + c.height)) {
-					c.collisionEnter(obj);
-					obj.collisionEnter(c);
-				} else if ((fromX >= c.x) && (fromY >= c.y) && (fromX < c.x + c.width) && (fromY < c.y + c.height)) {
-					c.collisionStay(obj);
-					obj.collisionStay(c);
-				}
-			} else {
-				//If a callback returns true, it means we collide
-				if (c.collisionEnter(obj))
+			else if (typeOfEvent === 'enter') {
+				if (checkObj.collisionEnter(obj)) 
 					return;
-				obj.collisionEnter(c);
+			
+				obj.collisionEnter(checkObj);
+			} else if (typeOfEvent === 'stay') {
+				checkObj.collisionStay(obj);
+				obj.collisionStay(checkObj);
 			}
 		}
 
-		//Perhaps a collisionEvent caused us to move somewhere else, in which case, we don't push to the cell
-		// as we assume that the collisionEvent handled it for us
-		if (obj.x === x && obj.y === y)
-			cell.push(obj);
-		
+		this.ph.addObject(obj, x, y);
+
 		return true;
 	},
 
 	removeObject: function (obj, x, y, toX, toY) {
-		let row = this.cells[x];
+		const idsOfCollidingObjects = this.ph.removeObject(obj, x, y, toX, toY);
 
-		if (!row)
-			return;
+		for (let id of idsOfCollidingObjects) {
+			const checkObj = objects.objects.find(f => f.id + '' === id);
 
-		let cell = row[y];
-
-		if (!cell)
-			return;
-
-		let oId = obj.id;
-		let cLen = cell.length;
-		for (let i = 0; i < cLen; i++) {
-			let c = cell[i];
-
-			if (c.id !== oId) {
-				//If we have toX and toY, check if the target cell doesn't contain the same obj (like a notice area)
-				if ((c.width) && (toX)) {
-					if (c.area) {
-						if ((this.isInPolygon(x, y, c.area)) && (!this.isInPolygon(toX, toY, c.area))) {
-							c.collisionExit(obj);
-							obj.collisionExit(c);
-						}
-					} else if ((toX < c.x) || (toY < c.y) || (toX >= c.x + c.width) || (toY >= c.y + c.height)) {
-						c.collisionExit(obj);
-						obj.collisionExit(c);
-					}
-				} else {
-					c.collisionExit(obj);
-					obj.collisionExit(c);
-				}
-			} else {
-				cell.splice(i, 1);
-				i--;
-				cLen--;
-			}
+			checkObj.collisionExit(obj); 
+			obj.collisionExit(checkObj);
 		}
 	},
 
 	isValid: function (x, y) {
-		let row = this.cells[x];
+		const isInvalid = (
+			x < 0 ||
+			x >= this.width ||
+			y < 0 ||
+			y >= this.height ||
+			this.collisionMap[x][y] === 1
+		);
 
-		if ((!row) || (row.length <= y) || (!this.graph.grid[x][y]))
-			return false;
-		return true;
+		return !isInvalid;
 	},
 
 	getCell: function (x, y) {
-		let row = this.cells[x];
+		const idsOfObjects = this.ph.getCell(x, y);
 
-		if (!row)
-			return [];
+		const res = idsOfObjects.map(id => objects.objects.find(f => f.id + '' === id));
 
-		let cell = row[y];
-
-		if (!cell)
-			return [];
-
-		return cell;
+		return res;
 	},
 	getArea: function (x1, y1, x2, y2, filter) {
-		let width = this.width;
-		let height = this.height;
+		const { width, height } = this;
 
-		x1 = ~~x1;
-		y1 = ~~y1;
+		const idsOfObjects = this.ph.getArea(
+			Math.max(0, x1),
+			Math.max(0, y1),
+			Math.min(x2, width - 1),
+			Math.min(y2, height - 1)
+		);
 
-		x2 = ~~x2;
-		y2 = ~~y2;
+		let res = idsOfObjects.map(id => objects.objects.find(f => f.id + '' === id));
 
-		if (x1 < 0)
-			x1 = 0;
-		if (x2 >= width)
-			x2 = width - 1;
-		if (y1 < 0)
-			y1 = 0;
-		if (y2 >= height)
-			y2 = height - 1;
+		if (filter)
+			res = res.filter(f => filter(f));
 
-		let cells = this.cells;
-		let grid = this.graph.grid;
-
-		let result = [];
-		for (let i = x1; i <= x2; i++) {
-			let row = cells[i];
-			let gridRow = grid[i];
-			for (let j = y1; j <= y2; j++) {
-				if (!gridRow[j])
-					continue;
-
-				let cell = row[j];
-				let cLen = cell.length;
-				for (let k = 0; k < cLen; k++) {
-					let c = cell[k];
-
-					if (filter) {
-						if (filter(c))
-							result.push(c);
-					} else
-						result.push(c);
-				}
-			}
-		}
-
-		return result;
+		return res;
 	},
 
 	getOpenCellInArea: function (x1, y1, x2, y2) {
-		let width = this.width;
-		let height = this.height;
+		const { width, height } = this;
 
-		x1 = ~~x1;
-		y1 = ~~y1;
+		const cellCoordinates = this.ph.getOpenCellInArea(
+			Math.max(0, x1),
+			Math.max(0, y1),
+			Math.min(x2, width - 1),
+			Math.min(y2, height - 1)
+		);
 
-		x2 = ~~x2;
-		y2 = ~~y2;
+		const firstEntry = cellCoordinates.find(c => {
+			const contents = this.getCell(c.x, c.y);
 
-		if (x1 < 0)
-			x1 = 0;
-		else if (x2 >= width)
-			x2 = width - 1;
-		if (y1 < 0)
-			y1 = 0;
-		else if (y2 >= height)
-			y2 = height - 1;
+			//If the only contents are notices, we can still use it
+			return (
+				contents.length === 0 ||
+				!contents.some(f => !f.notice)
+			);
+		});
 
-		let cells = this.cells;
-		let grid = this.graph.grid;
-
-		for (let i = x1; i <= x2; i++) {
-			let row = cells[i];
-			let gridRow = grid[i];
-			for (let j = y1; j <= y2; j++) {
-				if (!gridRow[j])
-					continue;
-
-				let cell = row[j];
-				if (cell.length === 0) {
-					return {
-						x: i,
-						y: j
-					};
-				} 
-				//If the only contents are notices, we can still use it
-				let allNotices = !cell.some(c => !c.notice);
-				if (allNotices) {
-					return {
-						x: i,
-						y: j
-					};
-				}
-			}
-		}
-
-		return null;
+		return firstEntry;
 	},
 
 	getPath: function (from, to) {
@@ -339,15 +171,9 @@ module.exports = {
 		if ((!grid[toX]) || (grid[toX].length <= toY) || (toX < 0) || (toY < 0))
 			return [];
 
-		let path = pathfinder.astar.search(graph, {
-			x: fromX,
-			y: fromY
-		}, {
-			x: toX,
-			y: toY
-		}, {
-			closest: true
-		});
+		let path = this.ph.getPath(fromX, toX, fromY, toY);
+		if (!path) 
+			return [];
 
 		return path;
 	},
@@ -378,46 +204,7 @@ module.exports = {
 		return true;
 	},
 	hasLos: function (fromX, fromY, toX, toY) {
-		if ((fromX < 0) || (fromY < 0) || (fromX >= this.width) | (fromY >= this.height) || (toX < 0) || (toY < 0) || (toX >= this.width) | (toY >= this.height))
-			return false;
-
-		let graphGrid = this.graph.grid;
-
-		if ((!graphGrid[fromX][fromY]) || (!graphGrid[toX][toY]))
-			return false;
-
-		let dx = toX - fromX;
-		let dy = toY - fromY;
-
-		let distance = sqrt((dx * dx) + (dy * dy));
-
-		dx /= distance;
-		dy /= distance;
-
-		fromX += 0.5;
-		fromY += 0.5;
-
-		distance = ceil(distance);
-
-		let x = 0;
-		let y = 0;
-
-		for (let i = 0; i < distance; i++) {
-			fromX += dx;
-			fromY += dy;
-
-			x = ~~fromX;
-			y = ~~fromY;
-
-			let node = graphGrid[x][y];
-
-			if ((!node) || (node.weight === 0))
-				return false;
-			else if ((x === toX) && (y === toY))
-				return true;
-		}
-
-		return true;
+		return this.ph.hasLos(...arguments);
 	},
 
 	getClosestPos: function (fromX, fromY, toX, toY, target, obj) {
@@ -549,27 +336,6 @@ module.exports = {
 	},
 
 	isInPolygon: function (x, y, verts) {
-		let inside = false;
-
-		let vLen = verts.length;
-		for (let i = 0, j = vLen - 1; i < vLen; j = i++) {
-			let vi = verts[i];
-			let vj = verts[j];
-
-			let xi = vi[0];
-			let yi = vi[1];
-			let xj = vj[0];
-			let yj = vj[1];
-
-			let doesIntersect = (
-				((yi > y) !== (yj > y)) &&
-					(x < ((((xj - xi) * (y - yi)) / (yj - yi)) + xi))
-			);
-
-			if (doesIntersect)
-				inside = !inside;
-		}
-
-		return inside;
+		return this.ph.isInPolygon(...arguments);
 	}
 };
