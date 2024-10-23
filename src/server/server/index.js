@@ -4,8 +4,8 @@ const http = require('http');
 const socketIo = require('socket.io');
 
 const express = require('express');
-//const compression = require('compression');
-//const lessMiddleware = require('less-middleware');
+const compression = require('compression');
+const lessMiddleware = require('less-middleware');
 
 const rest = require('../security/rest');
 
@@ -31,9 +31,9 @@ const init = async () => {
 
 		global.cons.sockets = socketServer.sockets;
 
-		//app.use(compression());
+		app.use(compression());
 
-		/*app.use((req, res, next) => {
+		app.use((req, res, next) => {
 			if (
 				!rest.willHandle(req.url) &&
 				req.url.indexOf('/server') !== 0 &&
@@ -47,12 +47,12 @@ const init = async () => {
 		app.use(lessMiddleware('../', {
 			once: compileLessOnce,
 			force: !compileLessOnce
-		}));*/
+		}));
 
 		rest.init(app);
 
-		/*app.get('/', appRoot);
-		app.get(/^(.*)$/, appFile);*/
+		app.get('/', appRoot);
+		app.get(/^(.*)$/, appFile);
 
 		socketServer.on('connection', onConnection);
 		server.listen(port, () => {
