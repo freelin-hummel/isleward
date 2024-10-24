@@ -36,8 +36,7 @@ async fn main() {
         .init();
 
     let root_path =
-        Path::new(&env::var("SERVE_PATH").unwrap_or_else(|_| "../../client".to_string()))
-            .to_path_buf();
+        Path::new(&env::var("SERVE_PATH").unwrap_or_else(|_| "../../".to_string())).to_path_buf();
     debug!("app_path: {root_path:?}");
 
     let state = Arc::new(AppState { root_path });
@@ -85,12 +84,15 @@ async fn iwd_serve_file(State(state): State<Arc<AppState>>, uri: Uri) -> Respons
     // Extract the path from the URI
     let path = uri.path();
 
-    let root = path.split("/").nth(1).unwrap_or("client");
+    let root = match path.split('/').nth(1) {
+        Some("server") => "",
+        _ => "client",
+    };
 
-    debug!("root: {root:?}");
-
-    let file = uri.path().replace(&format!("/{root}/"), "");
-    debug!("file: {file}");
+    let file = uri
+        .path()
+        .strip_prefix(&format!("/{root}/"))
+        .unwrap_or(uri.path());
     // Reconstruct the file path by removing the root prefix
     // (In this context, since we've already extracted the root, `file` is the relative path)
 
@@ -108,7 +110,11 @@ async fn iwd_serve_file(State(state): State<Arc<AppState>>, uri: Uri) -> Respons
     }
 
     // Construct the full file path
-    let full_path = state.root_path.join(root).join(&file);
+    let full_path = state
+        .root_path
+        .join(root)
+        .join(file.trim_start_matches('/'));
+    debug!("full_path: {full_path:?}");
 
     // Check if the file exists and is a file
     match fs::metadata(&full_path).await {
@@ -146,7 +152,7 @@ async fn iwd_serve_file(State(state): State<Arc<AppState>>, uri: Uri) -> Respons
 }
 
 async fn serve_index(State(state): State<Arc<AppState>>) -> Response {
-    let index_path = state.root_path.join("index.html");
+    let index_path = state.root_path.join("client/index.html");
     debug!("index_path: {index_path:?}");
     match fs::read(&index_path).await {
         Ok(contents) => {
