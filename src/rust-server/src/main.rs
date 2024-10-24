@@ -97,9 +97,9 @@ async fn iwd_serve_file(State(state): State<Arc<AppState>>, uri: Uri) -> Respons
     // (In this context, since we've already extracted the root, `file` is the relative path)
 
     // Apply validation logic
-    let valid_request = root != "server"
-        || file.starts_with("clientComponents")
-        || (file.contains("mods/")
+    let valid_request = root != ""
+        || file.contains("/clientComponents/")
+        || (file.contains("/mods/")
             && VALID_MOD_PATTERNS
                 .iter()
                 .any(|pattern| file.contains(pattern)));
