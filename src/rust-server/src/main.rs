@@ -1,3 +1,5 @@
+use axum::extract::State;
+use axum::response::Response;
 use axum::routing::get;
 use axum::{
     http::{StatusCode, Uri},
@@ -7,16 +9,19 @@ use axum::{
 use std::env;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
+use tokio::fs;
 use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
-use tracing::debug;
+use tracing::{debug, error};
+
 #[cfg(feature = "ws-proxy")]
 use ws_proxy::websocket_router;
 
 use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
-use tower_http::{compression::CompressionLayer, services::ServeDir};
+use tower_http::compression::CompressionLayer;
 
 #[cfg(feature = "ws-proxy")]
 mod ws_proxy;
@@ -30,18 +35,17 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let app_path =
-        Path::new(&env::var("SERVE_PATH").unwrap_or_else(|_| "../../".to_string())).to_path_buf();
-    debug!("app_path: {app_path:?}");
+    let root_path =
+        Path::new(&env::var("SERVE_PATH").unwrap_or_else(|_| "../../client".to_string()))
+            .to_path_buf();
+    debug!("app_path: {root_path:?}");
 
-    #[cfg(feature = "ws-proxy")]
-    let app = Router::new().nest("/socket.io/", websocket_router());
-    #[cfg(not(feature = "ws-proxy"))]
-    let app = Router::new();
+    let state = Arc::new(AppState { root_path });
 
-    let app = app
-        .nest_service("/", ServeDir::new(app_path.join("client")))
-        .nest("/server", server_router(&app_path))
+    let mut app = Router::new()
+        .route("/*file", get(iwd_serve_file))
+        .route("/", get(serve_index))
+        .with_state(state)
         .layer(
             ServiceBuilder::new()
                 .layer(CompressionLayer::new())
@@ -49,6 +53,10 @@ async fn main() {
                 .into_inner(),
         );
 
+    #[cfg(feature = "ws-proxy")]
+    {
+        app = app.nest("/socket.io/", websocket_router());
+    }
     let addr = SocketAddr::from(([0, 0, 0, 0], 4001));
     println!("Server listening on {}", addr);
 
@@ -60,131 +68,100 @@ async fn main() {
     .unwrap();
 }
 
-fn server_router(app_path: &Path) -> Router {
-    Router::new()
-        .nest_service(
-            "/clientComponents",
-            ServeDir::new(app_path.join("server/clientComponents")),
-        )
-        .nest("/mods", mods_router(app_path))
+#[derive(Clone)]
+struct AppState {
+    root_path: PathBuf,
 }
 
-fn mods_router(app_path: &Path) -> Router {
-    Router::new()
-        .route(
-            "/*file",
-            get({
-                let app_path = app_path.to_path_buf(); // Clone app_path into the closure
-                move |uri: Uri| serve_png_file(app_path.clone().to_path_buf(), uri)
-            }),
-        )
-        //ui
-        .nest_service(
-            "/iwd-audio/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-audio/ui")),
-        )
-        .nest_service(
-            "/iwd-tutorial/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-tutorial/ui")),
-        )
-        .nest_service(
-            "/iwd-leagues/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-leagues/ui")),
-        )
-        .nest_service(
-            "/iwd-blisterwind/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-blisterwind/ui")),
-        )
-        .nest_service(
-            "/iwd-trials-of-the-abyss/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-trials-of-the-abyss/ui")),
-        )
-        .nest_service(
-            "/iwd-mail/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-mail/ui")),
-        )
-        .nest_service(
-            "/iwd-mtx-stash/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-mtx-stash/ui")),
-        )
-        .nest_service(
-            "/iwd-patreon/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-patreon/ui")),
-        )
-        .nest_service(
-            "/iwd-online-list/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-online-list/ui")),
-        )
-        .nest_service(
-            "/iwd-report-issue/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-report-issue/ui")),
-        )
-        .nest_service(
-            "/iwd-fast-travel/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-fast-travel/ui")),
-        )
-        .nest_service(
-            "/iwd-confirm-action/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-confirm-action/ui")),
-        )
-        .nest_service(
-            "/iwd-crews/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-crews/ui")),
-        )
-        .nest_service(
-            "/iwd-construction/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-construction/ui")),
-        )
-        .nest_service(
-            "/iwd-mtx-shop/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-mtx-shop/ui")),
-        )
-        .nest_service(
-            "/iwd-trading/ui",
-            ServeDir::new(app_path.join("server/mods/iwd-trading/ui")),
-        )
-        //audio
-        .nest_service(
-            "/iwd-audio/audio",
-            ServeDir::new(app_path.join("server/mods/iwd-audio/audio")),
-        )
-        //clientComponents
-        .nest_service(
-            "/iwd-blisterwind/clientComponents",
-            ServeDir::new(app_path.join("server/mods/iwd-blisterwind/clientComponents")),
-        )
-        .nest_service(
-            "/iwd-ranger/clientComponents",
-            ServeDir::new(app_path.join("server/mods/iwd-ranger/clientComponents")),
-        )
-        .nest_service(
-            "/iwd-gaekatla-temple/clientComponents",
-            ServeDir::new(app_path.join("server/mods/iwd-gaekatla-temple/clientComponents")),
-        )
-}
+const VALID_MOD_PATTERNS: &[&str] = &[
+    ".png",
+    "/ui/",
+    "/clientComponents/",
+    "/audio/",
+    "/clientModules/",
+];
 
-async fn serve_png_file(app_path: PathBuf, uri: Uri) -> impl IntoResponse {
+async fn iwd_serve_file(State(state): State<Arc<AppState>>, uri: Uri) -> Response {
     // Extract the path from the URI
-    let path = uri.path().trim_start_matches('/');
+    let path = uri.path();
 
-    // Construct the full path
-    let mut full_path = app_path.join("server/mods");
-    full_path.push(path);
+    let root = path.split("/").nth(1).unwrap_or("client");
 
-    // Check if the file has a .png extension
-    if full_path.extension().and_then(|ext| ext.to_str()) == Some("png") {
-        // Serve the file if it's a PNG
-        match tokio::fs::read(full_path).await {
-            Ok(file_content) => (
-                StatusCode::OK,
-                [("Content-Type", "image/png")],
-                file_content,
-            )
-                .into_response(),
-            Err(_) => (StatusCode::NOT_FOUND, "File not found".to_string()).into_response(),
+    debug!("root: {root:?}");
+
+    let file = uri.path().replace(&format!("/{root}/"), "");
+    debug!("file: {file}");
+    // Reconstruct the file path by removing the root prefix
+    // (In this context, since we've already extracted the root, `file` is the relative path)
+
+    // Apply validation logic
+    let valid_request = root != "server"
+        || file.starts_with("clientComponents")
+        || (file.contains("mods/")
+            && VALID_MOD_PATTERNS
+                .iter()
+                .any(|pattern| file.contains(pattern)));
+
+    if !valid_request {
+        // Return 404 Not Found if the request is invalid
+        return (StatusCode::NOT_FOUND, "Not Found").into_response();
+    }
+
+    // Construct the full file path
+    let full_path = state.root_path.join(root).join(&file);
+
+    // Check if the file exists and is a file
+    match fs::metadata(&full_path).await {
+        Ok(metadata) => {
+            if metadata.is_file() {
+                // Read the file contents
+                match fs::read(&full_path).await {
+                    Ok(contents) => {
+                        // Guess the MIME type based on the file extension
+                        let mime_type = mime_guess::from_path(&full_path).first_or_octet_stream();
+                        // Return the file contents with the appropriate MIME type
+                        (
+                            axum::http::StatusCode::OK,
+                            [(axum::http::header::CONTENT_TYPE, mime_type.to_string())],
+                            contents,
+                        )
+                            .into_response()
+                    }
+                    Err(e) => {
+                        error!("{e:?}");
+                        // Return 500 Internal Server Error if the file cannot be read
+                        (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
+                    }
+                }
+            } else {
+                // If the path exists but is not a file, return 404
+                (StatusCode::NOT_FOUND, "Not Found").into_response()
+            }
         }
-    } else {
-        // If the file is not a PNG, return 404
-        (StatusCode::NOT_FOUND, "Not a PNG file".to_string()).into_response()
+        Err(_) => {
+            // If the file does not exist, return 404
+            (StatusCode::NOT_FOUND, "Not Found").into_response()
+        }
+    }
+}
+
+async fn serve_index(State(state): State<Arc<AppState>>) -> Response {
+    let index_path = state.root_path.join("index.html");
+    debug!("index_path: {index_path:?}");
+    match fs::read(&index_path).await {
+        Ok(contents) => {
+            let mime_type = mime_guess::from_path(&index_path).first_or_octet_stream();
+            (
+                axum::http::StatusCode::OK,
+                [(axum::http::header::CONTENT_TYPE, mime_type.to_string())],
+                contents,
+            )
+                .into_response()
+        }
+        Err(e) => {
+            error!("{e:?}");
+            // Return 500 Internal Server Error if index.html cannot be read
+            (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
+        }
     }
 }

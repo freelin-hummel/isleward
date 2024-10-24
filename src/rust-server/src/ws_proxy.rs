@@ -1,5 +1,10 @@
+use std::sync::Arc;
+
 use axum::{
-    extract::ws::{Message, WebSocket, WebSocketUpgrade},
+    extract::{
+        ws::{Message, WebSocket, WebSocketUpgrade},
+        State,
+    },
     response::IntoResponse,
     routing::get,
     Router,
@@ -10,6 +15,8 @@ use tracing::debug;
 use tokio_tungstenite::connect_async;
 
 use tungstenite::protocol::{CloseFrame, Message as TungsteniteMessage};
+
+use crate::AppState;
 
 pub fn websocket_router() -> Router {
     Router::new().route("/", get(ws_handler))
