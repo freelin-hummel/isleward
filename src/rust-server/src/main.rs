@@ -196,6 +196,8 @@ async fn serve_index(State(state): State<Arc<AppState>>) -> Response {
 type LessFileCount = usize;
 #[cfg(feature = "compile-less")]
 fn compile_less_css(root_path: &Path) -> LessFileCount {
+    use tracing::trace;
+
     let to_compile = WalkDir::new(root_path)
         .into_iter()
         .filter_map(|x| x.ok())
@@ -204,21 +206,25 @@ fn compile_less_css(root_path: &Path) -> LessFileCount {
         .map(|x| x.path().to_path_buf())
         .collect::<Vec<_>>();
     let file_count = to_compile.len();
-    let mut cmd = Command::new("lessc");
     for less in to_compile {
         debug!("compiling less file: {less:?}");
         let mut css_file = less.to_path_buf();
         css_file.set_extension("css");
-        let stt = cmd
+
+        let output = Command::new("lessc")
             .arg(&less)
             .arg(css_file)
-            .spawn()
-            .expect("lessc should be installed")
-            .wait()
-            .unwrap();
-        if !stt.success() {
-            error!("lessc could not compile file: {less:?}");
+            .current_dir(root_path)
+            .output()
+            .expect("lessc should be installed and executable");
+
+        if !output.status.success() {
+            let err = String::from_utf8_lossy(output.stderr.as_slice());
+            error!("{err}. lessc could not compile file: {less:?}");
+            continue;
         }
+        let out = String::from_utf8_lossy(output.stdout.as_slice());
+        trace!("lessc output: {out}")
     }
     file_count
 }
