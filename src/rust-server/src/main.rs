@@ -61,7 +61,7 @@ async fn main() {
 
     let state = Arc::new(AppState { root_path });
 
-    let mut app = Router::new()
+    let app = Router::new()
         .route("/*file", get(iwd_serve_file))
         .route("/", get(serve_index))
         .with_state(state)
@@ -73,9 +73,7 @@ async fn main() {
         );
 
     #[cfg(feature = "ws-proxy")]
-    {
-        app = app.nest("/socket.io/", websocket_router());
-    }
+    let app = app.nest("/socket.io/", websocket_router());
     let addr = SocketAddr::from(([0, 0, 0, 0], 4001));
 
     let server = axum::serve(
