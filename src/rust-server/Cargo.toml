@@ -18,6 +18,7 @@ tower-http = { version = "0.6", features = ["compression-gzip", "fs", "trace"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tungstenite = { version = "0.24.0", optional = true }
+walkdir = "2.5.0"
 
 [features]
 tokio-tungstenite = ["dep:tokio-tungstenite"]
@@ -25,3 +26,5 @@ tungstenite = ["dep:tungstenite"]
 futures = ["dep:futures"]
 axum-ws = ["axum/ws"]
 ws-proxy = ["futures","tungstenite","tokio-tungstenite","axum-ws"]
+compile-less = []
+production = ["compile-less"]

@@ -7,13 +7,22 @@ use axum::{
     Router,
 };
 use std::env;
+#[cfg(feature = "compile-less")]
+use std::ffi::OsStr;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
+#[cfg(feature = "compile-less")]
+use std::process::Command;
 use std::sync::Arc;
+#[cfg(feature = "compile-less")]
+use std::time::Instant;
 use tokio::fs;
 use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
-use tracing::{debug, error};
+
+use tracing::{debug, error, info};
+#[cfg(feature = "compile-less")]
+use walkdir::WalkDir;
 
 #[cfg(feature = "ws-proxy")]
 use ws_proxy::websocket_router;
@@ -39,6 +48,17 @@ async fn main() {
         Path::new(&env::var("SERVE_PATH").unwrap_or_else(|_| "../../".to_string())).to_path_buf();
     debug!("app_path: {root_path:?}");
 
+    #[cfg(feature = "compile-less")]
+    {
+        let rp = root_path.clone();
+        std::thread::spawn(move || {
+            info!("Compiling less files in the background...");
+            let t = Instant::now();
+            let count = compile_less_css(&rp);
+            info!("Compiled {count} less files in {:?}", t.elapsed());
+        });
+    }
+
     let state = Arc::new(AppState { root_path });
 
     let mut app = Router::new()
@@ -57,7 +77,7 @@ async fn main() {
         app = app.nest("/socket.io/", websocket_router());
     }
     let addr = SocketAddr::from(([0, 0, 0, 0], 4001));
-    println!("Server listening on {}", addr);
+    info!("Server listening on {}", addr);
 
     axum::serve(
         tokio::net::TcpListener::bind(addr).await.unwrap(),
@@ -97,7 +117,7 @@ async fn iwd_serve_file(State(state): State<Arc<AppState>>, uri: Uri) -> Respons
     // (In this context, since we've already extracted the root, `file` is the relative path)
 
     // Apply validation logic
-    let valid_request = root != ""
+    let valid_request = !root.is_empty()
         || file.contains("/clientComponents/")
         || (file.contains("/mods/")
             && VALID_MOD_PATTERNS
@@ -170,4 +190,35 @@ async fn serve_index(State(state): State<Arc<AppState>>) -> Response {
             (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
         }
     }
+}
+
+#[cfg(feature = "compile-less")]
+type LessFileCount = usize;
+#[cfg(feature = "compile-less")]
+fn compile_less_css(root_path: &Path) -> LessFileCount {
+    let to_compile = WalkDir::new(root_path)
+        .into_iter()
+        .filter_map(|x| x.ok())
+        .filter(|x| x.path().is_file())
+        .filter(|x| x.path().extension() == Some(OsStr::new("less")))
+        .map(|x| x.path().to_path_buf())
+        .collect::<Vec<_>>();
+    let file_count = to_compile.len();
+    let mut cmd = Command::new("lessc");
+    for less in to_compile {
+        debug!("compiling less file: {less:?}");
+        let mut css_file = less.to_path_buf();
+        css_file.set_extension("css");
+        let stt = cmd
+            .arg(&less)
+            .arg(css_file)
+            .spawn()
+            .expect("lessc should be installed")
+            .wait()
+            .unwrap();
+        if !stt.success() {
+            error!("lessc could not compile file: {less:?}");
+        }
+    }
+    file_count
 }

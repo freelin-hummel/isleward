@@ -26,3 +26,17 @@ This runs just the static fileserver and is not really useful when running local
 cd isleward/src/rust-server/src
 cargo r
 ```
+
+## Features
+
+### production
+
+Enables all compiler feature flags for use in production.
+
+### ws-proxy
+
+Enables the websocket reverse proxy to a local instance of isleward
+
+### compile-less
+
+Enables less file compilation on server startup. This will crash if lessc is not installed
