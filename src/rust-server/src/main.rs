@@ -77,14 +77,15 @@ async fn main() {
         app = app.nest("/socket.io/", websocket_router());
     }
     let addr = SocketAddr::from(([0, 0, 0, 0], 4001));
-    info!("Server listening on {}", addr);
 
-    axum::serve(
+    let server = axum::serve(
         tokio::net::TcpListener::bind(addr).await.unwrap(),
         app.into_make_service(),
-    )
-    .await
-    .unwrap();
+    );
+    info!("Server listening on {}", addr);
+    #[cfg(target_family = "unix")]
+    let server = server.with_graceful_shutdown(wait_for_sigterm_or_int());
+    server.await.unwrap();
 }
 
 #[derive(Clone)]
@@ -227,4 +228,30 @@ fn compile_less_css(root_path: &Path) -> LessFileCount {
         trace!("lessc output: {out}")
     }
     file_count
+}
+
+/// Wait for a termination signal (SIGTERM)
+/// Checks for the SIGTERM signal & sets a flag in the config so that we can stop accepting requests.
+#[cfg(target_family = "unix")]
+async fn wait_for_sigterm_or_int() {
+    use tokio::signal::unix::{signal, SignalKind};
+
+    let term = async {
+        signal(SignalKind::terminate())
+            .expect("Signal to register")
+            .recv()
+            .await
+    };
+    let ctrlc = async {
+        signal(SignalKind::interrupt())
+            .expect("Signal to register")
+            .recv()
+            .await
+    };
+
+    tokio::select! {
+        _ = term => {},
+        _ = ctrlc => {},
+    }
+    info!("Got term or int signal. Stopping...");
 }
