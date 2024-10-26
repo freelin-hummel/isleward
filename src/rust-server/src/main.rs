@@ -144,6 +144,29 @@ async fn iwd_serve_file(State(state): State<Arc<AppState>>, uri: Uri) -> Respons
                     Ok(contents) => {
                         // Guess the MIME type based on the file extension
                         let mime_type = mime_guess::from_path(&full_path).first_or_octet_stream();
+                        debug!("mime_type: {mime_type:?}");
+
+                        if mime_type.subtype() == mime::CSS {
+                            return (
+                                axum::http::StatusCode::OK,
+                                [(
+                                    axum::http::header::CONTENT_TYPE,
+                                    mime::TEXT_CSS_UTF_8.to_string(),
+                                )],
+                                contents,
+                            )
+                                .into_response();
+                        } else if mime_type.subtype() == mime::HTML {
+                            return (
+                                axum::http::StatusCode::OK,
+                                [(
+                                    axum::http::header::CONTENT_TYPE,
+                                    mime::TEXT_HTML_UTF_8.to_string(),
+                                )],
+                                contents,
+                            )
+                                .into_response();
+                        }
                         // Return the file contents with the appropriate MIME type
                         (
                             axum::http::StatusCode::OK,

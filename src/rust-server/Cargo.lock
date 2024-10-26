@@ -733,6 +733,7 @@ dependencies = [
  "axum",
  "futures",
  "hyper",
+ "mime",
  "mime_guess",
  "serde_json",
  "tokio",
