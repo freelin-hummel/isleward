@@ -54,7 +54,7 @@ build-image-latest:
     - docker push $IMAGE_TAG_REF
     - docker push $IMAGE_TAG_ALIAS
   only:
-    - master
+    - master-rust
 
 build-image-stable:
   stage: build
@@ -75,3 +75,20 @@ build-image-stable:
     - docker push $IMAGE_TAG_ALIAS
   only:
     - tags
+
+build-static-server-image-latest:
+  stage: build
+  image: docker:stable
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_TOKEN
+  variables:
+    IMAGE_TAG_REF: isleward/isleward-static:$CI_COMMIT_REF_SLUG
+    IMAGE_TAG_ALIAS: isleward/isleward-static:latest
+  script:
+    - docker build -f src/rust-server.Dockerfile -t $IMAGE_TAG_REF -t $IMAGE_TAG_ALIAS src/
+    - docker push $IMAGE_TAG_REF
+    - docker push $IMAGE_TAG_ALIAS
+  only:
+    - master-rust
