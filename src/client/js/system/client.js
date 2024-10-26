@@ -9,7 +9,7 @@ define([
 		doneConnect: false,
 
 		init: function (onReady) {
-			this.socket = io(`http://${window.location.hostname}:4000`, {
+			this.socket = io({
 				transports: ['websocket']
 			});
 
