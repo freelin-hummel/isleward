@@ -674,12 +674,10 @@ pub mod physics {
         // Add nodes to the graph
         for (x, row) in matrix.iter().enumerate() {
             for (y, _) in row.iter().enumerate() {
-                if matrix[x][y] == 0 {
-                    graph.add_node(Coordinate {
-                        x: x.try_into().unwrap(),
-                        y: y.try_into().unwrap(),
-                    });
-                }
+                graph.add_node(Coordinate {
+                    x: x.try_into().unwrap(),
+                    y: y.try_into().unwrap(),
+                });
             }
         }
         //dbg!(size, inner_size);
