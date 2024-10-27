@@ -82,6 +82,16 @@ module.exports = {
 
 		for (let id of idsOfCollidingObjects) {
 			const checkObj = objects.objects.find(f => f.id + '' === id);
+			if (!checkObj) {
+				console.log({
+					error: 'No object found for removeObject collision',
+					objName: obj.name,
+					x,
+					y,
+					toX,
+					toY
+				});
+			}
 
 			checkObj.collisionExit(obj); 
 			obj.collisionExit(checkObj);
