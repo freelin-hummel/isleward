@@ -11,7 +11,7 @@ use std::env;
 use std::ffi::OsStr;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
-#[cfg(feature = "compile-less")]
+#[cfg(any(feature = "compile-less", feature = "production"))]
 use std::process::Command;
 use std::sync::Arc;
 #[cfg(feature = "compile-less")]
@@ -46,7 +46,13 @@ async fn main() {
 
     let root_path =
         Path::new(&env::var("SERVE_PATH").unwrap_or_else(|_| "../../".to_string())).to_path_buf();
-    debug!("app_path: {root_path:?}");
+    info!("Root path: {root_path:?}");
+
+    #[cfg(feature = "production")]
+    {
+        info!("Moving mods to serve directory...");
+        find_and_move_mods();
+    }
 
     #[cfg(feature = "compile-less")]
     {
@@ -275,4 +281,75 @@ async fn wait_for_sigterm_or_int() {
         _ = ctrlc => {},
     }
     info!("Got term or int signal. Stopping...");
+}
+
+// The final build puts the mods in another directory, so lets just move them before we startup
+// mv /usr/src/isleward/src/server/mods/* static/server/mods/
+#[cfg(feature = "production")]
+fn find_and_move_mods() {
+    let prod_mod_path: &Path = Path::new("/usr/src/isleward/src/server/mods/");
+    let prod_serve_path: &Path = Path::new("static/server/mods");
+
+    if !prod_mod_path.exists() {
+        error!("No mods found in /usr/src/isleward/src/server/mods/");
+        return;
+    }
+
+    WalkDir::new(prod_serve_path)
+        .max_depth(1)
+        .into_iter()
+        .inspect(|x| {
+            debug!("remove: {x:?}");
+        })
+        .filter_map(|x| x.ok())
+        .inspect(|x| {
+            debug!("remove (file name): {:?}", x.path().file_name());
+        })
+        .filter(|x| x.path().is_dir())
+        .filter(|x| {
+            x.path()
+                .file_name()
+                .map(|x| x.to_string_lossy().starts_with("iwd"))
+                .is_some_and(|x| x)
+        })
+        .for_each(|x| {
+            debug!("Removing dir {:?}", x.path());
+            let out = Command::new("rm").arg("-r").arg(x.path()).output().unwrap();
+            if !out.status.success() {
+                error!("File removal: {}", String::from_utf8_lossy(&out.stderr));
+            }
+        });
+    let mut prod_serve_path = prod_serve_path.to_path_buf();
+    WalkDir::new(prod_mod_path)
+        .max_depth(1)
+        .into_iter()
+        .inspect(|x| {
+            debug!("rename: {x:?}");
+        })
+        .filter_map(|x| x.ok())
+        .filter(|x| x.path().is_dir())
+        .filter(|x| {
+            x.path()
+                .file_name()
+                .map(|x| x.to_string_lossy().starts_with("iwd"))
+                .is_some_and(|x| x)
+        })
+        .inspect(|x| {
+            debug!("rename (file name): {:?}", x.path().file_name());
+        })
+        .filter(|x| x.path().file_name() != Some(OsStr::new("mods")))
+        .for_each(|x| {
+            prod_serve_path.push(x.file_name());
+            debug!("Renaming {:?} to {prod_serve_path:?}", x.path());
+
+            let out = Command::new("mv")
+                .arg(x.path())
+                .arg(&prod_serve_path)
+                .output()
+                .unwrap();
+            if !out.status.success() {
+                error!("File rename: {}", String::from_utf8_lossy(&out.stderr));
+            }
+            prod_serve_path.pop();
+        });
 }
