@@ -141,7 +141,14 @@ pub mod physics {
                 area: if value.get_named_property::<Undefined>("notice").is_ok() {
                     None
                 } else {
-                    Some(value.get_named_property("area").unwrap_or_default())
+                    // Get `area` and set it to `None` if it's an empty vector
+                    match value
+                        .get_named_property::<Vec<Vec<i32>>>("area")
+                        .unwrap_or_default()
+                    {
+                        vec if vec.is_empty() => None,
+                        vec => Some(vec),
+                    }
                 },
                 id,
             }
