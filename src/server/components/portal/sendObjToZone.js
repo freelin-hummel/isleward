@@ -41,12 +41,13 @@ const sendObjToZone = async ({ obj, invokingObj, zoneName, toPos, toRelativePos,
 
 	obj.fireEvent('beforeRezone');
 
+	//Destroy, flush events and notify other objects
+	globalSyncer.processDestroyedObject(obj);
+
 	//We set this before saving so that objects aren't saved ON portals
 	obj.zoneName = zoneName;
 	fixPosition(obj, toPos, toRelativePos, invokingObj);
 
-	//Destroy, flush events and notify other objects
-	globalSyncer.processDestroyedObject(obj);
 	await obj.auth.doSave();
 
 	//Inform the main thread that we are rezoning. We do this because if the player 

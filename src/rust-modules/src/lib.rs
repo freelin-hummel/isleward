@@ -452,7 +452,7 @@ pub mod physics {
             let cell = &mut self.cells[xi][yi];
             cell.retain(|c| !remove_ids.contains(c));
 
-            ret
+            Some(ret)
         }
 
         #[napi]
