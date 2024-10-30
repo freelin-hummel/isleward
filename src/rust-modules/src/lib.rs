@@ -137,22 +137,26 @@ pub mod physics {
                 y: value.get_named_property("y").unwrap_or_default(),
                 width: value.get_named_property("width").unwrap_or_default(),
                 height: value.get_named_property("height").unwrap_or_default(),
-                is_notice: value.get_named_property::<Undefined>("notice").is_err(),
+                is_notice: !is_undefined(value, "notice"),
                 area: match (
-                    value.get_named_property::<Undefined>("notice"),
+                    is_undefined(value, "notice"),
                     value.get_named_property::<Vec<Vec<i32>>>("area"),
                 ) {
-                    (Ok(_notice_is_undefined), _) => None,
+                    (true, _) => None,
                     (_, Ok(v)) if !v.is_empty() => Some(v),
                     (_, Ok(_empty_list)) => None,
-                    (Err(notice_error), Err(area_error)) => {
-                        error!("PhysicsObject get_named_property: {notice_error},{area_error}");
+                    (false, Err(area_error)) => {
+                        debug!("PhysicsObject get_named_property: {area_error}");
                         None
                     }
                 },
                 id,
             }
         }
+    }
+
+    fn is_undefined(value: &JsObject, name: &str) -> bool {
+        value.get_named_property::<Undefined>(name).is_ok()
     }
 
     impl ObjectFinalize for Physics {
