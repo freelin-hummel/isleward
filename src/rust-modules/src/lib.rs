@@ -401,26 +401,25 @@ pub mod physics {
             y: i32,
             to_x: Option<i32>,
             to_y: Option<i32>,
-        ) -> Vec<String> {
-            let mut ret = vec![];
-
+        ) -> Option<Vec<String>> {
             let obj = PhysicsObject::from(&obj);
 
             let cells = &self.cells;
 
             let xi: usize = x.try_into().unwrap();
             if xi >= cells.len() {
-                return ret;
+                return None;
             }
             let row = &cells[xi];
             let yi: usize = y.try_into().unwrap();
             if yi >= row.len() {
-                return ret;
+                return None;
             }
 
             let cell = &row[yi];
 
             let mut remove_ids = vec![];
+            let mut ret = vec![];
 
             for c in cell {
                 if c.id != obj.id {
