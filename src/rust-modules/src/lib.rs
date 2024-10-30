@@ -138,16 +138,16 @@ pub mod physics {
                 width: value.get_named_property("width").unwrap_or_default(),
                 height: value.get_named_property("height").unwrap_or_default(),
                 is_notice: value.get_named_property::<Undefined>("notice").is_err(),
-                area: if value.get_named_property::<Undefined>("notice").is_ok() {
-                    None
-                } else {
-                    // Get `area` and set it to `None` if it's an empty vector
-                    match value
-                        .get_named_property::<Vec<Vec<i32>>>("area")
-                        .unwrap_or_default()
-                    {
-                        vec if vec.is_empty() => None,
-                        vec => Some(vec),
+                area: match (
+                    value.get_named_property::<Undefined>("notice"),
+                    value.get_named_property::<Vec<Vec<i32>>>("area"),
+                ) {
+                    (Ok(_notice_is_undefined), _) => None,
+                    (_, Ok(v)) if !v.is_empty() => Some(v),
+                    (_, Ok(_empty_list)) => None,
+                    (Err(notice_error), Err(area_error)) => {
+                        error!("PhysicsObject get_named_property: {notice_error},{area_error}");
+                        None
                     }
                 },
                 id,
