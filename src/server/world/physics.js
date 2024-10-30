@@ -119,7 +119,9 @@ module.exports = {
 			Math.min(y2, height - 1)
 		);
 
-		let res = idsOfObjects.map(id => objects.objects.find(f => f.id + '' === id));
+		let res = idsOfObjects
+			.map(id => objects.objects.find(f => f.id + '' === id))
+			.filter(obj => obj !== undefined);
 
 		if (filter)
 			res = res.filter(f => filter(f));

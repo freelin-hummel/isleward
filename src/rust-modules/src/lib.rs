@@ -252,6 +252,7 @@ pub mod physics {
             ret
         }
 
+        #[napi]
         pub fn remove_region(
             &mut self,
             jobj: JsObject,
@@ -400,24 +401,25 @@ pub mod physics {
             y: i32,
             to_x: Option<i32>,
             to_y: Option<i32>,
-        ) -> Option<Vec<String>> {
+        ) -> Vec<String> {
+            let mut ret = vec![];
+
             let obj = PhysicsObject::from(&obj);
 
             let cells = &self.cells;
 
             let xi: usize = x.try_into().unwrap();
             if xi >= cells.len() {
-                return None;
+                return ret;
             }
             let row = &cells[xi];
             let yi: usize = y.try_into().unwrap();
             if yi >= row.len() {
-                return None;
+                return ret;
             }
 
             let cell = &row[yi];
 
-            let mut ret = vec![];
             let mut remove_ids = vec![];
 
             for c in cell {
@@ -451,7 +453,7 @@ pub mod physics {
             let cell = &mut self.cells[xi][yi];
             cell.retain(|c| !remove_ids.contains(c));
 
-            Some(ret)
+            ret
         }
 
         #[napi]
@@ -471,7 +473,7 @@ pub mod physics {
         }
 
         #[napi]
-        pub fn get_area(&mut self, x1: i32, y1: i32, x2: i32, y2: i32) -> Option<Vec<String>> {
+        pub fn get_area(&mut self, x1: i32, y1: i32, x2: i32, y2: i32) -> Vec<String> {
             let cells = &mut self.cells;
 
             let mut ret = vec![];
@@ -493,7 +495,7 @@ pub mod physics {
                 }
             }
 
-            Some(ret)
+            ret
         }
 
         #[napi]
@@ -503,7 +505,7 @@ pub mod physics {
             y1: i32,
             x2: i32,
             y2: i32,
-        ) -> Option<Vec<IntCoordinate>> {
+        ) -> Vec<IntCoordinate> {
             let cells = &mut self.cells;
             let collision_map = &self.collision_map;
 
@@ -538,7 +540,7 @@ pub mod physics {
                 }
             }
 
-            Some(ret)
+            ret
         }
 
         #[napi]
