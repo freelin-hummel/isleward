@@ -82,6 +82,9 @@ module.exports = {
 
 		for (let id of idsOfCollidingObjects) {
 			const checkObj = objects.objects.find(f => f.id + '' === id);
+			//If we can't find it, it means it's already been removed before physics knew about it
+			if (!checkObj)
+				continue;
 
 			checkObj.collisionExit(obj); 
 			obj.collisionExit(checkObj);
