@@ -581,6 +581,16 @@ pub mod physics {
             }
             None
         }
+
+        #[napi]
+        pub fn does_collide(&self, x: i32, y: i32) -> bool {
+            let collision_map = &self.collision_map;
+            let xi: usize = x.try_into().unwrap();
+            let yi: usize = y.try_into().unwrap();
+
+            collision_map[xi][yi] == 1
+        }
+
         #[napi]
         pub fn has_los(&self, from_x: i32, from_y: i32, to_x: i32, to_y: i32) -> bool {
             if (from_x < 0)
@@ -646,6 +656,75 @@ pub mod physics {
             self.is_in_polygon_int(x, y, &verts)
         }
 
+        /// Sets a collision at the specified (x, y) position by updating the collision_map
+        /// and removing all edges connected to the corresponding node in the graph.
+        ///
+        /// # Arguments
+        ///
+        /// * `x` - The x-coordinate where the collision is to be set.
+        /// * `y` - The y-coordinate where the collision is to be set.
+        ///
+        /// # Returns
+        ///
+        /// * `napi::Result<()>` - Returns Ok(()) if successful, otherwise returns an error.
+        #[napi]
+        pub fn set_collision(&mut self, x: i32, y: i32, does_collide: i32) -> napi::Result<()> {
+            let xi: usize = x
+                .try_into()
+                .map_err(|_| napi::Error::from_reason("Invalid x coordinate"))?;
+            let yi: usize = y
+                .try_into()
+                .map_err(|_| napi::Error::from_reason("Invalid y coordinate"))?;
+
+            if xi >= self.collision_map.len() || yi >= self.collision_map[0].len() {
+                return Err(napi::Error::from_reason("x or y out of bounds"));
+            }
+
+            if self.collision_map[xi][yi] == does_collide {
+                return Ok(());
+            }
+
+            self.collision_map[xi][yi] = does_collide;
+
+            let graph: &mut PhysicsGraph = &mut self.graph;
+
+            let coord = Coordinate { x, y };
+
+            //If the node now collides, remove all edges to it
+            if does_collide == 1 {
+                let Some(from_node) = coord.find_node(graph) else {
+                    return Err(napi::Error::from_reason("Node not found in graph"));
+                };
+                let connected_edges: Vec<_> =
+                    graph.edges(from_node).map(|edge| edge.id()).collect();
+
+                for edge_id in connected_edges {
+                    graph.remove_edge(edge_id);
+                }
+            } else if does_collide == 0 {
+                let from_node = coord.find_node(graph).unwrap();
+
+                for ix in x - 1..=x + 1 {
+                    let ixu: usize = ix.try_into().expect("x conversion to usize failed");
+                    for iy in y - 1..=y + 1 {
+                        if ix == x && iy == y {
+                            continue;
+                        }
+                        let iyu: usize = iy.try_into().expect("x conversion to usize failed");
+                        if self.collision_map[ixu][iyu] == 1 {
+                            continue;
+                        }
+
+                        let to_node = Coordinate { x: ix, y: iy }.find_node(graph).unwrap();
+
+                        graph.add_edge(from_node, to_node, ());
+                    }
+                }
+            }
+
+            Ok(())
+        }
+
         #[inline(always)]
         pub fn is_in_polygon_int(&self, x: i32, y: i32, verts: &Area) -> bool {
             let mut inside = false;
@@ -708,7 +787,7 @@ pub mod physics {
                 }
                 .find_node(&graph)
                 .unwrap();
-                for (x, _) in matrix.iter().enumerate().take(i + 1 + 1).skip(i - 1) {
+                for (x, _) in matrix.iter().enumerate().take(i + 2).skip(i - 1) {
                     for y in j - 1..=j + 1 {
                         if x == i && y == j {
                             continue;
