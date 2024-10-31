@@ -585,10 +585,12 @@ pub mod physics {
         pub fn has_los(&self, from_x: i32, from_y: i32, to_x: i32, to_y: i32) -> bool {
             if (from_x < 0)
                 || (from_y < 0)
-                || (from_x >= self.width) | (from_y >= self.height)
+                || (from_x >= self.width)
+                || (from_y >= self.height)
                 || (to_x < 0)
                 || (to_y < 0)
-                || (to_x >= self.width) | (to_y >= self.height)
+                || (to_x >= self.width)
+                || (to_y >= self.height)
             {
                 return false;
             }
