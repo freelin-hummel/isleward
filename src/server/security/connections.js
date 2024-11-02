@@ -155,6 +155,26 @@ module.exports = {
 		}
 	},
 
+	logOutFromMainThread: async function ({ msg: { username } }) {
+		const { players } = this;
+
+		let pLen = players.length;
+		for (let i = 0; i < pLen; i++) {
+			const p = players[i];
+
+			if (p.auth?.username !== username)
+				continue;
+
+			if (p.socket?.connected)
+				p.socket.emit('dc', {});
+			else {
+				players.splice(i, 1);
+				i--;
+				pLen--;
+			}
+		}
+	},
+
 	emit: function (event, msg) {
 		this.sockets.emit(event, msg);
 	},
