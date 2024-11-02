@@ -101,7 +101,7 @@ module.exports = {
 		for (let s in item.stats) {
 			item.stats[s] = Math.round(item.stats[s]);
 			if (item.stats[s] === 0)
-				delete item.stats[s];
+				item.stats[s] = 1;
 		}
 	},
 
@@ -124,6 +124,8 @@ module.exports = {
 
 		if (result?.addStatMsgs) {
 			value = Math.round(value);
+			if (value === 0)
+				value = 1;
 
 			result.addStatMsgs.push({
 				stat,
