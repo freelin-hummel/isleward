@@ -262,5 +262,23 @@ module.exports = {
 					delete i.enchantedStats.dmgPercent;
 				}
 			});
+
+		//Fix all weapon damage ranges
+		items
+			.filter(f => f.spell !== undefined && f.slot !== undefined)
+			.forEach(item => {
+				const { spellConfig } = itemTypes.types[item.slot][item.type];
+
+				//We are slowly removing statMult from everything (Should just be 1 on everything implicitly)
+				delete item.spell.statMult;
+
+				//Ensure type scaling is corrected on old items
+				item.spell.cdMax = spellConfig.cdMax;
+				item.spell.castTimeMax = spellConfig.castTimeMax;
+				item.spell.random.damage = [...spellConfig.random.damage];
+
+				//Reroll values with nw ranges
+				spellGenerator.generateRollValues(item, item.spell, item.spell.rolls);
+			});
 	}
 };

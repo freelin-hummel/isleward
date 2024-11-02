@@ -9,7 +9,7 @@ module.exports = (obj, [item]) => {
 	delete item.spell;
 
 	generatorSpells.generate(item, {
-		spellName: spellName
+		spellName
 	});
 	item.spell = extend(oldSpell, item.spell);
 
