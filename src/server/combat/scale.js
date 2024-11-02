@@ -44,9 +44,9 @@ const scalePercentMultipliers = ({ isAttack, elementName, srcValues, scaleConfig
 
 	let totalPercent = 100 + dmgPercent;	
 
-	if (isAttack)
+	if (isAttack && !elementName)
 		totalPercent += physicalPercent;
-	else
+	else if (!isAttack)
 		totalPercent += spellPercent;
 
 	if (elementName)
