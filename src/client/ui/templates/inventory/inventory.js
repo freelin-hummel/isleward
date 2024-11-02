@@ -116,10 +116,6 @@ define([
 					.find('.icon')
 					.on('contextmenu', this.showContext.bind(this, item));
 			}
-
-			el.removeClass('scrolls');
-			if (container[0].scrollHeight > container[0].clientHeight)
-				el.addClass('scrolls');
 		},
 
 		onToggleQualityIndicators: function (state) {
