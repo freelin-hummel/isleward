@@ -326,7 +326,11 @@ module.exports = {
 		if (this.percentDamage)
 			config.damage = target.stats.values.hpMax * this.damage;
 
-		let damage = combat.getDamage(config);
+		const damage = combat.getDamage(config);
+
+		this.obj.fireEvent('onAfterCalculateDamage', {
+			damage
+		});
 
 		return damage;
 	},

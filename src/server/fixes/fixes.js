@@ -2,6 +2,8 @@
 
 const itemTypes = require('../items/config/types');
 const spellGenerator = require('../items/generators/spellbook');
+const effectGenerator = require('../items/generators/effects');
+const { getByName: getItemConfigByName } = require('../config/itemConfig');
 
 module.exports = {
 	fixCharacterList: function (username, characterList) {
@@ -124,19 +126,6 @@ module.exports = {
 			.filter(i => i.factions && i.factions.indexOf && i.factions.some(f => f.id === 'pumpkinSailor') && i.slot === 'finger')
 			.forEach(i => {
 				i.noDestroy = false;
-			});
-
-		items
-			.filter(i => (i.name === 'Steelclaw\'s Bite'))
-			.forEach(function (i) {
-				let effect = i.effects[0];
-
-				if (!effect.properties) {
-					effect.properties = {
-						element: 'poison'
-					};
-				} else if (!effect.properties.element)
-					effect.properties.element = 'poison';
 			});
 
 		items
@@ -280,5 +269,68 @@ module.exports = {
 				//Reroll values with nw ranges
 				spellGenerator.generateRollValues(item, item.spell, item.spell.rolls);
 			});
+
+		//Fix all item effects for items present in itemConfig
+		items.forEach(item => {
+			const itemConfig = getItemConfigByName(item.name);
+			if (!itemConfig)
+				return;
+
+			const effectsToRemove = [];
+			const effectsToAdd = [];
+			const effectsToScale = [];
+
+			itemConfig.effects.forEach(eNew => {
+				const eOld = item.effects.find(f => f.type === eNew.type);
+
+				if (!eOld)
+					effectsToAdd.push(eNew);
+				else {
+					effectsToScale.push({
+						eOld: eOld,
+						eNew: eNew
+					});
+				}
+			});
+
+			item.effects.forEach(eOld => {
+				const eNew = itemConfig.effects.find(f => f.type === eOld.type);
+
+				if (!eNew)
+					effectsToRemove.push(eOld);
+			});
+
+			effectsToRemove.forEach(e => item.effects.spliceWhere(f => f === e));
+
+			if (effectsToAdd.length > 0) {
+				const proxyItem = {};
+				effectGenerator.generate(proxyItem, itemConfig);
+
+				effectsToAdd.forEach(e => {
+					item.effects.push(proxyItem.effects.find(f => f.type === e.type));
+				});
+			}
+
+			if (effectsToScale.length > 0) {
+				const proxyItem = {};
+				effectGenerator.generate(proxyItem, itemConfig);
+
+				effectsToScale.forEach(({ eOld, eNew }) => {
+					Object.entries(eOld.rolls).forEach(([k, currentRoll]) => {
+						const rollConfig = eNew.rolls[k] ?? eNew.rolls[`i_${k}`];
+
+						if (!Array.isArray(rollConfig))
+							return;
+
+						const [minRoll, maxRoll] = rollConfig;
+
+						if (currentRoll < minRoll)
+							eOld.rolls[k] = minRoll;
+						else if (currentRoll > maxRoll)
+							eOld.rolls[k] = maxRoll;
+					});
+				});
+			}
+		});
 	}
 };

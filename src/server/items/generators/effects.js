@@ -1,4 +1,4 @@
-const rollValues = (rollsDefinition, result) => {
+const rollValues = (rollsDefinition, result, blueprint) => {
 	for (let p in rollsDefinition) {
 		const entry = rollsDefinition[p];
 
@@ -7,7 +7,7 @@ const rollValues = (rollsDefinition, result) => {
 
 			result[p] = newResult;
 
-			rollValues(entry, newResult);
+			rollValues(entry, newResult, blueprint);
 
 			continue;
 		}
@@ -27,7 +27,12 @@ const rollValues = (rollsDefinition, result) => {
 			continue;
 		}
 
-		let value = range[0] + (Math.random() * (range[1] - range[0]));
+		let value;
+		if (blueprint.spellPerfection !== undefined)
+			value = range[0] + (blueprint.spellPerfection * (range[1] - range[0]));
+		else
+			value = range[0] + (Math.random() * (range[1] - range[0]));
+
 		if (isInt)
 			value = ~~value;
 
@@ -40,11 +45,11 @@ module.exports = {
 		if (!blueprint.effects)
 			return;
 
-		item.effects = blueprint.effects.map(function (e) {
+		item.effects = blueprint.effects.map(e => {
 			let rolls = e.rolls;
 			let newRolls = {};
 
-			rollValues(rolls, newRolls);
+			rollValues(rolls, newRolls, blueprint);
 
 			return {
 				type: e.type,

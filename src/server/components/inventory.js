@@ -367,7 +367,7 @@ module.exports = {
 			let item = items[i];
 
 			if (item.effects) {
-				item.effects.forEach(function (e) {
+				item.effects.forEach(e => {
 					if (e.factionId) {
 						let faction = factions.getFaction(e.factionId);
 						let statGenerator = faction.uniqueStat;

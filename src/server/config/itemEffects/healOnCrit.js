@@ -11,7 +11,7 @@ module.exports = {
 			if (chance < 100)
 				text = `${chance}% chance to heal on crit for `;
 			else
-				text = 'critical hits heal you for ';
+				text = 'Critical hits heal you for ';
 
 			if (percentage)
 				text += `${percentage}% of damage dealt`;
