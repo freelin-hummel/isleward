@@ -26,6 +26,8 @@ module.exports = {
 
 	blueprint: null,
 
+	itemIdsBeingStashed: [],
+
 	init: function (blueprint, isTransfer) {
 		let items = blueprint.items || [];
 		let iLen = items.length;
@@ -246,19 +248,35 @@ module.exports = {
 	},
 
 	stashItem: async function ({ itemId }) {
+		const { obj, itemIdsBeingStashed } = this;
+
+		if (itemIdsBeingStashed.includes(itemId)) {
+			const message = 'Deposit failed: You can not stash this item';
+			obj.social.notifySelf({ message });
+
+			return;
+		}
+
 		const item = this.findItem(itemId);
 		if (!item || item.quest || item.noStash)
 			return;
 
+		itemIdsBeingStashed.push(itemId);
+
 		delete item.pos;
 
-		const stash = this.obj.stash;
+		const stash = obj.stash;
 		const clonedItem = extend({}, item);
 		const success = await stash.deposit(clonedItem);
-		if (!success)
+		if (!success) {
+			itemIdsBeingStashed.spliceWhere(f => f === itemId);
+
 			return;
+		}
 
 		this.destroyItem({ itemId: itemId }, null, true);
+
+		itemIdsBeingStashed.spliceWhere(f => f === itemId);
 	},
 
 	salvageItem: function ({ itemId }) {
