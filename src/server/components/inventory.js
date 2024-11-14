@@ -257,11 +257,11 @@ module.exports = {
 			return;
 		}
 
+		itemIdsBeingStashed.push(itemId);
+
 		const item = this.findItem(itemId);
 		if (!item || item.quest || item.noStash)
 			return;
-
-		itemIdsBeingStashed.push(itemId);
 
 		delete item.pos;
 
