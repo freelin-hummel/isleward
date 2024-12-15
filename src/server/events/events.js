@@ -29,6 +29,9 @@ module.exports = {
 	configs: [],
 	nextId: 0,
 
+	ttlCheckOverridesMax: 85,
+	ttlCheckOverrides: 0,
+
 	init: function (instance) {
 		this.instance = instance;
 
@@ -62,6 +65,43 @@ module.exports = {
 
 		this.instance.eventEmitter.emit('afterGetEventList', {
 			eventConfigs: this.configs
+		});
+	},
+
+	checkOverrides: async function () {
+		const overrides = await io.getAllAsync({
+			table: 'eventOverrides'
+		});
+
+		this.configs.forEach(eventConfig => {
+			const override = overrides.find(o => o.id === eventConfig.code);
+			if (!override)
+				return;
+
+			if (override.value.endTime && new Date() >= override.value.endTime) {
+				io.deleteAsync({
+					table: 'eventOverrides',
+					key: eventConfig.code
+				});
+
+				return;
+			}
+
+			if (override.value.cron) {
+				eventConfig.cron = override.value.cron;
+
+				if (eventConfig.event)
+					eventConfig.event.config.cron = eventConfig.cron;
+
+				delete eventConfig.manualTrigger;
+			}
+
+			if (override.value.endTime) {
+				eventConfig.endTime = override.value.endTime;
+
+				if (eventConfig.event)
+					eventConfig.event.config.endTime = eventConfig.endTime;
+			}
 		});
 	},
 
@@ -138,6 +178,16 @@ module.exports = {
 		event.winText = text;
 	},
 
+	overrideEventConfig: function (eventCode, overrideConfig) {
+		const eventConfig = this.configs.find(f => f.code === eventCode);
+
+		if (overrideConfig.cron)
+			eventConfig.cron = overrideConfig.cron;
+
+		if (overrideConfig.endTime)
+			eventConfig.endTime = overrideConfig.endTime;
+	},
+
 	setEventVariable: function (eventName, variableName, value) {
 		let config = this.getEvent(eventName);
 		let event = config.event;
@@ -162,6 +212,13 @@ module.exports = {
 		if (!configs)
 			return;
 
+		if (this.ttlCheckOverrides === 0) {
+			this.checkOverrides();
+
+			this.ttlCheckOverrides = this.ttlCheckOverridesMax;
+		} else
+			this.ttlCheckOverrides--;
+
 		let scheduler = this.instance.scheduler;
 
 		let cLen = configs.length;
@@ -177,6 +234,10 @@ module.exports = {
 						c.cron &&
 						c.durationEvent &&
 						!scheduler.isActive(c)
+					) ||
+					(
+						c.endTime !== undefined &&
+						new Date() >= c.endTime
 					)
 				);
 
@@ -188,7 +249,10 @@ module.exports = {
 				c.ttl--;
 				continue;
 			} else if (c.cron) {
-				if (c.durationEvent && !scheduler.isActive(c))
+				if (
+					(c.durationEvent && !scheduler.isActive(c)) ||
+					(c.endTime !== undefined && new Date() >= c.endTime)
+				)
 					continue;
 				else if (!c.durationEvent && !scheduler.shouldRun(c))
 					continue;
@@ -201,6 +265,9 @@ module.exports = {
 	},
 
 	startEvent: function (config) {
+		if (config.event !== undefined)
+			return false;
+
 		if (config.oldDescription)
 			config.description = config.oldDescription;
 
@@ -217,6 +284,9 @@ module.exports = {
 			age: 0
 		};
 		event.config.event = event;
+		//We can't clone/extend date objects so we add it manually
+		if (config.endTime !== undefined)
+			event.config.endTime = config.endTime;
 
 		const onStart = _.getDeepProperty(event, ['config', 'events', 'onStart']);
 		if (onStart)
@@ -228,9 +298,13 @@ module.exports = {
 	startEventByCode: function (eventCode) {
 		const config = this.configs.find(c => c.code === eventCode);
 		if (!config || config.event)
-			return;
+			return false;
 
-		config.event = this.startEvent(config);
+		const event = this.startEvent(config);
+		if (event === false)
+			return false;
+
+		config.event = event;
 		this.updateEvent(config.event);
 
 		this.instance.syncer.queue('onGetMessages', {
@@ -239,6 +313,8 @@ module.exports = {
 				message: `The ${config.name} event has begun!`
 			}
 		}, -1);
+
+		return true;
 	},
 
 	stopEventByCode: function (eventCode) {
@@ -375,10 +451,31 @@ module.exports = {
 			event.config.events[triggerEvent](this, event);
 	},
 
+	/* eslint-disable-next-line max-lines-per-function */
 	updateEvent: function (event) {
 		const onTick = _.getDeepProperty(event, ['config', 'events', 'onTick']);
 		if (onTick)
 			onTick(this, event);
+
+		if (event.config.endTime) {
+			let endsInText;
+
+			const diffMs = event.config.endTime - (new Date());
+			const diffMinutes = Math.ceil(diffMs / (1000 * 60));
+
+			if (diffMinutes < 60)
+				endsInText = `Ends in ${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''}`;
+			else {
+				const diffHours = Math.ceil(diffMinutes / 60);
+				endsInText = `Ends in ${diffHours} hour${diffHours !== 1 ? 's' : ''}`;
+			}
+
+			const originalConfig = this.configs.find(c => c.code === event.config.code);
+
+			const newDescription = `${originalConfig.description}<br /><br />${endsInText}`;
+			if (newDescription !== event.config.description)
+				this.setEventDescription(event.config.name, newDescription);
+		}
 
 		let objects = event.objects;
 		let oLen = objects.length;
