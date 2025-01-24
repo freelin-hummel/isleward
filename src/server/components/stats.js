@@ -261,7 +261,9 @@ module.exports = {
 	getXp: function (amount, source, target) {
 		const { obj, values } = this;
 
-		if (values.level === balance.maxLevel)
+		//TODO: Undo this
+		if (values.level === 20)
+		//if (values.level === balance.maxLevel)
 			return;
 
 		const xpEvent = {

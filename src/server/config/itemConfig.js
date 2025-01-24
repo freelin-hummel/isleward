@@ -18,17 +18,7 @@ const itemConfig = {
 			rolls: {
 				i_percentage: [20, 40]
 			}
-		}],
-		spellName: 'melee',
-		spellConfig: {
-			statType: 'dex',
-			cdMax: 3,
-			castTimeMax: 0,
-			useWeaponRange: true,
-			random: {
-				damage: [1.38, 2000]
-			}
-		}
+		}]
 	},
 	putridShank: {
 		name: 'Putrid Shank',
@@ -112,8 +102,8 @@ const itemConfig = {
 		effects: [{
 			type: 'healOnCrit',
 			rolls: {
-				i_chance: [20, 60],
-				i_percentage: [3, 7]
+				i_chance: [8, 16],
+				i_percentage: [1, 3]
 			}
 		}],
 		factions: [{

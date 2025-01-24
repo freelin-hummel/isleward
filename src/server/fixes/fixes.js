@@ -2,6 +2,7 @@
 
 const itemTypes = require('../items/config/types');
 const spellGenerator = require('../items/generators/spellbook');
+const statGenerator = require('../items/generators/stats');
 const effectGenerator = require('../items/generators/effects');
 const { getByName: getItemConfigByName } = require('../config/itemConfig');
 
@@ -329,6 +330,118 @@ module.exports = {
 						else if (currentRoll > maxRoll)
 							eOld.rolls[k] = maxRoll;
 					});
+				});
+			}
+		});
+
+		items.forEach(item => {
+			if (!item.stats || item.effects || item.slot === 'tool')
+				return;
+
+			let rollRanges = item.rollRanges?.[consts.balanceVersion];
+			rollRanges = rollRanges ?? {};
+			if (!item.rollRanges)
+				item.rollRanges = {};
+			item.rollRanges[consts.balanceVersion] = rollRanges;
+
+			if (item.implicitStats !== undefined) {
+				if (!rollRanges.implicitStats)
+					rollRanges.implicitStats = {};
+
+				item.implicitStats.forEach(({ stat, value }) => {
+					let typeImplicits = itemTypes.types[item.slot][item.type].implicitStat;
+					if (!Array.isArray(typeImplicits))
+						typeImplicits = [typeImplicits];
+
+					const blueprint = typeImplicits.find(f => f.stat === stat);
+					if (!blueprint) {
+						console.log({
+							error: 'No implicit blueprint found',
+							item: item.name,
+							stat,
+							type: item.type,
+							slot: item.slot
+						});
+
+						return;
+					}
+
+					if (Array.isArray(blueprint.value)) {
+						let [min, max] = blueprint.value;
+						if (blueprint.levelMult) {
+							min *= item.level;
+							max *= item.level;
+						}
+						rollRanges.implicitStats[stat] = (value - min) / (max - min);
+					} else {
+						const testItem = {
+							type: item.type,
+							slot: item.slot,
+							level: item.level,
+							stats: {}
+						};
+
+						statGenerator.buildStat(testItem, { perfection: 0 }, stat);
+						const min = Math.round(testItem.stats[stat]) * blueprint.valueMult;
+						testItem.stats = {};
+
+						statGenerator.buildStat(testItem, { perfection: 1 }, stat);
+						const max = Math.round(testItem.stats[stat]) * blueprint.valueMult;
+
+						const roll = (value - min) / (max - min);
+
+						rollRanges.implicitStats[stat] = roll;
+					}
+				});
+			}
+
+			if (item.enchantedStats !== undefined) {
+				if (!rollRanges.enchantedStats)
+					rollRanges.enchantedStats = {};
+
+				Object.entries(item.enchantedStats).forEach(([stat, value]) => {
+					const testItem = {
+						type: item.type,
+						slot: item.slot,
+						level: item.level,
+						stats: {}
+					};
+
+					statGenerator.buildStat(testItem, { perfection: 0 }, stat);
+					const min = Math.round(testItem.stats[stat]);
+					testItem.stats = {};
+
+					statGenerator.buildStat(testItem, { perfection: 1 }, stat);
+					const max = Math.round(testItem.stats[stat]);
+
+					const roll = (value - min) / (max - min);
+
+					rollRanges.enchantedStats[stat] = roll;
+				});
+			}
+
+			if (item.stats !== undefined) {
+				if (!rollRanges.stats)
+					rollRanges.stats = {};
+
+				Object.entries(item.stats).forEach(([stat, value]) => {
+					const testItem = {
+						type: item.type,
+						slot: item.slot,
+						level: item.level,
+						stats: {}
+					};
+
+					statGenerator.buildStat(testItem, { perfection: 0 }, stat);
+					const min = Math.round(testItem.stats[stat]);
+					testItem.stats = {};
+
+					statGenerator.buildStat(testItem, { perfection: 1 }, stat);
+					const max = Math.round(testItem.stats[stat]);
+
+					const roll = (value - min) / (max - min);
+
+					rollRanges.stats[stat] = roll;
 				});
 			}
 		});

@@ -1,3 +1,4 @@
+
 let combat = require('../../combat/combat');
 
 module.exports = {
@@ -179,6 +180,8 @@ module.exports = {
 						values: {}
 					}
 				}),
+				spellType: this.type,
+				castTime: this.castTimeMax,
 				damage: (this.healing ?? this.damage) * (this.dmgMult ?? 1),
 				cd: cdMax,
 				element: this.element,
@@ -307,6 +310,8 @@ module.exports = {
 			target: target,
 			damage: (this.healing ?? this.damage) * (this.dmgMult ?? 1),
 			cd: cdMax,
+			spellType: this.type,
+			castTime: this.castTimeMax,
 			element: this.element,
 			statType: this.statType,
 			isAttack: this.isAttack,

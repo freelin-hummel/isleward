@@ -29,7 +29,7 @@ let spells = {
 		manaCost: 5,
 		range: 9,
 		random: {
-			damage: [4, 75]
+			damage: [4, 74]
 		}
 	},
 	'ice spear': {
@@ -102,7 +102,7 @@ let spells = {
 		manaCost: 4,
 		useWeaponRange: true,
 		random: {
-			damage: [6, 55]
+			damage: [1, 57]
 		}
 	},
 	charge: {
@@ -113,7 +113,7 @@ let spells = {
 		range: 10,
 		manaCost: 3,
 		random: {
-			damage: [2, 42],
+			damage: [2, 30],
 			i_stunDuration: [6, 10]
 		}
 	},
@@ -187,7 +187,7 @@ let spells = {
 		auraRange: 9,
 		effect: 'regenHp',
 		random: {
-			regenPercentage: [0.2, 0.5]
+			regenPercentage: [0.2, 0.8]
 		}
 	},
 	tranquility: {

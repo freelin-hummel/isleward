@@ -15,6 +15,8 @@ module.exports = {
 	//How many milliseconds to wait to kill a thread after it's been empty
 	destroyThreadWhenEmptyForMs: 60 * 10 * 1000,
 
+	balanceVersion: 1,
+
 	init: function (threadArgs) {
 		const emBeforeGetConsts = {
 			threadArgs,

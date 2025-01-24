@@ -106,7 +106,7 @@ module.exports = {
 	},
 
 	buildStat: function (item, blueprint, stat, result) {
-		const statBlueprint = this.stats[stat];
+		let statBlueprint = this.stats[stat];
 
 		let value = null;
 
@@ -166,11 +166,16 @@ module.exports = {
 				const [min, max] = i.value;
 
 				if (perfection === undefined)
-					stat.value = Math.ceil(random.expNorm(min, max));
+					stat.value = random.expNorm(min, max);
 				else
-					stat.value = Math.ceil(min + ((max - min) * perfection));
+					stat.value = min + ((max - min) * perfection);
+
+				if (i.levelMult)
+					stat.value = Math.round(stat.value * (item.level * i.levelMult));
+				else
+					stat.value = Math.round(stat.value);
 			} else if (i.valueMult) {
-				let statBlueprint = this.stats[i.stat];
+				const statBlueprint = this.stats[i.stat];
 
 				if (statBlueprint.generator) {
 					const generator = this.generators[statBlueprint.generator];
