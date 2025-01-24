@@ -108,7 +108,8 @@ module.exports = {
 				},
 				implicitStat: {
 					stat: 'lifeOnHit',
-					valueMult: 3
+					value: [1, 5],
+					levelMult: 4
 				}
 			};
 		}, this);
