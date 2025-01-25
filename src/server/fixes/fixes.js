@@ -349,7 +349,13 @@ module.exports = {
 					rollRanges.implicitStats = {};
 
 				item.implicitStats.forEach(({ stat, value }) => {
-					let typeImplicits = itemTypes.types[item.slot][item.type].implicitStat;
+					let typeImplicits = itemTypes.types[item.slot][item.type]?.implicitStat;
+					if (!typeImplicits) {
+						console.log('No type found for', item.slot, item.type);
+
+						return;
+					}
+
 					if (!Array.isArray(typeImplicits))
 						typeImplicits = [typeImplicits];
 
