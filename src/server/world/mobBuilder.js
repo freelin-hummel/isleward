@@ -136,7 +136,9 @@ const buildCpnSpells = (mob, blueprint, typeDefinition, preferStat) => {
 		mob.inventory.getItem(rune);
 	}
 
-	const dmgMult = balance.dmgMults[blueprint.level - 1];
+	let dmgMult = balance.dmgMults[blueprint.level - 1];
+	if (typeDefinition.dmgMult !== undefined)
+		dmgMult *= typeDefinition.dmgMult;
 
 	mob.spellbook.spells.forEach((s, i) => {
 		if (i === 0)
