@@ -51,7 +51,7 @@ module.exports = {
 
 		//Force stats should always be rolled on an item, even if said stat should be ignored or can't occur on a slot
 		if (blueprint.forceStats) {
-			const clonedStats = extend([], blueprint.stats);
+			const clonedStats = extend([], blueprint.forceStats);
 			let len = Math.min(statCount, clonedStats.length);
 			for (let i = 0; i < len; i++) {
 				const choice = clonedStats[~~(Math.random() * clonedStats.length)];
