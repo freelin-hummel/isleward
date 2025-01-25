@@ -98,7 +98,6 @@ module.exports = {
 				spells: [{
 					type: template.basicSpell || this.basicSpell,
 					damage: 1,
-					statMult: 1,
 					animation: 'melee'
 				}]
 			}, 'regular');

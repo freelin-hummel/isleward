@@ -5,13 +5,42 @@ let configTypes = require('../config/types');
 const qualityGenerator = require('./quality');
 const qualityCount = qualityGenerator.qualities.length;
 
-const buildRolls = (item, blueprint, { random: spellProperties, negativeStats = [] }, quality) => {
+const generateRollValues = (item, spell, rolls) => {
+	if (!spell.random)
+		return;
+
+	Object.entries(spell.random).forEach(entry => {
+		const [ property, range ] = entry;
+		const roll = rolls[property];
+
+		item.spell.rolls[property] = roll;
+
+		const isInt = property.indexOf('i_') === 0;
+		let useProperty = property;
+		const minRange = range[0];
+		const maxRange = range[1];
+
+		let val = minRange + ((maxRange - minRange) * roll);
+
+		if (isInt) {
+			useProperty = property.substr(2);
+			val = Math.round(val);
+		} else
+			val = ~~(val * 100) / 100;
+
+		val = Math.max(range[0], Math.min(range[1], val));
+
+		item.spell.values[useProperty] = val;
+	});
+};
+
+const buildRolls = (item, { spellPerfection }, { random: spellProperties, negativeStats = [] }, quality) => {
 	//We randomise the order so a random property gets to 'pick first'
 	// otherwise it's easier for earlier properties to use more of the valuePool
 	const propKeys = Object
 		.keys(spellProperties)
 		.sort((a, b) => Math.random() - Math.random());
-
+ 
 	const propCount = propKeys.length;
 
 	const maxRoll = (quality + 1) / qualityCount;
@@ -22,9 +51,13 @@ const buildRolls = (item, blueprint, { random: spellProperties, negativeStats = 
 	const result = {};
 
 	for (let i = 0; i < propCount; i++) {
-		const minRoll = Math.max(0, minSum - runningTotal - ((propCount - (i + 1)) * maxRoll));
+		let roll;
+		if (spellPerfection === undefined) {
+			const minRoll = Math.max(0, minSum - runningTotal - ((propCount - (i + 1)) * maxRoll));
 
-		let roll = minRoll + (Math.random() * (maxRoll - minRoll));
+			roll = minRoll + (Math.random() * (maxRoll - minRoll));
+		} else 
+			roll = spellPerfection;
 
 		runningTotal += roll;
 
@@ -35,7 +68,7 @@ const buildRolls = (item, blueprint, { random: spellProperties, negativeStats = 
 			roll = 1 - roll;
 
 		const useLevel = item.originalLevel || item.level;
-		const scaledRoll = roll * (useLevel / consts.maxLevel);
+		const scaledRoll = roll * (useLevel / balance.maxLevel);
 
 		result[prop] = scaledRoll;
 	}
@@ -44,6 +77,7 @@ const buildRolls = (item, blueprint, { random: spellProperties, negativeStats = 
 };
 
 module.exports = {
+	generateRollValues,
 	generate: function (item, blueprint) {
 		blueprint = blueprint || {};
 		let spellQuality = blueprint ? blueprint.spellQuality : '';
@@ -112,30 +146,8 @@ module.exports = {
 		}
 
 		const rolls = buildRolls(item, blueprint, spell, quality);
-		
-		Object.entries(spell.random || {}).forEach(entry => {
-			const [ property, range ] = entry;
-			const roll = rolls[property];
 
-			item.spell.rolls[property] = roll;
-
-			const isInt = property.indexOf('i_') === 0;
-			let useProperty = property;
-			const minRange = range[0];
-			const maxRange = range[1];
-
-			let val = minRange + ((maxRange - minRange) * roll);
-
-			if (isInt) {
-				useProperty = property.substr(2);
-				val = Math.round(val);
-			} else
-				val = ~~(val * 100) / 100;
-
-			val = Math.max(range[0], Math.min(range[1], val));
-
-			item.spell.values[useProperty] = val;
-		});
+		generateRollValues(item, spell, rolls);
 
 		if (blueprint.spellProperties) {
 			item.spell.properties = {};

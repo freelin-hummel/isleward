@@ -10,7 +10,7 @@ module.exports = (obj, [item]) => {
 	delete item.implicitStats;
 
 	if ((item.stats) && (item.stats.lvlRequire)) {
-		item.level = Math.min(consts.maxLevel, item.level + item.stats.lvlRequire);
+		item.level = Math.min(balance.maxLevel, item.level + item.stats.lvlRequire);
 		delete item.originalLevel;
 	}
 

@@ -1,5 +1,5 @@
 //Config
-const validModPatterns = ['.png', '/ui/', '/clientComponents/', '/audio/'];
+const validModPatterns = ['.png', '/ui/', '/clientComponents/', '/audio/', '/clientModules/'];
 
 //Methods
 const appRoot = (req, res) => {
@@ -13,16 +13,13 @@ const appFile = (req, res) => {
 
 	const validRequest = (
 		root !== 'server' ||
-		(
-			root === 'server' &&
-			file.startsWith('clientComponents/')
-		) ||
+		file.startsWith('clientComponents') ||
 		(
 			file.includes('mods/') &&
 			validModPatterns.some(v => file.includes(v))
 		)
 	);
-	
+
 	if (!validRequest)
 		return null;
 	

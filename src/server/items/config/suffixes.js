@@ -57,6 +57,7 @@ module.exports = {
 		'promise',
 		'prospect',
 		'punishment',
+		'purge',
 		'quest',
 		'radiance',
 		'rage',
@@ -116,6 +117,7 @@ module.exports = {
 	],
 	weapons: [
 		'bite',
+		'cleaver',
 		'crusher',
 		'executor',
 		'implement',

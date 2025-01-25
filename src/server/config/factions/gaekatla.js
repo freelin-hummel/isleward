@@ -87,8 +87,7 @@ module.exports = {
 					},
 					spells: [{
 						type: 'melee',
-						damage: 1,
-						statMult: 0.1
+						damage: 0.1
 					}]
 				}, 'regular');
 

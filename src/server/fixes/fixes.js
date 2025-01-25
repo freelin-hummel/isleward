@@ -2,6 +2,9 @@
 
 const itemTypes = require('../items/config/types');
 const spellGenerator = require('../items/generators/spellbook');
+const statGenerator = require('../items/generators/stats');
+const effectGenerator = require('../items/generators/effects');
+const { getByName: getItemConfigByName } = require('../config/itemConfig');
 
 module.exports = {
 	fixCharacterList: function (username, characterList) {
@@ -31,8 +34,8 @@ module.exports = {
 			this.fixItems(inventory.items);
 
 		const stats = player.components.find(c => c.type === 'stats');
-		if (stats?.values?.level > consts.maxLevel)
-			stats.values.level = consts.maxLevel;
+		if (stats?.values?.level > balance.maxLevel)
+			stats.values.level = balance.maxLevel;
 	},
 
 	fixCustomChannels: function (customChannels) {
@@ -127,19 +130,6 @@ module.exports = {
 			});
 
 		items
-			.filter(i => (i.name === 'Steelclaw\'s Bite'))
-			.forEach(function (i) {
-				let effect = i.effects[0];
-
-				if (!effect.properties) {
-					effect.properties = {
-						element: 'poison'
-					};
-				} else if (!effect.properties.element)
-					effect.properties.element = 'poison';
-			});
-
-		items
 			.filter(i => i.name === 'Gourdhowl')
 			.forEach(i => {
 				const effect = i.effects[0];
@@ -151,7 +141,6 @@ module.exports = {
 							damage: effect.rolls.damage,
 							range: 1,
 							statType: 'str',
-							statMult: 1,
 							isAttack: true
 						},
 						castTarget: 'none',
@@ -189,7 +178,6 @@ module.exports = {
 							range: 1,
 							element: 'poison',
 							statType: 'dex',
-							statMult: 1,
 							duration: 5,
 							isAttack: true
 						}
@@ -264,5 +252,198 @@ module.exports = {
 					delete i.enchantedStats.dmgPercent;
 				}
 			});
+
+		//Fix all weapon damage ranges
+		items
+			.filter(f => f.spell !== undefined && f.slot !== undefined)
+			.forEach(item => {
+				const { spellConfig } = itemTypes.types[item.slot][item.type];
+
+				//We are slowly removing statMult from everything (Should just be 1 on everything implicitly)
+				delete item.spell.statMult;
+
+				//Ensure type scaling is corrected on old items
+				item.spell.cdMax = spellConfig.cdMax;
+				item.spell.castTimeMax = spellConfig.castTimeMax;
+				item.spell.random.damage = [...spellConfig.random.damage];
+
+				//Reroll values with nw ranges
+				spellGenerator.generateRollValues(item, item.spell, item.spell.rolls);
+			});
+
+		//Fix all item effects for items present in itemConfig
+		items.forEach(item => {
+			const itemConfig = getItemConfigByName(item.name);
+			if (!itemConfig)
+				return;
+
+			const effectsToRemove = [];
+			const effectsToAdd = [];
+			const effectsToScale = [];
+
+			itemConfig.effects.forEach(eNew => {
+				const eOld = item.effects.find(f => f.type === eNew.type);
+
+				if (!eOld)
+					effectsToAdd.push(eNew);
+				else {
+					effectsToScale.push({
+						eOld: eOld,
+						eNew: eNew
+					});
+				}
+			});
+
+			item.effects.forEach(eOld => {
+				const eNew = itemConfig.effects.find(f => f.type === eOld.type);
+
+				if (!eNew)
+					effectsToRemove.push(eOld);
+			});
+
+			effectsToRemove.forEach(e => item.effects.spliceWhere(f => f === e));
+
+			if (effectsToAdd.length > 0) {
+				const proxyItem = {};
+				effectGenerator.generate(proxyItem, itemConfig);
+
+				effectsToAdd.forEach(e => {
+					item.effects.push(proxyItem.effects.find(f => f.type === e.type));
+				});
+			}
+
+			if (effectsToScale.length > 0) {
+				const proxyItem = {};
+				effectGenerator.generate(proxyItem, itemConfig);
+
+				effectsToScale.forEach(({ eOld, eNew }) => {
+					Object.entries(eOld.rolls).forEach(([k, currentRoll]) => {
+						const rollConfig = eNew.rolls[k] ?? eNew.rolls[`i_${k}`];
+
+						if (!Array.isArray(rollConfig))
+							return;
+
+						const [minRoll, maxRoll] = rollConfig;
+
+						if (currentRoll < minRoll)
+							eOld.rolls[k] = minRoll;
+						else if (currentRoll > maxRoll)
+							eOld.rolls[k] = maxRoll;
+					});
+				});
+			}
+		});
+
+		items.forEach(item => {
+			if (!item.stats || item.effects || item.slot === 'tool')
+				return;
+
+			let rollRanges = item.rollRanges?.[consts.balanceVersion];
+			rollRanges = rollRanges ?? {};
+			if (!item.rollRanges)
+				item.rollRanges = {};
+			item.rollRanges[consts.balanceVersion] = rollRanges;
+
+			if (item.implicitStats !== undefined) {
+				if (!rollRanges.implicitStats)
+					rollRanges.implicitStats = {};
+
+				item.implicitStats.forEach(({ stat, value }) => {
+					let typeImplicits = itemTypes.types[item.slot][item.type].implicitStat;
+					if (!Array.isArray(typeImplicits))
+						typeImplicits = [typeImplicits];
+
+					const blueprint = typeImplicits.find(f => f.stat === stat);
+					if (!blueprint) {
+						console.log({
+							error: 'No implicit blueprint found',
+							item: item.name,
+							stat,
+							type: item.type,
+							slot: item.slot
+						});
+
+						return;
+					}
+
+					if (Array.isArray(blueprint.value)) {
+						let [min, max] = blueprint.value;
+						if (blueprint.levelMult) {
+							min *= item.level;
+							max *= item.level;
+						}
+						rollRanges.implicitStats[stat] = (value - min) / (max - min);
+					} else {
+						const testItem = {
+							type: item.type,
+							slot: item.slot,
+							level: item.level,
+							stats: {}
+						};
+
+						statGenerator.buildStat(testItem, { perfection: 0 }, stat);
+						const min = Math.round(testItem.stats[stat]) * blueprint.valueMult;
+						testItem.stats = {};
+
+						statGenerator.buildStat(testItem, { perfection: 1 }, stat);
+						const max = Math.round(testItem.stats[stat]) * blueprint.valueMult;
+
+						const roll = (value - min) / (max - min);
+
+						rollRanges.implicitStats[stat] = roll;
+					}
+				});
+			}
+
+			if (item.enchantedStats !== undefined) {
+				if (!rollRanges.enchantedStats)
+					rollRanges.enchantedStats = {};
+
+				Object.entries(item.enchantedStats).forEach(([stat, value]) => {
+					const testItem = {
+						type: item.type,
+						slot: item.slot,
+						level: item.level,
+						stats: {}
+					};
+
+					statGenerator.buildStat(testItem, { perfection: 0 }, stat);
+					const min = Math.round(testItem.stats[stat]);
+					testItem.stats = {};
+
+					statGenerator.buildStat(testItem, { perfection: 1 }, stat);
+					const max = Math.round(testItem.stats[stat]);
+
+					const roll = (value - min) / (max - min);
+
+					rollRanges.enchantedStats[stat] = roll;
+				});
+			}
+
+			if (item.stats !== undefined) {
+				if (!rollRanges.stats)
+					rollRanges.stats = {};
+
+				Object.entries(item.stats).forEach(([stat, value]) => {
+					const testItem = {
+						type: item.type,
+						slot: item.slot,
+						level: item.level,
+						stats: {}
+					};
+
+					statGenerator.buildStat(testItem, { perfection: 0 }, stat);
+					const min = Math.round(testItem.stats[stat]);
+					testItem.stats = {};
+
+					statGenerator.buildStat(testItem, { perfection: 1 }, stat);
+					const max = Math.round(testItem.stats[stat]);
+
+					const roll = (value - min) / (max - min);
+
+					rollRanges.stats[stat] = roll;
+				});
+			}
+		});
 	}
 };

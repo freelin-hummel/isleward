@@ -116,10 +116,6 @@ define([
 					.find('.icon')
 					.on('contextmenu', this.showContext.bind(this, item));
 			}
-
-			el.removeClass('scrolls');
-			if (container[0].scrollHeight > container[0].clientHeight)
-				el.addClass('scrolls');
 		},
 
 		onToggleQualityIndicators: function (state) {
@@ -198,9 +194,7 @@ define([
 
 					data.moveMsgs = msgs;
 
-					this.items.find(function (i) {
-						return (i.id === this.dragItem.data('item').id);
-					}, this).pos = this.dragItem.index();
+					this.items.find(i => i.id === this.dragItem.data('item').id).pos = this.dragItem.index();
 
 					let hoverCellItem = this.hoverCell.data('item');
 					if (hoverCellItem) {
@@ -210,9 +204,7 @@ define([
 								targetPos: this.hoverCell.index()
 							});
 
-							this.items.find(function (i) {
-								return (i.id === hoverCellItem.id);
-							}, this).pos = this.hoverCell.index();
+							this.items.find(i => i.id === hoverCellItem.id).pos = this.hoverCell.index();
 						} else {
 							delete data.moveMsgs;
 							data.fromId = this.dragItem.data('item').id;
@@ -227,7 +219,7 @@ define([
 						method: 'performAction',
 						data: {
 							cpn: 'inventory',
-							method: method,
+							method,
 							data
 						}
 					});
@@ -501,13 +493,13 @@ define([
 				this.build();
 		},
 		onDestroyItems: function (itemIds) {
-			itemIds.forEach(function (id) {
+			itemIds.forEach(id => {
 				let item = this.items.find(i => i.id === id);
 				if (item === this.hoverItem)
 					this.hideTooltip();
 
 				this.items.spliceWhere(i => i.id === id);
-			}, this);
+			});
 
 			if (this.shown)
 				this.build();

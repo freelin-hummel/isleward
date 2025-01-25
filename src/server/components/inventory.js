@@ -385,7 +385,7 @@ module.exports = {
 			let item = items[i];
 
 			if (item.effects) {
-				item.effects.forEach(function (e) {
+				item.effects.forEach(e => {
 					if (e.factionId) {
 						let faction = factions.getFaction(e.factionId);
 						let statGenerator = faction.uniqueStat;
@@ -725,7 +725,7 @@ module.exports = {
 		if (item.level > statValues.level)
 			errors.push('level');
 
-		if (item.requires && statValues[item.requires[0].stat] < item.requires[0].value)
+		if (item.requires?.[0] !== undefined && statValues[item.requires[0].stat] < item.requires[0].value)
 			errors.push(item.requires[0].stat);
 
 		if (item.factions?.some(f => reputation.getTier(f.id) < f.tier))

@@ -10,13 +10,6 @@ define([
 	let shiftDown = null;
 	let equipErrors = null;
 
-	const init = (_item, _compare, _shiftDown, _equipErrors) => {
-		item = _item;
-		compare = _compare;
-		shiftDown = _shiftDown;
-		equipErrors = _equipErrors;
-	};
-
 	const lineBuilders = {
 		div: (className, children) => {
 			if (!children)
@@ -386,6 +379,26 @@ define([
 			
 			return `uses: ${item.uses}`;
 		}
+	};
+
+	const originalBuilders = {};
+	Object.entries(lineBuilders).forEach(([type, builder]) => {
+		originalBuilders[type] = builder;
+	});
+
+	const init = (_item, _compare, _shiftDown, _equipErrors, _customLineBuilders) => {
+		item = _item;
+		compare = _compare;
+		shiftDown = _shiftDown;
+		equipErrors = _equipErrors;
+
+		Object.entries(originalBuilders).forEach(([k, v]) => {
+			const useBuilder = _customLineBuilders[k] !== undefined ?
+				_customLineBuilders[k].bind(null, item) :
+				originalBuilders[k];
+
+			lineBuilders[k] = useBuilder;
+		});
 	};
 
 	return {

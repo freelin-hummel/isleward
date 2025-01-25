@@ -3,19 +3,21 @@ let mobBuilder = require('../../world/mobBuilder');
 const buildMob = (objects, mobConfig, x, y, mobIndex) => {
 	const { id, sheetName, cell, name, properties, originX, originY, maxChaseDistance, dialogue, trade, chats, events } = mobConfig;
 
+	let useId = id;
+	if (useId?.indexOf && mobIndex !== undefined)
+		useId = useId.split('$').join(mobIndex);
+
 	let mob = objects.buildObjects([{
-		x: x,
-		y: y,
-		sheetName: sheetName || 'mobs',
-		cell: cell,
-		name: name,
-		properties: properties
+		id: useId,
+		x,
+		y,
+		sheetName: sheetName ?? 'mobs',
+		cell,
+		name,
+		properties
 	}]);
 
 	mobBuilder.build(mob, mobConfig);
-
-	if (id)
-		mob.id = id.split('$').join(mobIndex);
 
 	if (originX) {
 		mob.mob.originX = originX;

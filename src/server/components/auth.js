@@ -191,6 +191,9 @@ module.exports = {
 			clean: true
 		});
 
+		if (!character)
+			return;
+
 		await eventEmitter.emit('onAfterGetCharacter', {
 			obj: this.obj,
 			character

@@ -52,6 +52,9 @@ define([
 		attackSpeed: 'attack speed',
 		castSpeed: 'cast speed',
 
+		addAttackDamage: 'added attack damage',
+		addSpellDamage: 'added spell damage',
+
 		lifeOnHit: 'life gained on dealing physical damage',
 
 		auraReserveMultiplier: 'aura mana reservation multiplier',

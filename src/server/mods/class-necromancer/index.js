@@ -99,17 +99,17 @@ module.exports = {
 				attrRequire: ['int'],
 				spellConfig: {
 					statType: ['str', 'int'],
-					statMult: 1,
 					cdMax: 4,
 					castTimeMax: 0,
 					useWeaponRange: true,
 					random: {
-						damage: [1, 7]
+						damage: [1.6, 10.4]
 					}
 				},
 				implicitStat: {
 					stat: 'lifeOnHit',
-					value: [1, 30]
+					value: [1, 5],
+					levelMult: 4
 				}
 			};
 		}, this);
@@ -118,7 +118,6 @@ module.exports = {
 	beforeGetSpellsConfig: function (spells) {
 		spells['harvest life'] = {
 			statType: ['str', 'int'],
-			statMult: 1,
 			cdMax: 10,
 			castTimeMax: 3,
 			manaCost: 5,
@@ -132,7 +131,6 @@ module.exports = {
 
 		spells['summon skeleton'] = {
 			statType: ['str', 'int'],
-			statMult: 0.27,
 			cdMax: 6,
 			castTimeMax: 6,
 			manaCost: 5,
@@ -145,7 +143,6 @@ module.exports = {
 
 		spells['blood barrier'] = {
 			statType: ['str', 'int'],
-			statMult: 0.1,
 			cdMax: 13,
 			castTimeMax: 3,
 			manaCost: 5,

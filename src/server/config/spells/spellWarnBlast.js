@@ -6,7 +6,6 @@ module.exports = {
 	castingEffect: null,
 
 	statType: 'dex',
-	statMult: 1,
 	targetGround: true,
 
 	needLos: true,
