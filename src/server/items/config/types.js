@@ -380,26 +380,6 @@ let types = {
 				stat: 'castSpeed',
 				value: [1, 5]
 			}
-		},
-		Sickle: {
-			spritesheet: 'DELETESICKLELATER/images/items.png',
-			sprite: [0, 0],
-			spellName: 'melee',
-			attrRequire: ['int'],
-			spellConfig: {
-				statType: ['str', 'int'],
-				cdMax: 4,
-				castTimeMax: 0,
-				useWeaponRange: true,
-				random: {
-					damage: [1.6, 10.4]
-				}
-			},
-			implicitStat: {
-				stat: 'lifeOnHit',
-				value: [1, 5],
-				levelMult: 4
-			}
 		}
 	},
 	twoHanded: {
