@@ -326,6 +326,10 @@ module.exports = {
 
 		for (let i = 0; i < cLen; i++) {
 			let c = cell[i];
+			//Perhaps it was removed
+			if (!c)
+				return;
+
 			//If we're first in the cell, we get preference
 			if (c === obj)
 				return false;
