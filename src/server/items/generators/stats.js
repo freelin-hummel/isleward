@@ -107,6 +107,8 @@ module.exports = {
 
 	buildStat: function (item, blueprint, stat, result) {
 		let statBlueprint = this.stats[stat];
+		if (!statBlueprint)
+			console.log('No stat blueprint found for', stat, 'on', item.name);
 
 		let value = null;
 
