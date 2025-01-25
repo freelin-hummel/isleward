@@ -12,7 +12,7 @@ module.exports = {
 		Object.entries(restEndpoints).forEach(e => {
 			const [ route, handler ] = e;
 
-			app.get(`/${route}`, handler);
+			app.get(`/rest/${route}`, handler);
 		});
 	},
 
