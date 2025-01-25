@@ -401,7 +401,7 @@ module.exports = {
 				});
 			}
 
-			if (item.enchantedStats !== undefined) {
+			if (item.enchantedStats !== undefined && item.enchantedStats !== null) {
 				if (!rollRanges.enchantedStats)
 					rollRanges.enchantedStats = {};
 
