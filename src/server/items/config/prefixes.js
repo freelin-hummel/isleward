@@ -94,6 +94,8 @@ module.exports = {
 		'majesty',
 		'master%',
 		'mercy%',
+		'moon',
+		'moon%',
 		'mysterious',
 		'mystic',
 		'noble',

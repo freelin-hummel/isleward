@@ -48,6 +48,7 @@ module.exports = {
 		'mercy',
 		'mind',
 		'might',
+		'moon',
 		'myth',
 		'oblivion',
 		'omen',
