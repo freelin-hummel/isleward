@@ -10,7 +10,7 @@ const generators = {
 		if (perfection === undefined)
 			return random.norm(1, max);
 
-		return max * perfection;
+		return 1 + ((max - 1) * perfection);
 	},
 
 	addCritMultiplier: (item, level, perfection) => {
@@ -20,7 +20,7 @@ const generators = {
 		const max = (level * 8.6) * useMult;
 
 		if (perfection === undefined)
-			return random.norm(1, max);
+			return random.norm(min, max);
 
 		return (min + ((max - min) * perfection));
 	},
@@ -32,7 +32,7 @@ const generators = {
 		const max = level * 27.5 * useMult;
 
 		if (perfection === undefined)
-			return random.norm(1, max);
+			return random.norm(min, max);
 
 		return (min + ((max - min) * perfection));
 	},
@@ -112,7 +112,7 @@ const generators = {
 			max *= 2;
 
 		if (perfection === undefined)
-			return (min + random.norm(1, max));
+			return random.norm(min, max);
 
 		return (min + (max * perfection));
 	},

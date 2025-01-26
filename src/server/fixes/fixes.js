@@ -336,6 +336,8 @@ module.exports = {
 		});
 
 		items.forEach(item => {
+			const itemLevel = item.originalLevel ?? item.level;
+
 			let rollRanges = item.rollRanges?.[consts.balanceVersion];
 			rollRanges = rollRanges ?? {};
 			if (!item.rollRanges)
@@ -351,9 +353,9 @@ module.exports = {
 					let useV = v;
 					if (!hasBeenRangedBefore) {
 						if (negativeStats.includes(k))
-							useV = 1 - ((1 - v) * (item.level / balance.maxLevel));
+							useV = 1 - ((1 - v) * (itemLevel / balance.maxLevel));
 						else
-							useV *= item.level / balance.maxLevel;
+							useV *= itemLevel / balance.maxLevel;
 					}
 
 					rollRanges.spellRolls[k] = useV;
@@ -396,15 +398,15 @@ module.exports = {
 					if (Array.isArray(blueprint.value)) {
 						let [min, max] = blueprint.value;
 						if (blueprint.levelMult) {
-							min *= item.level;
-							max *= item.level;
+							min *= itemLevel;
+							max *= itemLevel;
 						}
 						rollRanges.implicitStats[stat] = (value - min) / (max - min);
 					} else {
 						const testItem = {
 							type: item.type,
 							slot: item.slot,
-							level: item.level,
+							level: itemLevel,
 							stats: {}
 						};
 
@@ -430,7 +432,7 @@ module.exports = {
 					const testItem = {
 						type: item.type,
 						slot: item.slot,
-						level: item.level,
+						level: itemLevel,
 						stats: {}
 					};
 
@@ -455,7 +457,7 @@ module.exports = {
 					const testItem = {
 						type: item.type,
 						slot: item.slot,
-						level: item.level,
+						level: itemLevel,
 						stats: {}
 					};
 
@@ -466,7 +468,14 @@ module.exports = {
 					statGenerator.buildStat(testItem, { perfection: 1 }, stat);
 					const max = Math.round(testItem.stats[stat]);
 
-					const roll = (value - min) / (max - min);
+					let useValue = value;
+					if (item.enchantedStats?.[stat] !== undefined)
+						useValue -= item.enchantedStats[stat];
+
+					if (useValue === 0)
+						return;
+
+					const roll = (useValue - min) / (max - min);
 
 					rollRanges.stats[stat] = roll;
 				});
