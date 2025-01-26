@@ -175,7 +175,7 @@ module.exports = (cpnInv, item, hideMessage, noStack, hideAlert, createBagIfFull
 		notifyPlayer(obj, item, item.quantity, hideAlert, hideMessage);
 
 		//Some handlers will sync the item to the player themselves
-		if (!item.eq && !item.has('quickSlot') && !item.effects) {
+		if (!item.eq && !item.has('quickSlot')) {
 			obj.syncer.deleteFromArray(true, 'inventory', 'getItems', i => i.id === item.id);
 			obj.syncer.setArray(true, 'inventory', 'getItems', cpnInv.simplifyItem(item), true);
 		}

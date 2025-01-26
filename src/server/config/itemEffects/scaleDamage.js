@@ -16,7 +16,7 @@ module.exports = {
 			return `You deal ${percentage}% damage`;
 		},
 
-		onAfterCalculateDamage: function (item, damage, target) {
+		onAfterCalculateDamage: function (item, { damage }) {
 			const itemEffect = getItemEffect(item);
 
 			damage.amount *= (itemEffect.rolls.percentage / 100); 

@@ -5,6 +5,7 @@ const spellGenerator = require('../items/generators/spellbook');
 const statGenerator = require('../items/generators/stats');
 const effectGenerator = require('../items/generators/effects');
 const { getByName: getItemConfigByName } = require('../config/itemConfig');
+const { spells: spellsConfig } = require('../config/spellsConfig');
 
 module.exports = {
 	fixCharacterList: function (username, characterList) {
@@ -335,14 +336,34 @@ module.exports = {
 		});
 
 		items.forEach(item => {
-			if (!item.stats || item.effects || item.slot === 'tool')
-				return;
-
 			let rollRanges = item.rollRanges?.[consts.balanceVersion];
 			rollRanges = rollRanges ?? {};
 			if (!item.rollRanges)
 				item.rollRanges = {};
 			item.rollRanges[consts.balanceVersion] = rollRanges;
+
+			if (item.spell?.rolls !== undefined) {
+				const hasBeenRangedBefore = rollRanges.spellRolls !== undefined;
+				if (!rollRanges.spellRolls)
+					rollRanges.spellRolls = {};
+				const negativeStats = spellsConfig[item.spell.name.toLowerCase()].negativeStats ?? [];
+				Object.entries(item.spell.rolls).forEach(([k, v]) => {
+					let useV = v;
+					if (!hasBeenRangedBefore) {
+						if (negativeStats.includes(k))
+							useV = 1 - ((1 - v) * (item.level / balance.maxLevel));
+						else
+							useV *= item.level / balance.maxLevel;
+					}
+
+					rollRanges.spellRolls[k] = useV;
+
+					item.spell.rolls[k] = useV;
+				});
+			}
+
+			if (!item.stats || item.effects || item.slot === 'tool')
+				return;
 
 			if (item.implicitStats !== undefined) {
 				if (!rollRanges.implicitStats)
