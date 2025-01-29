@@ -336,6 +336,9 @@ module.exports = {
 		});
 
 		items.forEach(item => {
+			if (item.material === true)
+				return;
+
 			const itemLevel = item.originalLevel ?? item.level;
 
 			let rollRanges = item.rollRanges?.[consts.balanceVersion];
