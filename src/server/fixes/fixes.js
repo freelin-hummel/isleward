@@ -414,11 +414,11 @@ module.exports = {
 						};
 
 						statGenerator.buildStat(testItem, { perfection: 0 }, stat);
-						const min = Math.round(testItem.stats[stat]) * blueprint.valueMult;
+						const min = Math.max(1, Math.round(testItem.stats[stat]) * blueprint.valueMult);
 						testItem.stats = {};
 
 						statGenerator.buildStat(testItem, { perfection: 1 }, stat);
-						const max = Math.round(testItem.stats[stat]) * blueprint.valueMult;
+						const max = Math.max(1, Math.round(testItem.stats[stat]) * blueprint.valueMult);
 
 						let roll;
 						if (min === max)
@@ -444,11 +444,11 @@ module.exports = {
 					};
 
 					statGenerator.buildStat(testItem, { perfection: 0 }, stat);
-					const min = Math.round(testItem.stats[stat]);
+					const min = Math.max(1, Math.round(testItem.stats[stat]));
 					testItem.stats = {};
 
 					statGenerator.buildStat(testItem, { perfection: 1 }, stat);
-					const max = Math.round(testItem.stats[stat]);
+					const max = Math.max(1, Math.round(testItem.stats[stat]));
 
 					let roll;
 					if (min === max)
@@ -473,11 +473,11 @@ module.exports = {
 					};
 
 					statGenerator.buildStat(testItem, { perfection: 0 }, stat);
-					const min = Math.round(testItem.stats[stat]);
+					const min = Math.max(1, Math.round(testItem.stats[stat]));
 					testItem.stats = {};
 
 					statGenerator.buildStat(testItem, { perfection: 1 }, stat);
-					const max = Math.round(testItem.stats[stat]);
+					const max = Math.max(1, Math.round(testItem.stats[stat]));
 
 					let useValue = value;
 					if (item.enchantedStats?.[stat] !== undefined)
