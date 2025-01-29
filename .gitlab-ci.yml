@@ -38,7 +38,7 @@ lint-client:
 
 build-image-latest:
   stage: build
-  image: docker:stable
+  image: docker:latest
   services:
     - docker:dind
   before_script:
@@ -50,7 +50,8 @@ build-image-latest:
     IMAGE_TAG_REF: isleward/isleward:$CI_COMMIT_REF_SLUG
     IMAGE_TAG_ALIAS: isleward/isleward:latest
   script:
-    - docker build -t $IMAGE_TAG_REF -t $IMAGE_TAG_ALIAS .
+    - docker pull $IMAGE_TAG_ALIAS || true
+    - docker build --build-arg BUILDKIT_INLINE_CACHE=1 -t $IMAGE_TAG_REF -t $IMAGE_TAG_ALIAS .
     - docker push $IMAGE_TAG_REF
     - docker push $IMAGE_TAG_ALIAS
   only:
@@ -58,7 +59,7 @@ build-image-latest:
 
 build-image-stable:
   stage: build
-  image: docker:stable
+  image: docker:latest
   services:
     - docker:dind
   before_script:
@@ -78,7 +79,7 @@ build-image-stable:
 
 build-static-server-image-latest:
   stage: build
-  image: docker:stable
+  image: docker:latest
   services:
     - docker:dind
   before_script:
@@ -95,7 +96,7 @@ build-static-server-image-latest:
 
 build-static-server-image-stable:
   stage: build
-  image: docker:stable
+  image: docker:latest
   services:
     - docker:dind
   before_script:
