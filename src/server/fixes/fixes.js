@@ -417,7 +417,11 @@ module.exports = {
 						statGenerator.buildStat(testItem, { perfection: 1 }, stat);
 						const max = Math.round(testItem.stats[stat]) * blueprint.valueMult;
 
-						const roll = (value - min) / (max - min);
+						let roll;
+						if (min === max)
+							roll = value / max;
+						else
+							roll = (value - min) / (max - min);
 
 						rollRanges.implicitStats[stat] = roll;
 					}
@@ -443,7 +447,11 @@ module.exports = {
 					statGenerator.buildStat(testItem, { perfection: 1 }, stat);
 					const max = Math.round(testItem.stats[stat]);
 
-					const roll = (value - min) / (max - min);
+					let roll;
+					if (min === max)
+						roll = value / max;
+					else
+						roll = (value - min) / (max - min);
 
 					rollRanges.enchantedStats[stat] = roll;
 				});
@@ -475,7 +483,11 @@ module.exports = {
 					if (useValue === 0)
 						return;
 
-					const roll = (useValue - min) / (max - min);
+					let roll;
+					if (min === max)
+						roll = useValue / max;
+					else
+						roll = (useValue - min) / (max - min);
 
 					rollRanges.stats[stat] = roll;
 				});
