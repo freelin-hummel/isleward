@@ -51,7 +51,7 @@ build-image-latest:
     IMAGE_TAG_ALIAS: isleward/isleward:latest
   script:
     - docker pull $IMAGE_TAG_ALIAS || true
-    - docker build --build-arg BUILDKIT_INLINE_CACHE=1 -t $IMAGE_TAG_REF -t $IMAGE_TAG_ALIAS .
+    - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_TAG_ALIAS -t $IMAGE_TAG_REF -t $IMAGE_TAG_ALIAS .
     - docker push $IMAGE_TAG_REF
     - docker push $IMAGE_TAG_ALIAS
   only:
@@ -71,7 +71,8 @@ build-image-stable:
     IMAGE_TAG_REF: isleward/isleward:$CI_COMMIT_REF_SLUG
     IMAGE_TAG_ALIAS: isleward/isleward:stable
   script:
-    - docker build -t $IMAGE_TAG_REF -t $IMAGE_TAG_ALIAS .
+    - docker pull $IMAGE_TAG_ALIAS || true
+    - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_TAG_ALIAS -t $IMAGE_TAG_REF -t $IMAGE_TAG_ALIAS .
     - docker push $IMAGE_TAG_REF
     - docker push $IMAGE_TAG_ALIAS
   only:
@@ -88,7 +89,8 @@ build-static-server-image-latest:
     IMAGE_TAG_REF: isleward/isleward-static:$CI_COMMIT_REF_SLUG
     IMAGE_TAG_ALIAS: isleward/isleward-static:latest
   script:
-    - docker build -f src/rust-server.Dockerfile -t $IMAGE_TAG_REF -t $IMAGE_TAG_ALIAS src/
+    - docker pull $IMAGE_TAG_ALIAS || true
+    - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_TAG_ALIAS -f src/rust-server.Dockerfile -t $IMAGE_TAG_REF -t $IMAGE_TAG_ALIAS src/
     - docker push $IMAGE_TAG_REF
     - docker push $IMAGE_TAG_ALIAS
   only:
@@ -105,7 +107,8 @@ build-static-server-image-stable:
     IMAGE_TAG_REF: isleward/isleward-static:$CI_COMMIT_REF_SLUG
     IMAGE_TAG_ALIAS: isleward/isleward-static:stable
   script:
-    - docker build -f src/rust-server.Dockerfile -t $IMAGE_TAG_REF -t $IMAGE_TAG_ALIAS src/
+    - docker pull $IMAGE_TAG_ALIAS || true
+    - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_TAG_ALIAS -f src/rust-server.Dockerfile -t $IMAGE_TAG_REF -t $IMAGE_TAG_ALIAS src/
     - docker push $IMAGE_TAG_REF
     - docker push $IMAGE_TAG_ALIAS
   only:
