@@ -124,8 +124,8 @@ module.exports = {
 			isAttack: true,
 			range: 1,
 			random: {
-				damage: [4, 14],
-				healPercent: [2, 15]
+				damage: [4, 24],
+				healPercent: [10, 20]
 			}
 		};
 
