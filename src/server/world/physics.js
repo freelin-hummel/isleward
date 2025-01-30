@@ -79,6 +79,8 @@ module.exports = {
 
 	removeObject: function (obj, x, y, toX, toY) {
 		const idsOfCollidingObjects = this.engine.removeObject(obj, x, y, toX, toY);
+		if (!idsOfCollidingObjects)
+			return;
 
 		for (let id of idsOfCollidingObjects) {
 			const checkObj = objects.objects.find(f => f.id + '' === id);
