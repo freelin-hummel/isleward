@@ -64,7 +64,7 @@ let spells = {
 		range: 9,
 		manaCost: 7,
 		random: {
-			damage: [4, 35],
+			damage: [4, 31],
 			i_stunDuration: [6, 10]
 		}
 	},
@@ -113,7 +113,7 @@ let spells = {
 		range: 10,
 		manaCost: 3,
 		random: {
-			damage: [2, 30],
+			damage: [2, 22],
 			i_stunDuration: [6, 10]
 		}
 	},

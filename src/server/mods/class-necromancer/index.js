@@ -136,8 +136,8 @@ module.exports = {
 			manaCost: 5,
 			range: 9,
 			random: {
-				damagePercent: [20, 76],
-				hpPercent: [40, 60]
+				damagePercent: [40, 400],
+				hpPercent: [40, 70]
 			}
 		};
 
