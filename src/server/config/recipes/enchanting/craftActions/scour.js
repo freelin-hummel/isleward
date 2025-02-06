@@ -26,6 +26,8 @@ module.exports = (obj, [item]) => {
 
 	delete item.enchantedStats;
 	delete item.power;
+	delete item.infusedStats;
+	delete item.infused;
 
 	return result;
 };

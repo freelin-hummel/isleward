@@ -1,20 +1,34 @@
-let generatorSpells = require('../../../../items/generators/spellbook');
+const generatorSpells = require('../../../../items/generators/spellbook');
 
-module.exports = (obj, [item]) => {
+module.exports = ([rollsMin, rollsMax], obj, [item]) => {
 	if (!item.spell)
 		return;
 
-	let spellName = item.spell.name.toLowerCase();
-	let oldSpell = item.spell;
-	delete item.spell;
+	const reforgeCount = rollsMin + ~~(Math.random() * (rollsMax - rollsMin + 1));
 
-	generatorSpells.generate(item, {
-		spellName
-	});
-	item.spell = extend(oldSpell, item.spell);
+	const spellName = item.spell.name.toLowerCase();
 
-	const damage = item.spell.values.damage;
-	const msg = `Reforged weapon to damage: ${damage}`;
+	const clonedItem = extend({}, item);
 
-	return { msg };
+	const oldDamage = item.spell.values.damage;
+
+	for (let i = 0; i < reforgeCount; i++) {
+		delete clonedItem.spell;
+		generatorSpells.generate(clonedItem, {
+			spellName
+		});
+
+		if (reforgeCount === 1 || clonedItem.spell.rolls.damage > item.spell.rolls.damage)
+			Object.assign(item.spell, clonedItem.spell);
+	}
+
+	if (reforgeCount > 1 && item.spell.values.damage === oldDamage) {
+		return {
+			msg: 'Blessed Reforge failed to increase the damage'
+		};
+	}
+
+	return {
+		msg: `Reforged weapon to damage from: ${oldDamage} to ${item.spell.values.damage} (${reforgeCount}x rolls})`
+	};
 };

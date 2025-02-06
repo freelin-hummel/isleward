@@ -112,7 +112,8 @@ define([
 
 		stats: () => {
 			const tempStats = $.extend(true, {}, item.stats);
-			const enchantedStats = item.enchantedStats || {};
+			const enchantedStats = item.enchantedStats ?? {};
+			const infusedStats = item.infusedStats ?? {};
 
 			if (compare && shiftDown) {
 				if (!item.eq) {
@@ -141,6 +142,14 @@ define([
 
 						tempStats['_' + s] = enchantedStats[s];
 					}
+
+					if (infusedStats[s]) {
+						tempStats['_' + s] -= infusedStats[s];
+						if (tempStats['_' + s] <= 0)
+							delete tempStats['_' + s];
+
+						tempStats['~' + s] = infusedStats[s];
+					}
 				});
 			}
 
@@ -149,6 +158,10 @@ define([
 					const isEnchanted = (s[0] === '_');
 					let statName = s;
 					if (isEnchanted)
+						statName = statName.substr(1);
+
+					const isInfused = (s[0] === '~');
+					if (isInfused)
 						statName = statName.substr(1);
 
 					const prettyValue = stringifyStatValue(statName, tempStats[s]);
@@ -164,6 +177,8 @@ define([
 					}
 					if (isEnchanted)
 						rowClass += ' enchanted';
+					if (isInfused)
+						rowClass += ' infused';
 
 					return `<div class="${rowClass}">${prettyValue} ${statName}</div>`;
 				})
@@ -171,6 +186,11 @@ define([
 					return (a.replace(' enchanted', '').length - b.replace(' enchanted', '').length);
 				})
 				.sort((a, b) => {
+					if (a.indexOf('infused') > -1 && b.indexOf('infused') === -1)
+						return -1;
+					else if (a.indexOf('infused') === -1 && b.indexOf('infused') > -1)
+						return 1;
+
 					if (a.indexOf('enchanted') > -1 && b.indexOf('enchanted') === -1)
 						return 1;
 					else if (a.indexOf('enchanted') === -1 && b.indexOf('enchanted') > -1)
