@@ -37,7 +37,7 @@ module.exports = [{
 	craftAction: reroll
 }, {
 	name: 'Fated Reroll Stats',
-	description: 'Rerolls a single explicit stat on a magic or better item. The reroll has a chance to roll multiple times based on the value of the stat that\'s chosen.',
+	description: 'Rerolls a single explicit stat (randomly chosen) on a magic or better item. The reroll has a chance to roll multiple times based on the value of the stat that\'s chosen.',
 	materials: [{
 		name: 'Dragon-Glass Idol',
 		quantity: 1
