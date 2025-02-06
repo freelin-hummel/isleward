@@ -98,7 +98,7 @@ define([
 		},
 
 		onGetRecipe: function (persistNeedItems, recipe) {
-			const { name: recipeName, description, materials, needItems } = recipe;
+			const { name: recipeName, description, materials, needItems, needMaterials } = recipe;
 
 			this.currentRecipe = recipe;
 
@@ -112,7 +112,7 @@ define([
 					visibility: 'visible'
 				});
 
-			let canCraft = !!materials.length;
+			let canCraft = !!materials.length || needMaterials === false;
 
 			materials.forEach(m => {
 				const { needQuantity, nameLike, name: materialName, haveQuantity, noHaveEnough } = m;
@@ -137,7 +137,7 @@ define([
 
 			//If there are no materials, the selected items aren't valid
 			this.find('.materialList').show();
-			if (!materials.length) {
+			if (!materials.length && needMaterials !== false) {
 				this.find('.materialList').hide();
 				persistNeedItems = false;
 			}
@@ -287,7 +287,10 @@ define([
 			this.onGetRecipe(true, recipe);
 		
 			if (resultMsg) {
-				const { msg: baseMsg, addStatMsgs = [] } = resultMsg;
+				const { msg: baseMsg, addStatMsgs = [], itemsDestroyed } = resultMsg;
+
+				if (itemsDestroyed)
+					this.buildNeedItemBoxes();
 
 				let msg = baseMsg; 
 

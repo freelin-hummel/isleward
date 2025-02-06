@@ -3,10 +3,11 @@ const recipes = require('../../config/recipes/recipes');
 const buildMaterials = require('./buildMaterials');
 const buildNeedItems = require('./buildNeedItems');
 
-const buildBase = (crafter, { name, description }) => {
+const buildBase = (crafter, { name, description, needMaterials }) => {
 	return {
 		name,
-		description
+		description,
+		needMaterials: needMaterials !== false
 	};
 };
 

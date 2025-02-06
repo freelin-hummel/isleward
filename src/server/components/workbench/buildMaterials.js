@@ -2,7 +2,7 @@ const buildPickedItems = require('./buildPickedItems');
 
 module.exports = (crafter, recipe, msg) => {
 	const { inventory: { items } } = crafter;
-	const { materialGenerator, materials, needItems = [] } = recipe;
+	const { materialGenerator, materials, needItems = [], needMaterials } = recipe;
 	const { pickedItemIds = [] } = msg;
 
 	const pickedItems = buildPickedItems(crafter, recipe, msg);
@@ -11,7 +11,7 @@ module.exports = (crafter, recipe, msg) => {
 		!pickedItems.some(i => !i)
 	);
 
-	if (!allPickedItemsSet)
+	if (!allPickedItemsSet || needMaterials === false)
 		return [];
 
 	let useMaterials = materials;

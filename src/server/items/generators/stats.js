@@ -137,12 +137,14 @@ module.exports = {
 				value
 			});
 
-			if (!item.enchantedStats)
-				item.enchantedStats = {};
-			if (item.enchantedStats[stat])
-				item.enchantedStats[stat] += value;
-			else
-				item.enchantedStats[stat] = value;
+			if (result?.addToEnchantedStats !== false) {
+				if (!item.enchantedStats)
+					item.enchantedStats = {};
+				if (item.enchantedStats[stat])
+					item.enchantedStats[stat] += value;
+				else
+					item.enchantedStats[stat] = value;
+			}
 		}
 
 		if (stat === 'lvlRequire') {

@@ -2,7 +2,6 @@ const buildNeedItems = require('./buildNeedItems');
 
 module.exports = (crafter, recipe, { pickedItemIds = [] }) => {
 	const needItems = buildNeedItems(crafter, recipe);
-
 	const { inventory: { items } } = crafter;
 
 	const result = pickedItemIds.map((pickedId, i) => {
