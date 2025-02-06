@@ -19,7 +19,7 @@ module.exports = [{
 		withProps: ['slot'],
 		withoutProps: ['noAugment'],
 		checks: [
-			item => !item.power || item.power < 3
+			item => (!item.power || item.power < 3) && item.slot !== 'tool'
 		]
 	}]
 }, {
@@ -32,7 +32,10 @@ module.exports = [{
 	needItems: [{
 		info: 'Pick an item to reroll',
 		withProps: ['slot'],
-		withoutProps: ['noAugment']
+		withoutProps: ['noAugment'],
+		checks: [
+			item => item.slot !== 'tool'
+		]
 	}],
 	craftAction: reroll
 }, {
@@ -47,7 +50,7 @@ module.exports = [{
 		withProps: ['slot'],
 		withoutProps: ['noAugment'],
 		checks: [
-			item => item.quality > 0
+			item => item.quality > 0 && item.slot !== 'tool'
 		]
 	}],
 	craftAction: fatedReroll
@@ -63,7 +66,7 @@ module.exports = [{
 		withProps: ['slot'],
 		withoutProps: ['noAugment', 'effects', 'factions'],
 		checks: [
-			item => item.quality === 0
+			item => item.quality === 0 && item.slot !== 'tool'
 		]
 	}],
 	craftAction: ascend.bind(null, 0, 1)
@@ -79,7 +82,7 @@ module.exports = [{
 		withProps: ['slot'],
 		withoutProps: ['noAugment', 'effects', 'factions'],
 		checks: [
-			item => item.quality === 1
+			item => item.quality === 1 && item.slot !== 'tool'
 		]
 	}],
 	craftAction: ascend.bind(null, 1, 2)
@@ -95,7 +98,7 @@ module.exports = [{
 		withProps: ['slot'],
 		withoutProps: ['noAugment', 'effects', 'factions'],
 		checks: [
-			item => item.quality === 2
+			item => item.quality === 2 && item.slot !== 'tool'
 		]
 	}],
 	craftAction: ascend.bind(null, 2, 3)
@@ -135,7 +138,10 @@ module.exports = [{
 	needItems: [{
 		info: 'Pick an item to scour',
 		withProps: ['slot', 'power'],
-		withoutProps: ['noAugment']
+		withoutProps: ['noAugment'],
+		checks: [
+			item => item.slot !== 'tool'
+		]
 	}],
 	craftAction: scour,
 	checks: [
