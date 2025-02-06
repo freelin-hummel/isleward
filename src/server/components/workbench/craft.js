@@ -69,7 +69,7 @@ module.exports = (cpnWorkbench, msg) => {
 		}
 	}
 
-	if (!resultMsg.itemsDestroyed && (recipe.item || recipe.items)) {
+	if (!resultMsg?.itemsDestroyed && (recipe.item || recipe.items)) {
 		const outputItems = recipe.item ? [ recipe.item ] : recipe.items;
 		outputItems.forEach(itemBpt => {
 			let item = null;
@@ -93,7 +93,7 @@ module.exports = (cpnWorkbench, msg) => {
 		});
 	}
 
-	if (resultMsg.itemsDestroyed)
+	if (resultMsg?.itemsDestroyed)
 		msg.pickedItemIds = [];
 
 	const emAfterCraft = {
