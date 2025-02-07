@@ -19,7 +19,7 @@ module.exports = [{
 		withProps: ['slot'],
 		withoutProps: ['noAugment'],
 		checks: [
-			item => (!item.power || item.power < 3) && item.slot !== 'tool'
+			item => (!item.power || item.power < 3)
 		]
 	}]
 }, {
