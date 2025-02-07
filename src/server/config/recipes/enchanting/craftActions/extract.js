@@ -6,7 +6,8 @@ module.exports = (obj, items) => {
 	//Check if the items are unique
 	if (itemA.id === itemB.id || itemA.id === itemC.id || itemB.id === itemC.id) {
 		return {
-			msg: 'You must pick three different items.'
+			msg: 'You must pick three different items.',
+			success: false
 		};
 	}
 
@@ -28,7 +29,8 @@ module.exports = (obj, items) => {
 
 	if (duplicateStats.length === 0) {
 		return {
-			msg: 'All items must have at least one stat in common. Enchanted stats are not taken into consideration.'
+			msg: 'All items must have at least one stat in common. Enchanted stats are not taken into consideration.',
+			success: false
 		};
 	}
 
