@@ -34,7 +34,8 @@ module.exports = (cpnWorkbench, msg) => {
 	if (!canCraft)
 		return null;
 
-	materials.forEach(m => inventory.destroyItem({ itemId: m.id }, m.needQuantity));
+	if (!recipe.craftAction)
+		materials.forEach(m => inventory.destroyItem({ itemId: m.id }, m.needQuantity));
 
 	let resultMsg = null;
 
@@ -46,6 +47,9 @@ module.exports = (cpnWorkbench, msg) => {
 
 		const oldSlots = pickedItems.map(p => p.slot);
 		resultMsg = recipe.craftAction(crafter, pickedItems);
+
+		if (resultMsg.success !== false)
+			materials.forEach(m => inventory.destroyItem({ itemId: m.id }, m.needQuantity));
 
 		if (!resultMsg.itemsDestroyed) {
 			pickedItems.forEach((p, i) => {
