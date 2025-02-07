@@ -1,3 +1,5 @@
+/* eslint-disable max-lines-per-function */
+
 let statGenerator = require('../../../../items/generators/stats');
 
 module.exports = (obj, [item]) => {
@@ -15,7 +17,7 @@ module.exports = (obj, [item]) => {
 
 	if (allowedStatPicks.length === 0) {
 		return {
-			msg: 'That item does not have any explicit stats'
+			msg: 'That item does not have any explicit stats.'
 		};
 	}
 
@@ -43,12 +45,17 @@ module.exports = (obj, [item]) => {
 		roll = 0;
 
 	let statCount = 1;
-	if (roll >= 1.95)
+	if (roll > 4.4 && Math.random() > 0.5)
+		statCount = 5;
+	else if (roll > 3.2 && Math.random() > 0.35)
 		statCount = 4;
-	else if (roll >= 1.45)
+	else if (roll >= 1.6)
 		statCount = 3;
-	else if (roll >= 0.95)
+	else if (roll >= 0.9)
 		statCount = 2;
+
+	if (statCount < 2 && Math.random() < 0.05)
+		statCount++;
 
 	const result = { msg: 'Fated Reroll successful', addStatMsgs: [] };
 
@@ -61,7 +68,7 @@ module.exports = (obj, [item]) => {
 		}, result);
 
 		newChosenStat = result.addStatMsgs[0].stat;
-	} while (newChosenStat === chosenStat);
+	} while (newChosenStat === chosenStat || allowedStatPicks.includes(newChosenStat));
 
 	newItem.stats = {};
 
@@ -82,6 +89,26 @@ module.exports = (obj, [item]) => {
 	result.addStatMsgs.forEach(s => {
 		item.stats[newChosenStat] += s.value;
 	});
+
+	//Test Code
+	/*testItem.stats = {};
+	statGenerator.buildStat(testItem, { perfection: 0 }, newChosenStat);
+	const newMin = Math.max(1, Math.round(testItem.stats[newChosenStat]));
+
+	testItem.stats = {};
+	statGenerator.buildStat(testItem, { perfection: 1 }, newChosenStat);
+	const newMax = Math.max(1, Math.round(testItem.stats[newChosenStat]));
+
+	const newValue = item.stats[newChosenStat] - (item.enchantedStats?.[newChosenStat] ?? 0);
+
+	let newRoll;
+	if (newMin === newMax)
+		newRoll = newValue / newMax;
+	else
+		newRoll = (newValue - newMin) / (newMax - newMin);
+
+	if (newRoll < 0)
+		newRoll = 0;*/
 
 	return result;
 };
