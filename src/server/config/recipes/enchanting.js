@@ -174,19 +174,19 @@ module.exports = [{
 		info: 'Pick an epic item that shares at least one stat with 2 others',
 		withoutProps: ['eq', 'noDrop', 'noDestroy', 'effects', 'factions'],
 		checks: [
-			item => item.quality === 3 && item.stats !== undefined
+			item => item.quality >= 3 && item.stats !== undefined && !item.effects
 		]
 	}, {
 		info: 'Pick an epic item that shares at least one stat with 2 others',
 		withoutProps: ['eq', 'noDrop', 'noDestroy', 'effects', 'factions'],
 		checks: [
-			item => item.quality === 3 && item.stats !== undefined
+			item => item.quality >= 3 && item.stats !== undefined && !item.effects
 		]
 	}, {
 		info: 'Pick an epic item that shares at least one stat with 2 others',
 		withoutProps: ['eq', 'noDrop', 'noDestroy', 'effects', 'factions'],
 		checks: [
-			item => item.quality === 3 && item.stats !== undefined
+			item => item.quality >= 3 && item.stats !== undefined && !item.effects
 		]
 	}],
 	craftAction: extract
