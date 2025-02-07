@@ -32,8 +32,14 @@ module.exports = (obj, items) => {
 		};
 	}
 
+	const uniqueStats = [];
+	combinedStats.forEach(c => {
+		if (!uniqueStats.includes(c))
+			uniqueStats.push(c);
+	});
+
 	//Choose a random stat
-	const pickStat = duplicateStats[~~(Math.random() * duplicateStats.length)];
+	const pickStat = uniqueStats[~~(Math.random() * uniqueStats.length)];
 
 	//Destroy the items
 	items.forEach(({ id: itemId }) => {
