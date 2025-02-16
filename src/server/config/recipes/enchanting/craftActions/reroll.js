@@ -9,10 +9,7 @@ module.exports = (obj, [item]) => {
 	delete item.enchantedStats;
 	delete item.implicitStats;
 
-	if ((item.stats) && (item.stats.lvlRequire)) {
-		item.level = Math.min(balance.maxLevel, item.level + item.stats.lvlRequire);
-		delete item.originalLevel;
-	}
+	const originalItemLevel = item.originalLevel ?? item.level;
 
 	item.stats = {};
 	let bpt = {
@@ -30,17 +27,8 @@ module.exports = (obj, [item]) => {
 			item.stats[p] = 0;
 
 		item.stats[p] += enchantedStats[p];
-
-		if (p === 'lvlRequire') {
-			if (!item.originalLevel)
-				item.originalLevel = item.level;
-
-			item.level -= enchantedStats[p];
-			if (item.level < 1)
-				item.level = 1;
-		}
 	}
-	item.enchantedStats = enchantedStats || null;
+	item.enchantedStats = enchantedStats ?? null;
 
 	//Some items have special implicits (different stats than their types imply)
 	// We add the old one back in if this is the case. Ideally we'd like to reroll
@@ -53,6 +41,22 @@ module.exports = (obj, [item]) => {
 		item.implicitStats[0].stat !== implicitStats[0].stat
 	)
 		item.implicitStats = implicitStats;
+
+	let newItemLevel = originalItemLevel;
+	newItemLevel -= (item.stats?.lvlRequire ?? 0);
+	if (newItemLevel < 1)
+		newItemLevel = 1;
+
+	if (newItemLevel === originalItemLevel) {
+		delete item.originalLevel;
+
+		item.level = newItemLevel;
+	} else {
+		if (!item.originalLevel)
+			item.originalLevel = originalItemLevel;
+
+		item.level = newItemLevel;
+	}
 
 	return { msg: 'Reroll successful' };
 };

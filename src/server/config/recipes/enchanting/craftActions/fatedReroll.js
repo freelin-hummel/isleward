@@ -5,6 +5,8 @@ let statGenerator = require('../../../../items/generators/stats');
 module.exports = (obj, [item]) => {
 	const newItem = extend({}, item);
 
+	const originalItemLevel = newItem.originalLevel ?? newItem.level;
+
 	const allowedStatPicks = Object.keys(newItem.stats);
 	const toRemove = [];
 	allowedStatPicks.forEach(s => {
@@ -89,6 +91,22 @@ module.exports = (obj, [item]) => {
 	result.addStatMsgs.forEach(s => {
 		item.stats[newChosenStat] += s.value;
 	});
+
+	let newItemLevel = originalItemLevel;
+	newItemLevel -= (item.stats?.lvlRequire ?? 0);
+	if (newItemLevel < 1)
+		newItemLevel = 1;
+
+	if (newItemLevel === originalItemLevel) {
+		delete item.originalLevel;
+
+		item.level = newItemLevel;
+	} else {
+		if (!item.originalLevel)
+			item.originalLevel = originalItemLevel;
+
+		item.level = newItemLevel;
+	}
 
 	//Test Code
 	/*testItem.stats = {};
