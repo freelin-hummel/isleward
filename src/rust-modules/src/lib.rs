@@ -762,46 +762,40 @@ pub mod physics {
         let size = matrix.len();
         let inner_size = matrix[0].len();
         let mut graph = Graph::with_capacity(size * inner_size, inner_size * size * 8);
-        // let mut nodes = vec![vec![NodeIndex::default(); inner_size]; size];
 
-        // Add nodes to the graph
-        for (x, row) in matrix.iter().enumerate() {
-            for (y, _) in row.iter().enumerate() {
-                graph.add_node(Coordinate {
-                    x: x.try_into().unwrap(),
-                    y: y.try_into().unwrap(),
-                });
+        // Create a 2D vector to store node indices.
+        let mut nodes = vec![vec![NodeIndex::end(); inner_size]; size];
+
+        // Add nodes to the graph and store their indices.
+        for (x, row) in nodes.iter_mut().enumerate() {
+            for (y, cell) in row.iter_mut().enumerate() {
+                let coord = Coordinate {
+                    x: x as i32,
+                    y: y as i32,
+                };
+                let node = graph.add_node(coord);
+                *cell = node;
             }
         }
-        //dbg!(size, inner_size);
 
-        // Add edges based on the collision map
+        // Add edges based on the collision map.
         for i in 1..size - 1 {
             for j in 1..inner_size - 1 {
                 if matrix[i][j] == 1 {
                     continue;
                 }
-                let from = Coordinate {
-                    x: i.try_into().unwrap(),
-                    y: j.try_into().unwrap(),
-                }
-                .find_node(&graph)
-                .unwrap();
-                for (x, _) in matrix.iter().enumerate().take(i + 2).skip(i - 1) {
-                    for y in j - 1..=j + 1 {
+                let from = nodes[i][j];
+
+                // Check neighbors in the 3x3 region around (i, j)
+                for x in (i.saturating_sub(1))..=(i + 1) {
+                    for y in (j.saturating_sub(1))..=(j + 1) {
                         if x == i && y == j {
                             continue;
                         }
                         if matrix[x][y] == 1 {
                             continue;
                         }
-                        let to = Coordinate {
-                            x: x.try_into().unwrap(),
-                            y: y.try_into().unwrap(),
-                        }
-                        .find_node(&graph)
-                        .unwrap();
-
+                        let to = nodes[x][y];
                         graph.add_edge(from, to, ());
                     }
                 }

@@ -80,7 +80,14 @@ async fn main() {
 
     #[cfg(feature = "ws-proxy")]
     let app = app.nest("/socket.io/", websocket_router());
-    let addr = SocketAddr::from(([0, 0, 0, 0], 4001));
+
+    // Read port from the environment variable "PORT", or use 4001 as a default.
+    let port: u16 = env::var("IWD_PORT_STATIC_SERVER")
+        .unwrap_or_else(|_| "4001".to_string())
+        .parse()
+        .expect("PORT must be a valid u16 number");
+
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
 
     let server = axum::serve(
         tokio::net::TcpListener::bind(addr).await.unwrap(),
