@@ -2,7 +2,7 @@
 
 module.exports = {
 	version: '0.16.0',
-	port: 4000,
+	port: process.env.IWD_PORT || 4000,
 	startupMessage: 'Ready: Server',
 
 	nodeEnv: process.env.NODE_ENV,
