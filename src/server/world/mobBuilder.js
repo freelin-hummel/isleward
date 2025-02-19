@@ -208,8 +208,12 @@ const build = (mob, blueprint, type, zoneName) => {
 	const zoneConfig = instancer.instances[0].map.zoneConfig;
 
 	const chats = zoneConfig?.chats?.[mob.name.toLowerCase()];
-	if (chats)
-		mob.addComponent('chatter', { chats });
+	if (chats) {
+		mob.addComponent('chatter', {
+			chats,
+			chance: blueprint?.properties?.cpnChatter?.chance
+		});
+	}
 
 	const dialogues = zoneConfig?.dialogues?.[mob.name.toLowerCase()];
 	if (dialogues)
