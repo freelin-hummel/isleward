@@ -241,8 +241,17 @@ module.exports = {
 	},
 
 	calcXpMax: function () {
-		let level = this.values.level;
-		this.values.xpMax = (level * 5) + ~~(level * 10 * Math.pow(level, 2.2)) - 5;
+		const { values: { level } } = this;
+
+		let xpMax = (level * 5) + ~~(level * 10 * Math.pow(level, 2.2)) - 5;
+		if (level === 20)
+			xpMax *= 1.1;
+		else if (level === 21)
+			xpMax *= 1.2;
+		else if (level === 22)
+			xpMax *= 1.3;
+
+		this.values.xpMax = xpMax;
 
 		this.obj.syncer.setObject(true, 'stats', 'values', 'xpMax', this.values.xpMax);
 	},
@@ -261,9 +270,7 @@ module.exports = {
 	getXp: function (amount, source, target) {
 		const { obj, values } = this;
 
-		//TODO: Undo this
-		if (values.level === 20)
-		//if (values.level === balance.maxLevel)
+		if (values.level === balance.maxLevel)
 			return;
 
 		const xpEvent = {
