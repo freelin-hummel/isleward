@@ -103,7 +103,15 @@ module.exports = {
 				if (!Array.isArray(typeImplicits))
 					typeImplicits = [typeImplicits];
 
-				const blueprint = typeImplicits.find(f => f.stat === stat);
+				let blueprint = typeImplicits.find(f => f.stat === stat);
+				if (!blueprint && item.type === 'Ring' && stat === 'allAttributes') {
+					//Hack to be able to calculate rolls for Soul's Moor Rings
+					blueprint = {
+						stat: 'allAttributes',
+						value: 8
+					};
+				}
+
 				if (!blueprint) {
 					console.log({
 						error: 'No implicit blueprint found',
@@ -123,7 +131,9 @@ module.exports = {
 						max *= itemLevel;
 					}
 					rollRanges.implicitStats[stat] = (value - min) / (max - min);
-				} else {
+				} else if (blueprint.value !== undefined)
+					rollRanges.implicitStats[stat] = value / blueprint.value;
+				else {
 					const testItem = {
 						type: item.type,
 						slot: item.slot,
