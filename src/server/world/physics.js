@@ -112,7 +112,13 @@ module.exports = {
 	getCell: function (x, y) {
 		const idsOfObjects = this.engine.getCell(x, y);
 
-		const res = idsOfObjects.map(id => objects.objects.find(f => f.id + '' === id));
+		const res = [];
+		idsOfObjects.forEach(id => {
+			const obj = objects.objects.find(f => f.id + '' === id);
+
+			if (obj !== undefined)
+				res.push(obj);
+		});
 
 		return res;
 	},
