@@ -1,3 +1,4 @@
+use axum::body::Body;
 use axum::extract::State;
 use axum::response::Response;
 use axum::routing::get;
@@ -16,8 +17,10 @@ use std::process::Command;
 use std::sync::Arc;
 #[cfg(feature = "compile-less")]
 use std::time::Instant;
-use tokio::fs;
+use tokio::fs::{self, File};
+use tokio_util::io::ReaderStream;
 use tower::ServiceBuilder;
+
 use tower_http::trace::TraceLayer;
 
 use tracing::{debug, error, info};
@@ -153,47 +156,31 @@ async fn iwd_serve_file(State(state): State<Arc<AppState>>, uri: Uri) -> Respons
         Ok(metadata) => {
             if metadata.is_file() {
                 // Read the file contents
-                match fs::read(&full_path).await {
-                    Ok(contents) => {
-                        // Guess the MIME type based on the file extension
-                        let mime_type = mime_guess::from_path(&full_path).first_or_octet_stream();
-                        debug!("mime_type: {mime_type:?}");
+                let mime_type = mime_guess::from_path(&full_path).first_or_octet_stream();
+                let new_mime = if mime_type.subtype() == mime::CSS {
+                    mime::TEXT_CSS_UTF_8
+                } else if mime_type.subtype() == mime::HTML {
+                    mime::TEXT_HTML_UTF_8
+                } else {
+                    mime_type
+                };
 
-                        if mime_type.subtype() == mime::CSS {
-                            return (
-                                axum::http::StatusCode::OK,
-                                [(
-                                    axum::http::header::CONTENT_TYPE,
-                                    mime::TEXT_CSS_UTF_8.to_string(),
-                                )],
-                                contents,
-                            )
-                                .into_response();
-                        } else if mime_type.subtype() == mime::HTML {
-                            return (
-                                axum::http::StatusCode::OK,
-                                [(
-                                    axum::http::header::CONTENT_TYPE,
-                                    mime::TEXT_HTML_UTF_8.to_string(),
-                                )],
-                                contents,
-                            )
-                                .into_response();
-                        }
-                        // Return the file contents with the appropriate MIME type
-                        (
-                            axum::http::StatusCode::OK,
-                            [(axum::http::header::CONTENT_TYPE, mime_type.to_string())],
-                            contents,
-                        )
-                            .into_response()
+                let file = match File::open(&full_path).await {
+                    Ok(file) => file,
+                    Err(err) => {
+                        info!("{err:?}. Could not open file: {full_path:?}");
+                        return (StatusCode::NOT_FOUND, "Not Found").into_response();
                     }
-                    Err(e) => {
-                        error!("{e:?}");
-                        // Return 500 Internal Server Error if the file cannot be read
-                        (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
-                    }
-                }
+                };
+
+                let s = ReaderStream::new(file);
+                let bod = Body::from_stream(s);
+                (
+                    StatusCode::OK,
+                    [(axum::http::header::CONTENT_TYPE, new_mime.to_string())],
+                    bod,
+                )
+                    .into_response()
             } else {
                 // If the path exists but is not a file, return 404
                 (StatusCode::NOT_FOUND, "Not Found").into_response()
