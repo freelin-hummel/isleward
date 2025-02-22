@@ -251,6 +251,8 @@ module.exports = {
 		else if (level === 22)
 			xpMax *= 1.6;
 
+		xpMax = Math.ceil(xpMax);
+
 		this.values.xpMax = xpMax;
 
 		this.obj.syncer.setObject(true, 'stats', 'values', 'xpMax', this.values.xpMax);
