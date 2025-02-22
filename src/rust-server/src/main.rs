@@ -218,12 +218,19 @@ async fn serve_index(State(state): State<Arc<AppState>>) -> Response {
 type LessFileCount = usize;
 #[cfg(feature = "compile-less")]
 fn compile_less_css(root_path: &Path) -> LessFileCount {
+    use std::path::Component;
+
     use tracing::trace;
 
     let to_compile = WalkDir::new(root_path)
         .into_iter()
         .filter_map(|x| x.ok())
         .filter(|x| x.path().is_file())
+        .filter(|x| {
+            !x.path()
+                .components()
+                .any(|c| c == Component::Normal(OsStr::new("node_modules")))
+        })
         .filter(|x| x.path().extension() == Some(OsStr::new("less")))
         .map(|x| x.path().to_path_buf())
         .collect::<Vec<_>>();
