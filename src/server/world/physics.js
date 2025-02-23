@@ -235,6 +235,16 @@ module.exports = {
 	},
 
 	hasLos: function (fromX, fromY, toX, toY) {
+		if (fromX === toX && fromY === toY)
+			return true;
+		else if (Math.abs(fromX - toX) <= 1 && Math.abs(fromY - toY) <= 1)
+			return true;
+
+		const { width, height } = this;
+
+		if (fromX < 0 || toX < 0 || fromY < 0 || toY < 0 || fromX >= width || toX >= width || fromY >= height || toY >= height)
+			return false;
+
 		return this.engine.hasLos(fromX, fromY, toX, toY);
 	},
 
