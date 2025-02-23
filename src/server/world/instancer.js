@@ -16,10 +16,14 @@ const transactions = require('../security/transactions');
 //Own helpers
 const { stageZoneIn, unstageZoneIn, clientAck } = require('./instancer/handshakes');
 
+let lastTick;
+let tickInterval;
+
+let cbTick;
+
 module.exports = {
 	instances: [],
 	zoneId: -1,
-	speed: consts.tickTime,
 
 	//During regens, adds are placed in a queue
 	addQueue: [],
@@ -31,6 +35,10 @@ module.exports = {
 
 	init: function (args) {
 		const { zoneId, zoneName } = args;
+
+		tickInterval = consts.tickTime;
+
+		cbTick = this.tick.bind(this);
 
 		this.zoneName = zoneName;
 		this.zoneId = zoneId;
@@ -171,10 +179,17 @@ module.exports = {
 	},
 
 	tick: function () {
+		if (lastTick) {
+			const now = Date.now();
+
+			lastTick = now;
+		} else
+			lastTick = +new Date();
+
 		if (this.regenBusy) {
 			this.tickRegen();
 
-			setTimeout(this.tick.bind(this), this.speed);
+			setTimeout(cbTick, tickInterval);
 
 			return;
 		}
@@ -187,7 +202,9 @@ module.exports = {
 		scheduler.update();
 		mods.tick();
 
-		setTimeout(this.tick.bind(this), this.speed);
+		const hastenNextTickByMs = Date.now() - lastTick;
+
+		setTimeout(cbTick, tickInterval - hastenNextTickByMs);
 	},
 
 	addObject: function (msg) {

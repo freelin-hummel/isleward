@@ -593,61 +593,53 @@ pub mod physics {
 
         #[napi]
         pub fn has_los(&self, from_x: i32, from_y: i32, to_x: i32, to_y: i32) -> bool {
-            if (from_x < 0)
-                || (from_y < 0)
-                || (from_x >= self.width)
-                || (from_y >= self.height)
-                || (to_x < 0)
-                || (to_y < 0)
-                || (to_x >= self.width)
-                || (to_y >= self.height)
-            {
-                return false;
-            }
-
             let collision_map = &self.collision_map;
-            let from_xi: usize = from_x.try_into().unwrap();
-            let from_yi: usize = from_y.try_into().unwrap();
 
-            let to_xi: usize = to_x.try_into().unwrap();
-            let to_yi: usize = to_y.try_into().unwrap();
+            // Convert coordinates once.
+            let fx = from_x as usize;
+            let fy = from_y as usize;
 
-            if collision_map[from_xi][from_yi] == 1 || collision_map[to_xi][to_yi] == 1 {
+            // Check start and target collision status.
+            if collision_map[fx][fy] == 1 {
                 return false;
             }
 
-            let mut dx = (to_x - from_x) as f64;
-            let mut dy = (to_y - from_y) as f64;
+            let tx = to_x as usize;
+            let ty = to_y as usize;
 
-            let mut from_x = from_x as f64;
-            let mut from_y = from_y as f64;
+            if collision_map[tx][ty] == 1 {
+                return false;
+            }
 
-            let distance = ((dx * dx) + (dy * dy)).sqrt();
+            // Compute deltas and distance.
+            let dx = (to_x - from_x) as f64;
+            let dy = (to_y - from_y) as f64;
+            let distance = (dx * dx + dy * dy).sqrt();
 
-            dx /= distance;
-            dy /= distance;
+            // Normalize to get per-step increments.
+            let step_x = dx / distance;
+            let step_y = dy / distance;
 
-            from_x += 0.5;
-            from_y += 0.5;
+            // Start at center of the starting tile.
+            let mut curr_x = from_x as f64 + 0.5;
+            let mut curr_y = from_y as f64 + 0.5;
 
             debug!("float distance: {distance}");
-            let idistance = distance.ceil() as usize;
-            debug!("int distance: {idistance}");
+            let steps = distance.ceil() as usize;
+            debug!("int distance (steps): {steps}");
 
-            for _ in 0..idistance {
-                from_x += dx;
-                from_y += dy;
+            for _ in 0..steps {
+                curr_x += step_x;
+                curr_y += step_y;
+                let ix = curr_x.floor() as usize;
+                let iy = curr_y.floor() as usize;
 
-                let x = from_x.floor() as usize;
-                let y = from_y.floor() as usize;
-
-                if collision_map[x][y] == 1 {
+                if collision_map[ix][iy] == 1 {
                     return false;
-                } else if (x == to_xi) && (y == to_yi) {
+                } else if ix == tx && iy == ty {
                     return true;
                 }
             }
-
             true
         }
 
