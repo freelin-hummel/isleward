@@ -13,7 +13,7 @@ module.exports = (obj, [item, idol]) => {
 
 	generatorStats.generate(item, {
 		statCount: 1,
-		stats: [idol.applyStat]
+		forceStats: [idol.applyStat]
 	}, result);
 
 	item.infusedStats = {
