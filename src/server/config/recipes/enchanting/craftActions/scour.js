@@ -19,7 +19,8 @@ module.exports = (obj, [item]) => {
 
 			if (p === 'lvlRequire') {
 				item.level = Math.min(balance.maxLevel, item.level + value);
-				delete item.originalLevel;
+				if (item.originalLevel === item.level)
+					delete item.originalLevel;
 			}
 		}
 	}
