@@ -1,9 +1,9 @@
 /* eslint-disable-next-line max-lines-per-function */
-const cast = (cpnSpellbook, action, isAuto) => {
+const cast = (cpnSpellbook, action, isAuto, config) => {
 	const { obj, physics, spells } = cpnSpellbook;
 
 	//Stop casting
-	if (!action.has('spell')) {
+	if (!config?.stopOtherCasting && !action.has('spell')) {
 		const wasCasting = cpnSpellbook.isCasting();
 		cpnSpellbook.stopCasting();
 
@@ -22,16 +22,21 @@ const cast = (cpnSpellbook, action, isAuto) => {
 	if (!action.target || action.target.nonSelectable)
 		return false;
 
+	const manaCost = config?.overrides?.manaCost;
+
 	let success = true;
-	if (spell.cd > 0) {
+	if (!config?.ignoreCooldown && spell.cd > 0) {
 		if (!isAuto) {
 			const type = (spell.auto) ? 'Weapon' : 'Spell';
 			cpnSpellbook.sendAnnouncement(`${type} is on cooldown`);
 		}
 		success = false;
-	} else if (spell.manaCost > obj.stats.values.mana) {
-		if (!isAuto)
-			cpnSpellbook.sendAnnouncement('Insufficient mana to cast spell');
+	} else if (manaCost > obj.stats.values.mana) {
+		if (!isAuto) {
+			const msg = config?.overrides?.messages?.insufficientMana ?? 'Insufficient mana to cast spell';
+
+			cpnSpellbook.sendAnnouncement(msg);
+		}
 		success = false;
 	} else if (spell.has('range')) {
 		const distance = Math.max(Math.abs(action.target.x - obj.x), Math.abs(action.target.y - obj.y));
@@ -109,12 +114,14 @@ const cast = (cpnSpellbook, action, isAuto) => {
 		eventBeforeCastSpell.action.target = eventBeforeIsSpellTarget.target;
 	}
 
-	success = spell.castBase(eventBeforeCastSpell.action);
+	success = spell.castBase(eventBeforeCastSpell.action, config);
 	cpnSpellbook.stopCasting(spell, true);
 
 	if (success) {
-		spell.consumeMana();
-		spell.setCd();
+		spell.consumeMana(config);
+
+		if (!config?.ignoreCooldown)
+			spell.setCd();
 	}
 
 	obj.fireEvent('afterCastSpell', {
