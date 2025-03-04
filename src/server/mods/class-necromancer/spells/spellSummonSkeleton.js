@@ -30,22 +30,37 @@ module.exports = {
 	damagePercent: 20,
 	hpPercent: 40,
 
+	/* eslint-disable-next-line max-lines-per-function */
 	cast: function (action) {
 		const { target } = action;
 
 		const {
-			obj, name, cell, minions, maxSummon, summonTemplates, animation,
+			obj, name, cell, minions, summonTemplates, animation,
 			minionsDieOnAggroClear, killMinionsBeforeSummon, killMinionsOnDeath,
 			hpPercent, damagePercent
 		} = this;
 
+		let maxSummon = this.maxSummon;
+
+		const eBeforeCheckMaxSummons = {
+			spellName: this.spellName,
+			caster: this.obj,
+			maxSummon
+		};
+		obj.fireEvent('beforeCheckMaxSummons', eBeforeCheckMaxSummons);
+		maxSummon = eBeforeCheckMaxSummons.maxSummon;
+
 		const positions = this.positions || [[target.x, target.y]];
 		const sheetName = this.sheetName || `${this.folderName}/images/mobs.png`;
 
-		if (killMinionsBeforeSummon)
-			this.killMinions();
+		let livingMinions = minions.filter(m => !m.destroyed);
 
-		const livingMinions = minions.filter(m => !m.destroyed);
+		if (killMinionsBeforeSummon && livingMinions.length >= this.maxSummon) {
+			this.killMinions(1);
+
+			livingMinions = minions.filter(m => !m.destroyed);
+		}
+
 		if (livingMinions.length >= maxSummon)
 			return false;
 
@@ -161,11 +176,19 @@ module.exports = {
 		delete simple.minions;
 	},
 
-	killMinions: function (minion) {
-		this.minions.forEach(m => {
+	killMinions: function (killTotal) {
+		let killedSoFar = 0;
+
+		let mLen = this.minions.length;
+		for (let i = 0; i < mLen; i++) {
+			const m = this.minions[i];
+
 			if (m && !m.destroyed) {
 				m.destroyed = true;
-				this.minions.length = 0;
+				this.minions.spliceWhere(f => f === m);
+
+				i--;
+				mLen--;
 
 				let animations = require('../../../config/animations');
 
@@ -187,8 +210,13 @@ module.exports = {
 						}]
 					}, -1);
 				}
+
+				killedSoFar++;
+
+				if (killTotal !== undefined && killedSoFar === killTotal)
+					break;
 			}
-		});
+		}
 	},
 
 	unlearn: function () {
