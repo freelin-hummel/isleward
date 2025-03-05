@@ -173,6 +173,7 @@ module.exports = {
 
 	events: {
 		afterDeath: function (deathEvent) {
+			console.log('follower death for', this.master.name);
 			this.master.fireEvent('afterFollowerDeath', {
 				deathEvent,
 				follower: this.obj,
