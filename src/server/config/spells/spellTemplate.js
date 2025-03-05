@@ -36,26 +36,28 @@ module.exports = {
 		return inRange;
 	},
 
-	castBase: function (action) {
-		if (this.castTimeMax > 0) {
-			if ((!this.currentAction) || (this.currentAction.target !== action.target)) {
-				this.currentAction = action;
+	castBase: function (action, config) {
+		if (!config?.ignoreCastTime) {
+			if (this.castTimeMax > 0) {
+				if ((!this.currentAction) || (this.currentAction.target !== action.target)) {
+					this.currentAction = action;
 
-				const speedModifier = this.obj.stats.values[this.isAttack ? 'attackSpeed' : 'castSpeed'];
-				const castTimeMax = Math.max(1, Math.ceil(this.castTimeMax * (1 - (speedModifier / 100))));
+					const speedModifier = this.obj.stats.values[this.isAttack ? 'attackSpeed' : 'castSpeed'];
+					const castTimeMax = Math.max(1, Math.ceil(this.castTimeMax * (1 - (speedModifier / 100))));
 
-				const castEvent = {
-					spell: this,
-					castTimeMax: castTimeMax
-				};
-				this.obj.fireEvent('beforeGetSpellCastTime', castEvent);
+					const castEvent = {
+						spell: this,
+						castTimeMax: castTimeMax
+					};
+					this.obj.fireEvent('beforeGetSpellCastTime', castEvent);
 
-				this.currentAction.castTimeMax = castEvent.castTimeMax;
-				this.castTime = castEvent.castTimeMax;
-				this.obj.syncer.set(false, null, 'casting', 0);
+					this.currentAction.castTimeMax = castEvent.castTimeMax;
+					this.castTime = castEvent.castTimeMax;
+					this.obj.syncer.set(false, null, 'casting', 0);
+				}
+
+				return null;
 			}
-
-			return null;
 		}
 
 		return this.cast(action);
@@ -111,9 +113,11 @@ module.exports = {
 		}
 	},
 
-	consumeMana: function () {
+	consumeMana: function (config) {
+		const manaCost = config?.overrides?.manaCost ?? this.manaCost;
+
 		let stats = this.obj.stats.values;
-		stats.mana -= this.manaCost;
+		stats.mana -= manaCost;
 
 		if (this.obj.player)
 			this.obj.syncer.setObject(true, 'stats', 'values', 'mana', stats.mana);

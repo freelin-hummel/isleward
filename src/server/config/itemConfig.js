@@ -118,6 +118,10 @@ module.exports = {
 		return extend({}, itemConfig[id]);
 	},
 
+	add: ({ id, config }) => {
+		itemConfig[id] = config;
+	},
+
 	getByName: name => {
 		const entry = Object.entries(itemConfig).find(([id, config]) => {
 			return config.name === name;
