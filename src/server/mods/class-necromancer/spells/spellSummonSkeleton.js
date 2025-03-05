@@ -43,7 +43,7 @@ module.exports = {
 		let maxSummon = this.maxSummon;
 
 		const eBeforeCheckMaxSummons = {
-			spellName: this.spellName,
+			spellName: this.type,
 			caster: this.obj,
 			maxSummon
 		};
@@ -55,7 +55,7 @@ module.exports = {
 
 		let livingMinions = minions.filter(m => !m.destroyed);
 
-		if (killMinionsBeforeSummon && livingMinions.length >= this.maxSummon) {
+		if (killMinionsBeforeSummon && livingMinions.length >= maxSummon) {
 			this.killMinions(1);
 
 			livingMinions = minions.filter(m => !m.destroyed);
