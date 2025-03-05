@@ -12,6 +12,10 @@ const cast = (cpnSpellbook, action, isAuto, config) => {
 	}
 
 	const spell = spells.find(s => (s.id === action.spell));
+	if (obj.player) {
+		console.log('found spell', !!spell);
+		console.log(config);
+	}
 	if (!spell)
 		return false;
 
