@@ -88,19 +88,23 @@ module.exports = {
 
 		const physics = obj.instance.physics;
 		const fnTileValid = this.isTileValid.bind(this, physics, x, y);
-		//Check where we should land
-		if (!fnTileValid(targetPos.x + offsetX, targetPos.y + offsetY)) {
-			if (!fnTileValid(targetPos.x + offsetX, targetPos.y)) {
-				if (!fnTileValid(targetPos.x, targetPos.y + offsetY)) {
-					targetPos.x -= offsetX;
-					targetPos.y -= offsetY;
-				} else
-					targetPos.y += offsetY;
-			} else 
-				targetPos.x += offsetX;
-		} else {
-			targetPos.x += offsetX;
-			targetPos.y += offsetY;
+
+		//First we try to land directly opposite the target
+		// if that doesn't work, we try just one offset
+		// and fallback to doing nothing (landing directly on the target)
+		const candidateDeltas = [
+			{ dx: offsetX, dy: offsetY },
+			{ dx: offsetX, dy: 0 },
+			{ dx: 0, dy: offsetY },
+			{ dx: -offsetX, dy: -offsetY }
+		];
+
+		for (const { dx: ux, dy: uy } of candidateDeltas) {
+			if (fnTileValid(targetPos.x + ux, targetPos.y + uy)) {
+				targetPos.x += ux;
+				targetPos.y += uy;
+				break;
+			}
 		}
 
 		const selfEffect = this.obj.effects.addEffect({
