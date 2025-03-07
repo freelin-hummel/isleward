@@ -14,6 +14,10 @@ module.exports = {
 		noCrit: false
 	},
 
+	init: function () {
+		this.ttlMax = this.ttl;
+	},
+
 	events: {
 		afterTick: function () {
 			const { isAttack, damage, element, noScale, noMitigate, noCrit } = this.scaleDamage;
@@ -26,7 +30,8 @@ module.exports = {
 				element,
 				noScale,
 				noMitigate,
-				noCrit
+				noCrit,
+				duration: this.ttlMax
 			});
 				
 			this.obj.stats.takeDamage({
