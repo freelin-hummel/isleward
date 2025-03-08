@@ -55,7 +55,7 @@ build-image-latest:
     - docker push $IMAGE_TAG_REF
     - docker push $IMAGE_TAG_ALIAS
   only:
-    - master-rust
+    - master
 
 build-image-stable:
   stage: build
@@ -94,7 +94,7 @@ build-static-server-image-latest:
     - docker push $IMAGE_TAG_REF
     - docker push $IMAGE_TAG_ALIAS
   only:
-    - master-rust
+    - master
 
 build-static-server-image-stable:
   stage: build
