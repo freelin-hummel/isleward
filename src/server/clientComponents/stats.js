@@ -5,16 +5,15 @@ define([
 	events,
 	renderer
 ) {
-	const hpBarPadding = scaleMult;
-	const hpBarHeight = scaleMult;
+	const barPadding = scaleMult;
+	const barHeight = scaleMult;
 
 	return {
 		type: 'stats',
 
 		values: null,
 
-		hpSprite: null,
-		hpSpriteInner: null,
+		bars: [],
 
 		init: function (blueprint) {
 			if (this.obj.self)
@@ -25,66 +24,125 @@ define([
 
 			let obj = this.obj;
 
-			this.hpSprite = renderer.buildRectangle({
+			this.addBar({
+				color: 0x802343,
+				innerColor: 0xd43346,
+				calcPercent: () => (this.values.hp / this.values.hpMax),
+				isVisible: () => (this.values.hp < this.values.hpMax) && (!obj.sprite || obj.sprite.visible)
+			});
+
+			this.updateBars();
+		},
+
+		addBar: function (config) {
+			let obj = this.obj;
+
+			let { color, innerColor, calcPercent, isVisible } = config;
+
+			let sprite = renderer.buildRectangle({
 				layerName: 'effects',
 				x: obj.x * scale,
 				y: obj.y * scale,
 				w: 1,
 				h: 1,
-				color: 0x802343
+				color: color
 			});
-
-			this.hpSpriteInner = renderer.buildRectangle({
-				x: 0,
-				y: 0,
+			let spriteInner = renderer.buildRectangle({
+				layerName: 'effects',
+				x: obj.x,
+				y: obj.y,
 				w: 1,
 				h: 1,
-				layerName: 'effects',
-				color: 0xd43346
+				color: innerColor
 			});
 
-			this.updateHpSprite();
+			let bar = {
+				sprite: sprite,
+				spriteInner: spriteInner,
+				calcPercent: calcPercent,
+				isVisible: isVisible
+			};
+			
+			this.bars.push(bar);
+
+			return bar;
 		},
 
-		updateHpSprite: function () {
+		removeBar: function (bar) {
+			this.removeSprites(this.bars.find(b => b === bar));
+
+			this.bars.spliceFirstWhere(b => b === bar);
+		},
+
+		removeSprites: function (bar) {
+			renderer.destroyObject({
+				sprite: bar.sprite,
+				layerName: 'effects'
+			});
+
+			renderer.destroyObject({
+				sprite: bar.spriteInner,
+				layerName: 'effects'
+			});
+		},
+
+		updateBars: function () {
 			const { obj: { x, y, dead, sprite } } = this;
 
 			if (dead)
 				return;
+			
+			let barIndex = 0;
 
-			//By default, hp sprites are 10px higher than the owner object's sprite. Keeping in
-			// mind that bigger sprites always have their 'origin' in the bottom middle tile
-			const spriteHeight = sprite ? sprite.height : scale;
-			const spriteWidth = sprite ? sprite.width : scale;
+			this.bars.forEach(bar => {
+				const percent = bar.calcPercent();
 
-			const xOffset = -(spriteWidth - scale) / 2;
-			const yOffset = -(spriteHeight - scale) - (scaleMult * 2);
+				//By default, hp sprites are 10px higher than the owner object's sprite. Keeping in
+				// mind that bigger sprites always have their 'origin' in the bottom middle tile
+				const spriteHeight = sprite ? sprite.height : scale;
+				const spriteWidth = sprite ? sprite.width : scale;
 
-			const hpBarWidth = spriteWidth - (hpBarPadding * 2);
+				const xOffset = -(spriteWidth - scale) / 2;
+				const yOffset = -(spriteHeight - scale) - ((barIndex + 1) * scaleMult * 2);
 
-			const newX = (x * scale) + hpBarPadding + xOffset;
-			const newY = (y * scale) + yOffset;
+				const barWidth = spriteWidth - (barPadding * 2);
 
-			renderer.moveRectangle({
-				sprite: this.hpSprite,
-				x: newX,
-				y: newY,
-				w: hpBarWidth,
-				h: hpBarHeight
+				const newX = (x * scale) + barPadding + xOffset;
+				const newY = (y * scale) + yOffset;
+
+				renderer.moveRectangle({
+					sprite: bar.sprite,
+					x: newX,
+					y: newY,
+					w: barWidth,
+					h: barHeight
+				});
+
+				renderer.moveRectangle({
+					sprite: bar.spriteInner,
+					x: newX,
+					y: newY,
+					w: percent * barWidth,
+					h: barHeight
+				});
+
+				const isVisible = bar.isVisible ? bar.isVisible() : true;
+
+				if (isVisible)
+					barIndex++;
+
+				bar.sprite.visible = isVisible;
+				bar.spriteInner.visible = isVisible;
 			});
+		},
 
-			renderer.moveRectangle({
-				sprite: this.hpSpriteInner,
-				x: newX,
-				y: newY,
-				w: (this.values.hp / this.values.hpMax) * hpBarWidth,
-				h: hpBarHeight
+		updateBarVisibility: function (visible) {
+			this.bars.forEach(bar => {
+				const isVisible = (visible !== undefined) ? visible : bar.isVisible();
+
+				bar.sprite.visible = isVisible;
+				bar.spriteInner.visible = isVisible;
 			});
-
-			const isVisible = (this.values.hp < this.values.hpMax) && (!sprite || sprite.visible);
-
-			this.hpSprite.visible = isVisible;
-			this.hpSpriteInner.visible = isVisible;
 		},
 
 		extend: function (blueprint) {
@@ -101,18 +159,12 @@ define([
 			if (this.obj.has('serverId'))
 				events.emit('onGetPartyStats', this.obj.serverId, this.values);
 
-			this.updateHpSprite();
+			this.updateBars();
 		},
 
 		destroy: function () {
-			renderer.destroyObject({
-				sprite: this.hpSprite,
-				layerName: 'effects'
-			});
-
-			renderer.destroyObject({
-				sprite: this.hpSpriteInner,
-				layerName: 'effects'
+			this.bars.forEach(bar => {
+				this.removeSprites(bar);
 			});
 		}
 	};

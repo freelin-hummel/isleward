@@ -105,7 +105,7 @@ define([
 			});
 
 			if (stats)
-				stats.updateHpSprite();
+				stats.updateBars();
 		},
 
 		updateVisibility: function () {
@@ -138,10 +138,8 @@ define([
 			if (this.nameSprite)
 				this.nameSprite.visible = (visible && config.showNames);
 
-			if (!visible && this.stats && this.stats.hpSprite && this.stats.hpSprite.visible) {
-				this.stats.hpSprite.visible = false;
-				this.stats.hpSpriteInner.visible = false;
-			}
+			if (!visible && this.stats)
+				this.stats.updateBarVisibility(false);
 
 			this.components.forEach(c => {
 				if (c.setVisible)
