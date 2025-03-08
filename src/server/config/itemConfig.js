@@ -108,7 +108,7 @@ const itemConfig = {
 		}],
 		factions: [{
 			id: 'gaekatla',
-			tier: 3
+			tier: 7
 		}]
 	}
 };
