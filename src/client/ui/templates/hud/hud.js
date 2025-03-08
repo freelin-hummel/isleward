@@ -30,6 +30,8 @@ define([
 				.on('mousemove', this.showQuickItemTooltip.bind(this, true))
 				.on('mouseleave', this.showQuickItemTooltip.bind(this, false))
 				.on('click', this.useQuickItem.bind(this));
+
+			setInterval(this.update.bind(this), 100);
 		},
 
 		build: function () {
@@ -86,6 +88,33 @@ define([
 				events.emit('onShowItemTooltip', item, ttPos);
 			} else
 				events.emit('onHideItemTooltip', item);
+		},
+
+		update: function () {
+			if (!this.items)
+				return;
+
+			const quickItem = this.items.find(f => f.has('quickSlot'));
+			if (!quickItem)
+				return;
+
+			if (!quickItem.cd) {
+				this.find('.quickItem').find('.cooldown').css({
+					width: '0%'
+				});
+				return;
+			}
+
+			let elapsed = quickItem.cdMax - quickItem.cd;
+			let width = 1 - (elapsed / quickItem.cdMax);
+			if (width <= 0)
+				width = 0;
+
+			width = Math.ceil((width * 100) / 4) * 4;
+
+			this.find('.quickItem').find('.cooldown').css({
+				width: width + '%'
+			});
 		},
 
 		events: {
