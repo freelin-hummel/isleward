@@ -7,7 +7,7 @@
     "compression": "^1.8.0",
     "express": "4.21.2",
     "image-size": "^2.0.0",
-    "less-middleware": "^3.1.0",
+    "less-middleware": "^2.2.1",
     "rethinkdbdash": "^2.3.31",
     "socket.io": "^4.8.1"
   },

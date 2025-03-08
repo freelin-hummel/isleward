@@ -46,7 +46,10 @@ const init = async () => {
 
 		app.use(lessMiddleware('../', {
 			once: compileLessOnce,
-			force: !compileLessOnce
+			force: !compileLessOnce,
+			render: {
+				strictMath: true
+			}
 		}));
 
 		rest.init(app);
