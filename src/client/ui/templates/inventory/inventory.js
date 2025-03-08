@@ -50,7 +50,8 @@ define([
 
 			this.find('.grid')
 				.on('mousemove', this.onMouseMove.bind(this))
-				.on('mouseleave', this.onMouseDown.bind(this, null, null, false));
+				.on('mouseleave', this.onMouseDown.bind(this, null, null, false))
+				.on('mouseup', this.onMouseDown.bind(this, null, null, false));
 
 			this.find('.split-box .amount')
 				.on('mousewheel', this.onChangeStackAmount.bind(this))
@@ -166,7 +167,6 @@ define([
 				this.dragEl = el.clone()
 					.appendTo(this.find('.grid'))
 					.hide()
-					.on('mouseup', this.onMouseDown.bind(this, null, null, false))
 					.addClass('dragging');
 
 				this.dragItem = el;
@@ -235,6 +235,8 @@ define([
 				this.hoverCell = null;
 				this.find('.hover').removeClass('hover');
 			}
+
+			e.stopPropagation();
 		},
 
 		onMouseMove: function (e) {
