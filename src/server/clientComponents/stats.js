@@ -1,3 +1,5 @@
+/* eslint-disable max-lines-per-function */
+
 define([
 	'js/system/events',
 	'js/rendering/renderer'

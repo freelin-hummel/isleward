@@ -12,9 +12,11 @@ module.exports = {
 	},
 
 	events: {
-		beforeTakeDamage: function (damage, source) {
+		beforeTakeDamage: function (damageEvent, source) {
+			const { damage } = damageEvent;
+
 			if (this.amount > 0) {
-				let mitigatedAmount = Math.min(damage.amount, this.amount);
+				const mitigatedAmount = Math.min(damage.amount, this.amount);
 
 				damage.amount -= mitigatedAmount;
 				this.amount -= mitigatedAmount;

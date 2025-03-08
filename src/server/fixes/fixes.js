@@ -95,6 +95,7 @@ module.exports = {
 			item.implicitStats.forEach(({ stat, value }) => {
 				let typeImplicits = itemTypes.types[item.slot][item.type]?.implicitStat;
 				if (!typeImplicits) {
+					/* eslint-disable-next-line no-console */
 					console.log('No type found for', item.slot, item.type);
 
 					return;
@@ -113,6 +114,7 @@ module.exports = {
 				}
 
 				if (!blueprint) {
+					/* eslint-disable-next-line no-console */
 					console.log({
 						error: 'No implicit blueprint found',
 						item: item.name,

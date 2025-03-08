@@ -240,7 +240,6 @@
 		"no-nested-ternary": 1,
 		"no-new-object": 2,
 		"no-spaced-func": 2,
-		"no-underscore-dangle": 1,
 		"no-unneeded-ternary": 2,
 		"object-curly-spacing": [
 			2,

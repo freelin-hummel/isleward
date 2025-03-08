@@ -108,6 +108,7 @@ module.exports = {
 	buildStat: function (item, blueprint, stat, result) {
 		let statBlueprint = this.stats[stat];
 		if (!statBlueprint) {
+			/* eslint-disable-next-line no-console */
 			console.log('No stat blueprint found for', stat, 'on', item.name);
 
 			return;

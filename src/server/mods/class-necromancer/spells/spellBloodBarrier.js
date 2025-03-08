@@ -46,7 +46,7 @@ module.exports = {
 		amount = amount * this.shieldMultiplier;
 		target.effects.addEffect({
 			type: 'shield',
-			ttl: this.frenzyDuration,
+			ttl: this.frenzyDuration * 10,
 			amount: amount,
 			maxAmount: amount
 		});

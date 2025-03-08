@@ -15,7 +15,7 @@ define([
 				this.bar = this.obj.stats.addBar({
 					color: 0x533399,
 					innerColor: 0xa24eff,
-					calcPercent: () => (this.amount / this.maxAmount),
+					calcPercent: () => this.amount / this.maxAmount,
 					isVisible: () => this.visible
 				});
 
