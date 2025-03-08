@@ -1,4 +1,4 @@
-const imageSize = require('image-size');
+const { imageSizeFromFile } = require('image-size/fromFile');
 
 const events = require('../misc/events');
 const fileLister = require('../misc/fileLister');
@@ -261,7 +261,7 @@ module.exports = {
 				continue;
 
 			const path = tex.includes('.png') ? `../${tex}` : `../client/images/${tex}.png`;
-			const dimensions = await imageSize(path);
+			const dimensions = await imageSizeFromFile(path);
 
 			delete dimensions.type;
 

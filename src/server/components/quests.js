@@ -40,8 +40,6 @@ module.exports = {
 		if ((!quest) || (!quest.isReady))
 			return;
 
-		this.obj.auth.track('quest', 'complete', quest.name);
-
 		quest.complete();
 
 		this.quests.spliceWhere(q => q === quest);

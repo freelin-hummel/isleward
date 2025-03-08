@@ -4,15 +4,14 @@
   "description": "isleward",
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
-    "compression": "^1.7.4",
-    "express": "4.19.2",
-    "image-size": "^1.0.0",
+    "compression": "^1.8.0",
+    "express": "4.21.2",
+    "image-size": "^2.0.0",
     "less-middleware": "^3.1.0",
     "rethinkdbdash": "^2.3.31",
-    "socket.io": "^4.2.0",
-    "universal-analytics": "^0.5.1"
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
-    "sqlite3": "^5.0.3"
+    "sqlite3": "^5.1.7"
   }
 }

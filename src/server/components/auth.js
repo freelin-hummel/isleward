@@ -5,7 +5,6 @@ const skins = require('../config/skins');
 const profanities = require('../misc/profanities');
 const fixes = require('../fixes/fixes');
 const spirits = require('../config/spirits');
-const ga = require('../security/ga');
 const eventEmitter = require('../misc/events');
 
 const checkLoginRewards = require('./auth/checkLoginRewards');
@@ -317,8 +316,6 @@ module.exports = {
 		this.username = username;
 		await cons.logOut(this.obj);
 
-		this.initTracker();
-
 		const accountInfo = await io.getAsync({
 			key: username,
 			table: 'accountInfo',
@@ -340,23 +337,6 @@ module.exports = {
 		this.accountInfo = msgAccountInfo.accountInfo;
 
 		msg.callback();
-	},
-
-	initTracker: function () {
-		this.gaTracker = ga.connect(this.username);
-	},
-
-	track: function (category, action, label, value = 1) {
-		process.send({
-			method: 'track',
-			serverId: this.obj.serverId,
-			obj: {
-				category,
-				action,
-				label,
-				value
-			}
-		});
 	},
 
 	register: async function (msg) {
@@ -553,8 +533,6 @@ module.exports = {
 		});
 
 		releaseCreateLock();
-
-		this.initTracker();
 
 		this.play({
 			data: {

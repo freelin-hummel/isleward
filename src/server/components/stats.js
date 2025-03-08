@@ -395,8 +395,6 @@ module.exports = {
 			}
 
 			if (a.obj.player) {
-				a.obj.auth.track('combat', 'kill', target.name);
-
 				//Scale xp by source level so you can't just farm low level mobs (or get boosted on high level mobs).
 				//Mobs that are farther then 10 levels from you, give no xp
 				//We don't currently do this for quests/herb gathering

@@ -102,14 +102,6 @@ const messageHandlers = {
 		objects.updateObject(message);
 	},
 
-	track: function (thread, message) {
-		let player = objects.objects.find(o => o.id === message.serverId);
-		if (!player)
-			return;
-
-		player.auth.gaTracker.track(message.obj);
-	},
-
 	rezone: async function (thread, message) {
 		const { args: { obj, newZone, keepPos = true, threadArgs, forceNew } } = message;
 
