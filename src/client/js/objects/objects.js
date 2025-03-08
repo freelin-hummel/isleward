@@ -279,6 +279,9 @@ define([
 			for (let i = 0; i < len; i++) {
 				let o = objects[i];
 
+				if (o.isNew)
+					delete o.isNew;
+
 				if (o.destroyed) {
 					o.destroy();
 					objects.splice(i, 1);

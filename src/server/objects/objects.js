@@ -78,6 +78,8 @@ module.exports = {
 			obj.x = l.x;
 			obj.y = l.y;
 
+			obj.isNew = true;
+
 			if (l.ttl)
 				obj.ttl = l.ttl;
 
@@ -346,7 +348,7 @@ module.exports = {
 
 			//Don't remove it from the list if it's destroyed, but don't update it either
 			//That's syncer's job
-			if ((o.update) && (!o.destroyed))
+			if (o.update && !o.destroyed)
 				o.update();
 
 			//When objects are sent to other zones, we destroy them immediately (thhrough sendObjToZone)

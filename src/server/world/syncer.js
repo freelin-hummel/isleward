@@ -31,6 +31,10 @@ module.exports = {
 	updateZoneEmpty: function (objects, oList, oLen) {
 		for (let i = 0; i < oLen; i++) {
 			let o = oList[i];
+
+			if (o.isNew)
+				delete o.isNew;
+
 			if (!o.destroyed) 
 				continue;
 
@@ -55,8 +59,12 @@ module.exports = {
 			let ox = o.x;
 			let oy = o.y;
 
-			if (!o.syncer)
+			if (!o.syncer) {
+				if (o.isNew)
+					delete o.isNew;
+
 				continue;
+			}
 
 			let destroyed = o.destroyed;
 
@@ -131,6 +139,7 @@ module.exports = {
 						syncO.self = true;
 						queueFunction(syncO, [ p.serverId ]);
 						p.player.see(oId);
+
 						continue;
 					} else {
 						cached = cache[oId];
@@ -145,6 +154,9 @@ module.exports = {
 					p.player.see(oId);
 				}
 			}
+
+			if (o.isNew)
+				delete o.isNew;
 
 			if (sendTo)
 				queueFunction(sync, toList);
