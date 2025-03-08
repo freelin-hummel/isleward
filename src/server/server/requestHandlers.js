@@ -3,7 +3,10 @@ const validModPatterns = ['.png', '/ui/', '/clientComponents/', '/audio/', '/cli
 
 //Methods
 const appRoot = (req, res) => {
-	res.sendFile('index.html');
+	res.sendFile('index.html', {}, err => {
+		if (err)
+			res.status(500).end(err.message);
+	});
 };
 
 const appFile = (req, res) => {
@@ -22,9 +25,12 @@ const appFile = (req, res) => {
 
 	if (!validRequest)
 		return null;
-	
+
 	res.sendFile(file, {
 		root: '../' + root
+	}, err => {
+		if (err)
+			res.status(404).end(err.message);
 	});
 };
 
