@@ -30,8 +30,6 @@ define([
 				.on('mousemove', this.showQuickItemTooltip.bind(this, true))
 				.on('mouseleave', this.showQuickItemTooltip.bind(this, false))
 				.on('click', this.useQuickItem.bind(this));
-
-			setInterval(this.update.bind(this), 100);
 		},
 
 		build: function () {
