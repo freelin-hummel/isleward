@@ -337,8 +337,13 @@ module.exports = {
 		return spell.canCast(target);
 	},
 
-	cast: function (action, isAuto) {
-		return cast(this, action, isAuto);
+	/* config: {
+		ignoreCooldown: boolean
+		ignoreCastTime: boolean
+		stopOtherCasting: boolean
+	} */
+	cast: function (action, isAuto, config) {
+		return cast(this, action, isAuto, config);
 	},
 
 	getClosestRange: function (spellNum) {

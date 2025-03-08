@@ -1,3 +1,4 @@
+
 let combat = require('../../combat/combat');
 
 module.exports = {
@@ -35,26 +36,28 @@ module.exports = {
 		return inRange;
 	},
 
-	castBase: function (action) {
-		if (this.castTimeMax > 0) {
-			if ((!this.currentAction) || (this.currentAction.target !== action.target)) {
-				this.currentAction = action;
+	castBase: function (action, config) {
+		if (!config?.ignoreCastTime) {
+			if (this.castTimeMax > 0) {
+				if ((!this.currentAction) || (this.currentAction.target !== action.target)) {
+					this.currentAction = action;
 
-				const speedModifier = this.obj.stats.values[this.isAttack ? 'attackSpeed' : 'castSpeed'];
-				const castTimeMax = Math.max(1, Math.ceil(this.castTimeMax * (1 - (speedModifier / 100))));
+					const speedModifier = this.obj.stats.values[this.isAttack ? 'attackSpeed' : 'castSpeed'];
+					const castTimeMax = Math.max(1, Math.ceil(this.castTimeMax * (1 - (speedModifier / 100))));
 
-				const castEvent = {
-					spell: this,
-					castTimeMax: castTimeMax
-				};
-				this.obj.fireEvent('beforeGetSpellCastTime', castEvent);
+					const castEvent = {
+						spell: this,
+						castTimeMax: castTimeMax
+					};
+					this.obj.fireEvent('beforeGetSpellCastTime', castEvent);
 
-				this.currentAction.castTimeMax = castEvent.castTimeMax;
-				this.castTime = castEvent.castTimeMax;
-				this.obj.syncer.set(false, null, 'casting', 0);
+					this.currentAction.castTimeMax = castEvent.castTimeMax;
+					this.castTime = castEvent.castTimeMax;
+					this.obj.syncer.set(false, null, 'casting', 0);
+				}
+
+				return null;
 			}
-
-			return null;
 		}
 
 		return this.cast(action);
@@ -110,9 +113,11 @@ module.exports = {
 		}
 	},
 
-	consumeMana: function () {
+	consumeMana: function (config) {
+		const manaCost = config?.overrides?.manaCost ?? this.manaCost;
+
 		let stats = this.obj.stats.values;
-		stats.mana -= this.manaCost;
+		stats.mana -= manaCost;
 
 		if (this.obj.player)
 			this.obj.syncer.setObject(true, 'stats', 'values', 'mana', stats.mana);
@@ -179,6 +184,8 @@ module.exports = {
 						values: {}
 					}
 				}),
+				spellType: this.type,
+				castTime: this.castTimeMax,
 				damage: (this.healing ?? this.damage) * (this.dmgMult ?? 1),
 				cd: cdMax,
 				element: this.element,
@@ -307,6 +314,8 @@ module.exports = {
 			target: target,
 			damage: (this.healing ?? this.damage) * (this.dmgMult ?? 1),
 			cd: cdMax,
+			spellType: this.type,
+			castTime: this.castTimeMax,
 			element: this.element,
 			statType: this.statType,
 			isAttack: this.isAttack,
@@ -326,7 +335,11 @@ module.exports = {
 		if (this.percentDamage)
 			config.damage = target.stats.values.hpMax * this.damage;
 
-		let damage = combat.getDamage(config);
+		const damage = combat.getDamage(config);
+
+		this.obj.fireEvent('onAfterCalculateDamage', {
+			damage
+		});
 
 		return damage;
 	},

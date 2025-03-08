@@ -1,7 +1,7 @@
 module.exports = {
 	events: {
 		onGetText: function (item) {
-			return 'your hits always crit';
+			return 'All your hits are critical hits';
 		},
 
 		onBeforeCalculateDamage: function (item, damage, target) {

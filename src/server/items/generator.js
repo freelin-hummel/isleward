@@ -1,3 +1,5 @@
+const { setItemRollRanges } = require('../fixes/fixes');
+
 let g1 = require('./generators/level'); 
 let g2 = require('./generators/quality'); 
 let g3 = require('./generators/slots'); 
@@ -82,8 +84,11 @@ module.exports = {
 			item: null
 		};
 		global.instancer.instances[0].eventEmitter.emit('beforeGenerateItem', beforeGenerateItemEvent);
-		if (beforeGenerateItemEvent.item)
+		if (beforeGenerateItemEvent.item) {
+			setItemRollRanges(beforeGenerateItemEvent.item);
+
 			return beforeGenerateItemEvent.item;
+		}
 
 		if (isSpell)
 			spellGenerators.forEach(g => g.generate(item, blueprint));
@@ -120,6 +125,8 @@ module.exports = {
 
 		if (blueprint.description)
 			item.description = blueprint.description;
+
+		setItemRollRanges(item, false);
 
 		return item;
 	},

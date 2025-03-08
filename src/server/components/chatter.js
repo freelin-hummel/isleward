@@ -18,6 +18,8 @@ module.exports = {
 
 			this[p] = blueprint[p];
 		}
+
+		this.chance = blueprint.chance ?? 0.035;
 	},
 
 	update: function () {

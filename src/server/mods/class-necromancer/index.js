@@ -108,7 +108,8 @@ module.exports = {
 				},
 				implicitStat: {
 					stat: 'lifeOnHit',
-					valueMult: 3
+					value: [1, 5],
+					levelMult: 4
 				}
 			};
 		}, this);
@@ -123,8 +124,8 @@ module.exports = {
 			isAttack: true,
 			range: 1,
 			random: {
-				damage: [4, 14],
-				healPercent: [2, 15]
+				damage: [4, 24],
+				healPercent: [10, 20]
 			}
 		};
 
@@ -135,8 +136,8 @@ module.exports = {
 			manaCost: 5,
 			range: 9,
 			random: {
-				damagePercent: [20, 76],
-				hpPercent: [40, 60]
+				damagePercent: [40, 400],
+				hpPercent: [40, 70]
 			}
 		};
 

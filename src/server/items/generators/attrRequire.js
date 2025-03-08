@@ -20,10 +20,10 @@ module.exports = {
 		};
 
 		let perfection = ~~(11 * (this.minSlotPerfection + (Math.random() * (this.maxSlotPerfection - this.minSlotPerfection))));
-
 		generatorStats.generate(tempItem, {
 			forceStats: [blueprint.attrRequire],
-			perfection: perfection
+			perfection: perfection,
+			statCount: 1
 		});
 
 		let statValue = tempItem.stats[Object.keys(tempItem.stats)[0]];

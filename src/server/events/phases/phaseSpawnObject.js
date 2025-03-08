@@ -6,17 +6,19 @@ const buildMob = (objects, mobConfig, i) => {
 
 	const { x, y } = pos;
 
+	let useId = id;
+	if (useId?.indexOf && i !== undefined)
+		useId = useId.split('$').join(i);
+
 	let obj = objects.buildObjects([{
+		id: useId,
 		x,
 		y,
-		sheetName: sheetName || 'objects',
+		sheetName: sheetName ?? 'objects',
 		cell,
 		name,
 		properties
 	}]);
-
-	if (id)
-		obj.id = id.split('$').join(i);
 
 	return obj;
 };

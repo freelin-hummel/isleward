@@ -329,6 +329,20 @@ let types = {
 				value: [1, 5]
 			}
 		},
+		'Curved Dagger': {
+			noDrop: true,
+			attrRequire: ['dex'],
+			spellName: 'melee',
+			spellConfig: {
+				statType: 'dex',
+				cdMax: 3,
+				castTimeMax: 0,
+				useWeaponRange: true,
+				random: {
+					damage: [1.38, 9]
+				}
+			}
+		},
 		Dagger: {
 			attrRequire: 'dex',
 			sprite: [9, 2],

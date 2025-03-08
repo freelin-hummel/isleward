@@ -7,7 +7,7 @@ module.exports = {
 		onGetText: function (item) {
 			let rolls = item.effects.find(e => (e.type === 'damageSelf')).rolls;
 
-			return `you take ${rolls.percentage}% of the damage you deal`;
+			return `You take ${rolls.percentage}% of the damage you deal`;
 		},
 
 		afterDealDamage: function (item, { damage, target }) {

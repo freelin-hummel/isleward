@@ -136,7 +136,9 @@ const buildCpnSpells = (mob, blueprint, typeDefinition, preferStat) => {
 		mob.inventory.getItem(rune);
 	}
 
-	const dmgMult = balance.dmgMults[blueprint.level - 1];
+	let dmgMult = balance.dmgMults[blueprint.level - 1];
+	if (typeDefinition.dmgMult !== undefined)
+		dmgMult *= typeDefinition.dmgMult;
 
 	mob.spellbook.spells.forEach((s, i) => {
 		if (i === 0)
@@ -206,8 +208,12 @@ const build = (mob, blueprint, type, zoneName) => {
 	const zoneConfig = instancer.instances[0].map.zoneConfig;
 
 	const chats = zoneConfig?.chats?.[mob.name.toLowerCase()];
-	if (chats)
-		mob.addComponent('chatter', { chats });
+	if (chats) {
+		mob.addComponent('chatter', {
+			chats,
+			chance: blueprint?.properties?.cpnChatter?.chance
+		});
+	}
 
 	const dialogues = zoneConfig?.dialogues?.[mob.name.toLowerCase()];
 	if (dialogues)

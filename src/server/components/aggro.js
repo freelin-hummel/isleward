@@ -13,7 +13,8 @@ module.exports = {
 	physics: null,
 
 	list: [],
-	ignoreList: [],
+
+	ignoreSet: null,
 
 	threatDecay: 0.9,
 	threatCeiling: 1,
@@ -25,6 +26,8 @@ module.exports = {
 		this.physics = this.obj.instance.physics;
 
 		blueprint = blueprint || {};
+
+		this.ignoreSet = new Set();
 
 		if (blueprint.faction) 
 			this.faction = blueprint.faction;
@@ -82,7 +85,7 @@ module.exports = {
 
 				let lThreat = l.obj.aggro.getHighest();
 				if (lThreat) {
-					l.obj.aggro.list.forEach(function (a) {
+					l.obj.aggro.list.forEach(a => {
 						a.obj.aggro.unIgnore(lThreat);
 					});
 				}
@@ -113,8 +116,8 @@ module.exports = {
 				!c.player || 
 				!obj.player
 			) && 
-			c.aggro.willAutoAttack(obj) &&
-			!list.some(l => l.obj === c)
+			!list.some(l => l.obj === c) &&
+			c.aggro.willAutoAttack(obj)
 		));
 
 		if (!inRange.length)
@@ -154,6 +157,8 @@ module.exports = {
 		let faction = target.aggro.faction;
 		if (!faction || !this.faction)
 			return false;
+		else if (faction === this.faction)
+			return false;
 
 		let rep = this.obj.reputation;
 		if (!rep) {
@@ -167,12 +172,12 @@ module.exports = {
 	},
 
 	ignore: function (obj) {
-		this.ignoreList.spliceWhere(o => o === obj);
-		this.ignoreList.push(obj);
+		if (!this.ignoreSet.has(obj))
+			this.ignoreSet.add(obj);
 	},
 
 	unIgnore: function (obj) {
-		this.ignoreList.spliceWhere(o => o === obj);
+		this.ignoreSet.delete(obj);
 	},
 
 	tryEngage: function (source, amount, threatMult = 1) {
@@ -287,7 +292,7 @@ module.exports = {
 		if (list.length !== lLen && this.dieOnAggroClear)
 			this.obj.destroyed = true;
 
-		this.ignoreList.spliceWhere(o => o === obj);
+		this.ignoreSet.delete(obj);
 
 		//Stuff like cocoons don't have spellbooks
 		if (this.obj.spellbook)
@@ -321,7 +326,7 @@ module.exports = {
 			let l = list[i];
 			let obj = l.obj;
 
-			if (this.ignoreList.some(o => o === obj))
+			if (this.ignoreSet.has(obj))
 				continue;
 
 			if (!highest || l.threat > highest.threat) {
@@ -360,7 +365,7 @@ module.exports = {
 			let l = list[i];
 			let obj = l.obj;
 
-			if (this.ignoreList.some(o => o === obj))
+			if (this.ignoreSet.has(obj))
 				continue;
 
 			let oDistance = Math.max(Math.abs(x - obj.x), Math.abs(y - obj.y));
@@ -374,14 +379,14 @@ module.exports = {
 	},
 
 	getRandom: function () {
-		let useList = this.list.filter(l => (!this.ignoreList.some(o => (o === l.obj))));
+		let useList = this.list.filter(l => (!this.ignoreSet.has(l.obj)));
 		return useList[~~(Math.random() * useList.length)];
 	},
 
 	hasAggroOn: function (obj) {
 		return (
 			this.list.find(l => l.obj === obj) &&
-			!this.ignoreList.find(l => l === obj)
+			!this.ignoreSet.has(obj)
 		);
 	},
 
@@ -402,7 +407,7 @@ module.exports = {
 	},
 
 	clearIgnoreList: function () {
-		this.ignoreList = [];
+		this.ignoreSet.clear();
 	},
 
 	isInCombat: function () {

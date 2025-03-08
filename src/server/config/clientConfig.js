@@ -50,7 +50,7 @@ const config = {
 		'images/characters.png': 8
 	},
 	blockingTileIndices: [
-		6, 7, 54, 55, 62, 63, 154, 189, 190, 192, 193, 194, 195, 196, 197
+		6, 7, 46, 47, 54, 55, 62, 63, 154, 189, 190, 192, 193, 194, 195, 196, 197
 	],
 	tileOpacities: {
 		default: {

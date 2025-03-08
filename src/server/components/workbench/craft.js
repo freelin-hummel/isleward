@@ -34,7 +34,8 @@ module.exports = (cpnWorkbench, msg) => {
 	if (!canCraft)
 		return null;
 
-	materials.forEach(m => inventory.destroyItem({ itemId: m.id }, m.needQuantity));
+	if (!recipe.craftAction)
+		materials.forEach(m => inventory.destroyItem({ itemId: m.id }, m.needQuantity));
 
 	let resultMsg = null;
 
@@ -47,27 +48,32 @@ module.exports = (cpnWorkbench, msg) => {
 		const oldSlots = pickedItems.map(p => p.slot);
 		resultMsg = recipe.craftAction(crafter, pickedItems);
 
-		pickedItems.forEach((p, i) => {
-			if (!p.eq) {
+		if (resultMsg.success !== false)
+			materials.forEach(m => inventory.destroyItem({ itemId: m.id }, m.needQuantity));
+
+		if (!resultMsg.itemsDestroyed) {
+			pickedItems.forEach((p, i) => {
+				if (!p.eq) {
+					pickedItems.forEach(item => syncer.setArray(true, 'inventory', 'getItems', inventory.simplifyItem(item)));
+
+					return;
+				}
+
+				applyItemStats(crafter, p, true);
+
+				if (p.slot !== oldSlots[i])
+					equipment.unequip({ itemId: p.id });
+
+				spellbook.calcDps();
+
 				pickedItems.forEach(item => syncer.setArray(true, 'inventory', 'getItems', inventory.simplifyItem(item)));
-				
-				return;
-			}
+			});
 
-			applyItemStats(crafter, p, true);
-
-			if (p.slot !== oldSlots[i])
-				equipment.unequip({ itemId: p.id });
-
-			spellbook.calcDps();
-
-			pickedItems.forEach(item => syncer.setArray(true, 'inventory', 'getItems', inventory.simplifyItem(item)));
-		});
-
-		equipment.unequipAttrRqrGear();
+			equipment.unequipAttrRqrGear();
+		}
 	}
 
-	if (recipe.item || recipe.items) {
+	if (!resultMsg?.itemsDestroyed && (recipe.item || recipe.items)) {
 		const outputItems = recipe.item ? [ recipe.item ] : recipe.items;
 		outputItems.forEach(itemBpt => {
 			let item = null;
@@ -75,11 +81,13 @@ module.exports = (cpnWorkbench, msg) => {
 				item = generator.generate(itemBpt);
 			else
 				item = extend({}, itemBpt);
-				
-			if (item.description)
-				item.description += `<br /><br />(Crafted by ${crafter.name})`;
-			else
-				item.description = `<br /><br />(Crafted by ${crafter.name})`;
+
+			if (recipe.addCreatedByToDescription !== false) {
+				if (item.description)
+					item.description += `<br /><br />(Crafted by ${crafter.name})`;
+				else
+					item.description = `<br /><br />(Crafted by ${crafter.name})`;
+			}
 				
 			const quantity = item.quantity;
 			if (quantity && quantity.push)
@@ -88,6 +96,9 @@ module.exports = (cpnWorkbench, msg) => {
 			crafter.inventory.getItem(item);
 		});
 	}
+
+	if (resultMsg?.itemsDestroyed)
+		msg.pickedItemIds = [];
 
 	const emAfterCraft = {
 		resultMsg,

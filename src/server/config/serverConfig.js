@@ -1,8 +1,8 @@
 /* eslint-disable no-process-env */
 
 module.exports = {
-	version: '0.15.0',
-	port: 4000,
+	version: '0.17.0',
+	port: process.env.IWD_PORT || 4000,
 	startupMessage: 'Ready: Server',
 
 	nodeEnv: process.env.NODE_ENV,
@@ -10,7 +10,7 @@ module.exports = {
 	//Options:
 	// sqlite
 	// rethink
-	db: process.env.IWD_DB || 'sqlite',
+	db: process.env.IWD_DB || 'rethink',
 	dbHost: process.env.IWD_DB_HOST || 'localhost',
 	dbPort: process.env.IWD_DB_PORT || 28015,
 	dbName: process.env.IWD_DB_NAME || 'live',

@@ -272,7 +272,6 @@ module.exports = {
 
 	performMove: function (action) {
 		const { x: xOld, y: yOld, syncer, aggro, instance: { physics } } = this;
-
 		const { maxDistance = 1, force, data } = action;
 		const { x: xNew, y: yNew } = data;
 
@@ -285,6 +284,7 @@ module.exports = {
 			if (data.success === false) {
 				action.priority = true;
 				this.queue(action);
+
 				return true;
 			}
 
@@ -305,7 +305,6 @@ module.exports = {
 
 		this.x = xNew;
 		this.y = yNew;
-
 		if (physics.addObject(this, xNew, yNew, xOld, yOld))
 			physics.removeObject(this, xOld, yOld, xNew, yNew);
 		else {

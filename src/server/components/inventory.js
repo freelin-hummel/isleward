@@ -26,6 +26,8 @@ module.exports = {
 
 	blueprint: null,
 
+	itemIdsBeingStashed: [],
+
 	init: function (blueprint, isTransfer) {
 		let items = blueprint.items || [];
 		let iLen = items.length;
@@ -246,19 +248,35 @@ module.exports = {
 	},
 
 	stashItem: async function ({ itemId }) {
+		const { obj, itemIdsBeingStashed } = this;
+
+		if (itemIdsBeingStashed.includes(itemId)) {
+			const message = 'Deposit failed: You can not stash this item';
+			obj.social.notifySelf({ message });
+
+			return;
+		}
+
+		itemIdsBeingStashed.push(itemId);
+
 		const item = this.findItem(itemId);
 		if (!item || item.quest || item.noStash)
 			return;
 
 		delete item.pos;
 
-		const stash = this.obj.stash;
+		const stash = obj.stash;
 		const clonedItem = extend({}, item);
 		const success = await stash.deposit(clonedItem);
-		if (!success)
+		if (!success) {
+			itemIdsBeingStashed.spliceWhere(f => f === itemId);
+
 			return;
+		}
 
 		this.destroyItem({ itemId: itemId }, null, true);
+
+		itemIdsBeingStashed.spliceWhere(f => f === itemId);
 	},
 
 	salvageItem: function ({ itemId }) {
@@ -367,7 +385,7 @@ module.exports = {
 			let item = items[i];
 
 			if (item.effects) {
-				item.effects.forEach(function (e) {
+				item.effects.forEach(e => {
 					if (e.factionId) {
 						let faction = factions.getFaction(e.factionId);
 						let statGenerator = faction.uniqueStat;
@@ -707,7 +725,7 @@ module.exports = {
 		if (item.level > statValues.level)
 			errors.push('level');
 
-		if (item.requires && statValues[item.requires[0].stat] < item.requires[0].value)
+		if (item.requires?.[0] !== undefined && statValues[item.requires[0].stat] < item.requires[0].value)
 			errors.push(item.requires[0].stat);
 
 		if (item.factions?.some(f => reputation.getTier(f.id) < f.tier))

@@ -97,12 +97,12 @@ module.exports = {
 		});
 	},
 
-	apply: function (msg) {
+	apply: async function (msg) {
 		let obj = this.obj.instance.objects.objects.find(o => o.serverId === msg.sourceId);
 		if (
 			!obj ||
 			!this.proximalPlayers.some(p => p === obj) ||
-			!obj.auth.doesOwnSkin(msg.skinId)
+			!(await obj.auth.doesOwnSkin(msg.skinId))
 		)
 			return;
 

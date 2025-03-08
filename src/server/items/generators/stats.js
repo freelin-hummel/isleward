@@ -51,7 +51,7 @@ module.exports = {
 
 		//Force stats should always be rolled on an item, even if said stat should be ignored or can't occur on a slot
 		if (blueprint.forceStats) {
-			const clonedStats = extend([], blueprint.stats);
+			const clonedStats = extend([], blueprint.forceStats);
 			let len = Math.min(statCount, clonedStats.length);
 			for (let i = 0; i < len; i++) {
 				const choice = clonedStats[~~(Math.random() * clonedStats.length)];
@@ -101,12 +101,17 @@ module.exports = {
 		for (let s in item.stats) {
 			item.stats[s] = Math.round(item.stats[s]);
 			if (item.stats[s] === 0)
-				delete item.stats[s];
+				item.stats[s] = 1;
 		}
 	},
 
 	buildStat: function (item, blueprint, stat, result) {
-		const statBlueprint = this.stats[stat];
+		let statBlueprint = this.stats[stat];
+		if (!statBlueprint) {
+			console.log('No stat blueprint found for', stat, 'on', item.name);
+
+			return;
+		}
 
 		let value = null;
 
@@ -124,18 +129,22 @@ module.exports = {
 
 		if (result?.addStatMsgs) {
 			value = Math.round(value);
+			if (value === 0)
+				value = 1;
 
 			result.addStatMsgs.push({
 				stat,
 				value
 			});
 
-			if (!item.enchantedStats)
-				item.enchantedStats = {};
-			if (item.enchantedStats[stat])
-				item.enchantedStats[stat] += value;
-			else
-				item.enchantedStats[stat] = value;
+			if (result?.addToEnchantedStats !== false) {
+				if (!item.enchantedStats)
+					item.enchantedStats = {};
+				if (item.enchantedStats[stat])
+					item.enchantedStats[stat] += value;
+				else
+					item.enchantedStats[stat] = value;
+			}
 		}
 
 		if (stat === 'lvlRequire') {
@@ -164,11 +173,16 @@ module.exports = {
 				const [min, max] = i.value;
 
 				if (perfection === undefined)
-					stat.value = Math.ceil(random.expNorm(min, max));
+					stat.value = random.expNorm(min, max);
 				else
-					stat.value = Math.ceil(min + ((max - min) * perfection));
+					stat.value = min + ((max - min) * perfection);
+
+				if (i.levelMult)
+					stat.value = Math.round(stat.value * (item.level * i.levelMult));
+				else
+					stat.value = Math.round(stat.value);
 			} else if (i.valueMult) {
-				let statBlueprint = this.stats[i.stat];
+				const statBlueprint = this.stats[i.stat];
 
 				if (statBlueprint.generator) {
 					const generator = this.generators[statBlueprint.generator];

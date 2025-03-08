@@ -1,438 +1,267 @@
-let pathfinder = require('../misc/pathfinder');
+/*
+	Todo:
+		getClosestPos
+*/
 
-let sqrt = Math.sqrt.bind(Math);
-let ceil = Math.ceil.bind(Math);
-let mathRand = Math.random.bind(Math);
+//System
+const objects = require('../objects/objects');
+const rustModules = require('../../rust-modules');
 
+//Helpers
+const mathRand = Math.random.bind(Math);
+
+//Module
 module.exports = {
-	graph: null,
-
-	collisionMap: null,
-	cells: [],
 	width: 0,
 	height: 0,
 
-	init: function (collisionMap) {
-		this.collisionMap = collisionMap;
+	collisionMap: null,
 
+	engine: null,
+
+	init: function (collisionMap) {
 		this.width = collisionMap.length;
 		this.height = collisionMap[0].length;
 
-		this.cells = _.get2dArray(this.width, this.height, 'array');
+		this.collisionMap = collisionMap;
 
-		this.graph = new pathfinder.Graph(collisionMap, {
-			diagonal: true
-		});
+		this.engine = new rustModules.physics.Physics(collisionMap, this.width, this.height);
 	},
 
-	addRegion: function (obj, oldPosition) {
-		let lowX = obj.x;
-		let lowY = obj.y;
-		let highX = lowX + obj.width;
-		let highY = lowY + obj.height;
-		let cells = this.cells;
+	addRegion: function (obj, fromX, fromY, fromWidth, fromHeight) {
+		const idsOfCollidingObjects = this.engine.addRegion(obj, fromX, fromY, fromWidth, fromHeight);
+		
+		for (let id of idsOfCollidingObjects) {
+			const f = objects.objects.find(o => o.id + '' === id);
 
-		for (let i = lowX; i < highX; i++) {
-			let row = cells[i];
-			for (let j = lowY; j < highY; j++) {
-				let cell = row[j];
-
-				if (!cell)
-					continue;
-
-				let cLen = cell.length;
-				for (let k = 0; k < cLen; k++) {
-					let c = cell[k];
-
-					//Only remove if the old position didn't contain the object
-					if (
-						!oldPosition ||
-						(
-							oldPosition.x + oldPosition.width <= c.x ||
-							oldPosition.x > c.x ||
-							oldPosition.y + oldPosition.height <= c.y ||
-							oldPosition.y > c.y
-						)
-					) {
-						c.collisionEnter(obj);
-						obj.collisionEnter(c);
-					}
-				}
-
-				cell.push(obj);
-			}
+			f.collisionEnter(obj);
+			obj.collisionEnter(f);
 		}
 	},
 
-	removeRegion: function (obj, newPosition) {
-		let oId = obj.id;
+	removeRegion: function (obj, toX, toY, toWidth, toHeight) {
+		const idsOfCollidingObjects = this.engine.removeRegion(obj, toX, toY, toWidth, toHeight);
 
-		let lowX = obj.x;
-		let lowY = obj.y;
-		let highX = lowX + obj.width;
-		let highY = lowY + obj.height;
-		let cells = this.cells;
+		for (let id of idsOfCollidingObjects) {
+			const f = objects.objects.find(o => o.id + '' === id);
 
-		for (let i = lowX; i < highX; i++) {
-			let row = cells[i];
-			for (let j = lowY; j < highY; j++) {
-				let cell = row[j];
-
-				if (!cell)
-					continue;
-
-				let cLen = cell.length;
-				for (let k = 0; k < cLen; k++) {
-					let c = cell[k];
-
-					if (c.id !== oId) {
-						//Only remove if the new position won't still contain the object
-						if (
-							!newPosition ||
-							(
-								newPosition.x + newPosition.width <= c.x ||
-								newPosition.x > c.x ||
-								newPosition.y + newPosition.height <= c.y ||
-								newPosition.y > c.y
-							)
-						) {
-							c.collisionExit(obj);
-							obj.collisionExit(c);
-						}
-					} else {
-						cell.splice(k, 1);
-						k--;
-						cLen--;
-					}
-				}
-			}
+			f.collisionExit(obj);
+			obj.collisionExit(f);
 		}
 	},
 
 	addObject: function (obj, x, y, fromX, fromY) {
-		let row = this.cells[x];
+		const idsOfCollidingObjects = this.engine.beforeAddObject(x, y, fromX, fromY);
 
-		if (!row)
-			return;
+		for (let entry of idsOfCollidingObjects) {
+			const [typeOfEvent, id] = entry.split('|');
 
-		let cell = row[y];
+			const checkObj = objects.objects.find(f => f.id + '' === id);
 
-		if (!cell)
-			return;
-
-		let cLen = cell.length;
-		for (let i = 0; i < cLen; i++) {
-			let c = cell[i];
-
-			//Maybe something was removed from the cell while we were running
-			if (!c)
+			// TODO: Ensure these can be ignored. Possible the object has already been deleted from the world
+			if (!checkObj)
 				continue;
-
-			//If we have fromX and fromY, check if the target cell doesn't contain the same obj (like a notice area)
-			if ((c.width) && (fromX)) {
-				if (c.area) {
-					if ((this.isInPolygon(x, y, c.area)) && (!this.isInPolygon(fromX, fromY, c.area))) {
-						c.collisionEnter(obj);
-						obj.collisionEnter(c);
-					}
-				} else if ((fromX < c.x) || (fromY < c.y) || (fromX >= c.x + c.width) || (fromY >= c.y + c.height)) {
-					c.collisionEnter(obj);
-					obj.collisionEnter(c);
-				} else if ((fromX >= c.x) && (fromY >= c.y) && (fromX < c.x + c.width) && (fromY < c.y + c.height)) {
-					c.collisionStay(obj);
-					obj.collisionStay(c);
-				}
-			} else {
-				//If a callback returns true, it means we collide
-				if (c.collisionEnter(obj))
+			else if (typeOfEvent === 'enter') {
+				if (checkObj.collisionEnter(obj)) 
 					return;
-				obj.collisionEnter(c);
+			
+				obj.collisionEnter(checkObj);
+			} else if (typeOfEvent === 'stay') {
+				checkObj.collisionStay(obj);
+				obj.collisionStay(checkObj);
 			}
 		}
 
-		//Perhaps a collisionEvent caused us to move somewhere else, in which case, we don't push to the cell
-		// as we assume that the collisionEvent handled it for us
-		if (obj.x === x && obj.y === y)
-			cell.push(obj);
-		
+		this.engine.addObject(obj, x, y);
+
 		return true;
 	},
 
 	removeObject: function (obj, x, y, toX, toY) {
-		let row = this.cells[x];
-
-		if (!row)
+		const idsOfCollidingObjects = this.engine.removeObject(obj, x, y, toX, toY);
+		if (!idsOfCollidingObjects)
 			return;
 
-		let cell = row[y];
+		for (let id of idsOfCollidingObjects) {
+			const checkObj = objects.objects.find(f => f.id + '' === id);
+			//If we can't find it, it means it's already been removed before physics knew about it
+			if (!checkObj)
+				continue;
 
-		if (!cell)
-			return;
-
-		let oId = obj.id;
-		let cLen = cell.length;
-		for (let i = 0; i < cLen; i++) {
-			let c = cell[i];
-
-			if (c.id !== oId) {
-				//If we have toX and toY, check if the target cell doesn't contain the same obj (like a notice area)
-				if ((c.width) && (toX)) {
-					if (c.area) {
-						if ((this.isInPolygon(x, y, c.area)) && (!this.isInPolygon(toX, toY, c.area))) {
-							c.collisionExit(obj);
-							obj.collisionExit(c);
-						}
-					} else if ((toX < c.x) || (toY < c.y) || (toX >= c.x + c.width) || (toY >= c.y + c.height)) {
-						c.collisionExit(obj);
-						obj.collisionExit(c);
-					}
-				} else {
-					c.collisionExit(obj);
-					obj.collisionExit(c);
-				}
-			} else {
-				cell.splice(i, 1);
-				i--;
-				cLen--;
-			}
+			checkObj.collisionExit(obj); 
+			obj.collisionExit(checkObj);
 		}
 	},
 
 	isValid: function (x, y) {
-		let row = this.cells[x];
+		const { width, height, engine } = this;
 
-		if ((!row) || (row.length <= y) || (!this.graph.grid[x][y]))
-			return false;
-		return true;
+		const isInvalid = (
+			x === undefined || 
+			y === undefined ||
+			x < 0 ||
+			x >= width ||
+			y < 0 ||
+			y >= height ||
+			engine.doesCollide(x, y)
+		);
+
+		return !isInvalid;
 	},
 
 	getCell: function (x, y) {
-		let row = this.cells[x];
+		const idsOfObjects = this.engine.getCell(x, y);
 
-		if (!row)
-			return [];
+		const res = [];
+		idsOfObjects.forEach(id => {
+			const obj = objects.objects.find(f => f.id + '' === id);
 
-		let cell = row[y];
+			if (obj !== undefined)
+				res.push(obj);
+		});
 
-		if (!cell)
-			return [];
-
-		return cell;
+		return res;
 	},
+
 	getArea: function (x1, y1, x2, y2, filter) {
-		let width = this.width;
-		let height = this.height;
+		const { width, height, engine } = this;
 
-		x1 = ~~x1;
-		y1 = ~~y1;
+		const idsOfObjects = engine.getArea(
+			Math.max(0, x1),
+			Math.max(0, y1),
+			Math.min(x2, width - 1),
+			Math.min(y2, height - 1)
+		);
 
-		x2 = ~~x2;
-		y2 = ~~y2;
+		let res = idsOfObjects
+			.map(id => objects.objects.find(f => f.id + '' === id))
+			.filter(obj => obj !== undefined);
 
-		if (x1 < 0)
-			x1 = 0;
-		if (x2 >= width)
-			x2 = width - 1;
-		if (y1 < 0)
-			y1 = 0;
-		if (y2 >= height)
-			y2 = height - 1;
+		if (filter)
+			res = res.filter(f => filter(f));
 
-		let cells = this.cells;
-		let grid = this.graph.grid;
-
-		let result = [];
-		for (let i = x1; i <= x2; i++) {
-			let row = cells[i];
-			let gridRow = grid[i];
-			for (let j = y1; j <= y2; j++) {
-				if (!gridRow[j])
-					continue;
-
-				let cell = row[j];
-				let cLen = cell.length;
-				for (let k = 0; k < cLen; k++) {
-					let c = cell[k];
-
-					if (filter) {
-						if (filter(c))
-							result.push(c);
-					} else
-						result.push(c);
-				}
-			}
-		}
-
-		return result;
+		return res;
 	},
 
 	getOpenCellInArea: function (x1, y1, x2, y2) {
-		let width = this.width;
-		let height = this.height;
+		const { width, height, engine } = this;
 
-		x1 = ~~x1;
-		y1 = ~~y1;
+		const cellCoordinates = engine.getOpenCellInArea(
+			Math.max(0, x1),
+			Math.max(0, y1),
+			Math.min(x2, width - 1),
+			Math.min(y2, height - 1)
+		);
 
-		x2 = ~~x2;
-		y2 = ~~y2;
+		const firstEntry = cellCoordinates.find(c => {
+			const contents = this.getCell(c.x, c.y);
 
-		if (x1 < 0)
-			x1 = 0;
-		else if (x2 >= width)
-			x2 = width - 1;
-		if (y1 < 0)
-			y1 = 0;
-		else if (y2 >= height)
-			y2 = height - 1;
+			//If the only contents are notices, we can still use it
+			return (
+				contents.length === 0 ||
+				!contents.some(f => !f.notice)
+			);
+		});
 
-		let cells = this.cells;
-		let grid = this.graph.grid;
-
-		for (let i = x1; i <= x2; i++) {
-			let row = cells[i];
-			let gridRow = grid[i];
-			for (let j = y1; j <= y2; j++) {
-				if (!gridRow[j])
-					continue;
-
-				let cell = row[j];
-				if (cell.length === 0) {
-					return {
-						x: i,
-						y: j
-					};
-				} 
-				//If the only contents are notices, we can still use it
-				let allNotices = !cell.some(c => !c.notice);
-				if (allNotices) {
-					return {
-						x: i,
-						y: j
-					};
-				}
-			}
-		}
-
-		return null;
+		return firstEntry;
 	},
 
 	getPath: function (from, to) {
-		let graph = this.graph;
-		let grid = graph.grid;
+		const { width, height, engine } = this;
+
+		const fromX = ~~from.x;
+		const fromY = ~~from.y;
+
+		if (fromX < 0 || fromX >= width || fromY < 0 || fromY >= height)
+			return [];
+
+		const fromCollides = engine.doesCollide(fromX, fromY);
+		if (fromCollides)
+			return [];
 
 		if (!to) {
 			to = {
-				x: ~~(mathRand() * grid.length),
-				y: ~~(mathRand() * grid[0].length)
+				x: ~~(mathRand() * width),
+				y: ~~(mathRand() * height)
 			};
 		}
 
-		let fromX = ~~from.x;
-		let fromY = ~~from.y;
+		const toX = ~~to.x;
+		const toY = ~~to.y;
 
-		if ((!grid[fromX]) || (grid[fromX].length <= fromY) || (fromX < 0) || (fromY < 0))
+		if (toX < 0 || toX >= width || toY < 0 || toY >= height)
 			return [];
 
-		let toX = ~~to.x;
-		let toY = ~~to.y;
-
-		if ((!grid[toX]) || (grid[toX].length <= toY) || (toX < 0) || (toY < 0))
+		const toCollides = engine.doesCollide(toX, toY);
+		if (toCollides)
 			return [];
 
-		let path = pathfinder.astar.search(graph, {
-			x: fromX,
-			y: fromY
-		}, {
-			x: toX,
-			y: toY
-		}, {
-			closest: true
-		});
+		const path = engine.getPath(fromX, toX, fromY, toY);
+		if (!path) 
+			return [];
 
 		return path;
 	},
+
 	isTileBlocking: function (x, y) {
-		if ((x < 0) || (y < 0) || (x >= this.width) | (y >= this.height))
+		const { width, height, engine } = this;
+
+		if (x < 0 || y < 0 || x >= width || y >= height)
 			return true;
 
 		x = ~~x;
 		y = ~~y;
 
-		let node = this.graph.grid[x][y];
-		if (node)
-			return (node.weight === 0);
-		return true;
+		return engine.doesCollide(x, y);
 	},
+
 	isCellOpen: function (x, y) {
-		if ((x < 0) || (y < 0) || (x >= this.width) | (y >= this.height))
+		const { width, height } = this;
+
+		if (x < 0 || y < 0 || x >= width || y >= height)
 			return true;
 
-		let cells = this.cells[x][y];
-		let cLen = cells.length;
-		for (let i = 0; i < cLen; i++) {
-			let c = cells[i];
-			if (!c.notice)
-				return false;
-		}
+		const cell = this.getCell(x, y);
 
-		return true;
+		if (cell.length === 0)
+			return true;
+
+		//If the cell has contents but all of them are notices, we are still open
+		const isBlocked = cell.some(obj => {
+			return !obj.notice;
+		});
+
+		return !isBlocked;
 	},
+
 	hasLos: function (fromX, fromY, toX, toY) {
-		if ((fromX < 0) || (fromY < 0) || (fromX >= this.width) | (fromY >= this.height) || (toX < 0) || (toY < 0) || (toX >= this.width) | (toY >= this.height))
-			return false;
-
-		let graphGrid = this.graph.grid;
-
-		if ((!graphGrid[fromX][fromY]) || (!graphGrid[toX][toY]))
-			return false;
-
-		let dx = toX - fromX;
-		let dy = toY - fromY;
-
-		let distance = sqrt((dx * dx) + (dy * dy));
-
-		dx /= distance;
-		dy /= distance;
-
-		fromX += 0.5;
-		fromY += 0.5;
-
-		distance = ceil(distance);
-
-		let x = 0;
-		let y = 0;
-
-		for (let i = 0; i < distance; i++) {
-			fromX += dx;
-			fromY += dy;
-
-			x = ~~fromX;
-			y = ~~fromY;
-
-			let node = graphGrid[x][y];
-
-			if ((!node) || (node.weight === 0))
+		if (fromX === toX && fromY === toY)
+			return true;
+		else if (Math.abs(fromX - toX) <= 1 && Math.abs(fromY - toY) <= 1) {
+			if (this.isTileBlocking(toX, toY))
 				return false;
-			else if ((x === toX) && (y === toY))
-				return true;
+
+			return true;
 		}
 
-		return true;
+		const { width, height } = this;
+
+		if (fromX < 0 || toX < 0 || fromY < 0 || toY < 0 || fromX >= width || toX >= width || fromY >= height || toY >= height)
+			return false;
+
+		return this.engine.hasLos(fromX, fromY, toX, toY);
 	},
 
 	getClosestPos: function (fromX, fromY, toX, toY, target, obj) {
-		let tried = {};
+		const { width, height, collisionMap } = this;
 
-		let hasLos = this.hasLos.bind(this, toX, toY);
+		const tried = {};
 
-		let width = this.width;
-		let height = this.height;
+		const hasLos = this.hasLos.bind(this, toX, toY);
+		const getCell = this.getCell.bind(this);
 
-		let collisionMap = this.collisionMap;
-		let cells = this.cells;
-
-		let reverseX = (fromX > toX);
-		let reverseY = (fromY > toY);
+		const reverseX = (fromX > toX);
+		const reverseY = (fromY > toY);
 
 		for (let c = 1; c <= 10; c++) {
 			let x1 = toX - c;
@@ -467,7 +296,6 @@ module.exports = {
 					continue;
 
 				let row = collisionMap[i];
-				let cellRow = cells[i];
 
 				let t = tried[i];
 				if (!t) 
@@ -487,7 +315,7 @@ module.exports = {
 						continue;
 
 					if (target && obj) {
-						let cell = cellRow[j];
+						let cell = getCell(i, j);
 						if (this.mobsCollide(i, j, obj, target, cell))
 							continue;
 					}
@@ -508,12 +336,8 @@ module.exports = {
 	mobsCollide: function (x, y, obj, target, cell) {
 		const allowOne = !cell;
 
-		if (!cell) {
-			if (x < 0 || y < 0 || x >= this.width | y >= this.height)
-				return true;
-
-			cell = this.cells[x][y];
-		}
+		if (!cell)
+			cell = this.getCell(x, y);
 
 		let cLen = cell.length;
 
@@ -524,6 +348,10 @@ module.exports = {
 
 		for (let i = 0; i < cLen; i++) {
 			let c = cell[i];
+			//Perhaps it was removed
+			if (!c)
+				return;
+
 			//If we're first in the cell, we get preference
 			if (c === obj)
 				return false;
@@ -537,39 +365,14 @@ module.exports = {
 	},
 
 	setCollision: function (x, y, collides) {
-		this.collisionMap[x][y] = collides ? 1 : 0;
+		const collisionFlag = collides ? 1 : 0;
 
-		let grid = this.graph.grid;
-		if (!grid[x][y]) 
-			grid[x][y] = new pathfinder.gridNode(x, y, collides ? 0 : 1);
-		else {
-			grid[x][y].weight = collides ? 0 : 1;
-			pathfinder.astar.cleanNode(grid[x][y]);
-		}
+		this.engine.setCollision(x, y, collisionFlag);
+
+		this.collisionMap[x][y] = collides;
 	},
 
 	isInPolygon: function (x, y, verts) {
-		let inside = false;
-
-		let vLen = verts.length;
-		for (let i = 0, j = vLen - 1; i < vLen; j = i++) {
-			let vi = verts[i];
-			let vj = verts[j];
-
-			let xi = vi[0];
-			let yi = vi[1];
-			let xj = vj[0];
-			let yj = vj[1];
-
-			let doesIntersect = (
-				((yi > y) !== (yj > y)) &&
-					(x < ((((xj - xi) * (y - yi)) / (yj - yi)) + xi))
-			);
-
-			if (doesIntersect)
-				inside = !inside;
-		}
-
-		return inside;
+		return this.engine.isInPolygon(x, y, verts);
 	}
 };

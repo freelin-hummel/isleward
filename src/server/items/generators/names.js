@@ -3,8 +3,9 @@ let suffixes = require('../config/suffixes');
 
 module.exports = {
 	generators: [
-		'basic', ['basic'],
-		['gPrefix', 'gSuffix'],
+		'basic',
+		'basic',
+		'basic',
 		['gPrefix', 'gSuffix'],
 		['gPrefix', 'gSuffix']
 	],

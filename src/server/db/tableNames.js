@@ -8,7 +8,8 @@ const tableNames = [
 	'modLog',
 	'recipes',
 	'stash',
-	'events'
+	'events',
+	'eventOverrides'
 ];
 
 module.exports = tableNames;
