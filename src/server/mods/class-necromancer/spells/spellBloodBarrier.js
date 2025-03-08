@@ -44,11 +44,11 @@ module.exports = {
 		});
 
 		amount = amount * this.shieldMultiplier;
-		const heal = { amount };
-		target.stats.getHp({
-			heal, 
-			source: obj,
-			target
+		target.effects.addEffect({
+			type: 'shield',
+			ttl: this.frenzyDuration,
+			amount: amount,
+			maxAmount: amount
 		});
 
 		//Only reset the first spell's cooldown if it's an auto attack and not a spell

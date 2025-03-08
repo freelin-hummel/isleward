@@ -1,7 +1,11 @@
 module.exports = {
 	syncExtend: function (data) {
 		let effects = this.obj.effects;
-		effects.syncExtend(this.id, data);
+		effects.syncExtend(this.id, data, false);
+	},
+	syncExtendSelf: function (data) {
+		let effects = this.obj.effects;
+		effects.syncExtend(this.id, data, true);
 	},
 
 	isFirstOfType: function () {
@@ -34,5 +38,5 @@ module.exports = {
 			id: this.id,
 			type: this.type
 		};
-	}	
+	}
 };

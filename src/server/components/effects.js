@@ -152,7 +152,7 @@ module.exports = {
 		//If there is no existing effect or the effect is not stackable, make a new effect
 		if (!oldEffect || !oldEffect.shouldStack)
 			return this.buildEffect(options);
-		
+
 		//If the effect is stackable and the new effect should stack, stack with the old effect
 		let shouldStack = oldEffect.shouldStack(options);
 		if (shouldStack && oldEffect.incrementStack) {
@@ -184,17 +184,17 @@ module.exports = {
 	buildEffect: function (options) {
 		let builtEffect = this.getTypeTemplate(options.type);
 
-		for (let p in options) 
+		for (let p in options)
 			builtEffect[p] = options[p];
-		
+
 		builtEffect.obj = this.obj;
 		builtEffect.id = this.nextId++;
 		builtEffect.silent = options.silent;
 
+		this.effects.push(builtEffect);
+
 		if (builtEffect.init)
 			builtEffect.init(options.source);
-
-		this.effects.push(builtEffect);
 
 		if (!options.silent)
 			this.obj.syncer.setArray(false, 'effects', 'addEffects', builtEffect.simplify());
@@ -204,7 +204,7 @@ module.exports = {
 		return builtEffect;
 	},
 
-	syncExtend: function (id, data) {
+	syncExtend: function (id, data, self) {
 		let effect = this.effects.find(e => e.id === id);
 		if (!effect)
 			return;
@@ -241,7 +241,7 @@ module.exports = {
 		this.destroyEffect(effect);
 
 		this.syncRemove(effect.id);
-		
+
 		this.effects.spliceWhere(e => e.id === id);
 	},
 

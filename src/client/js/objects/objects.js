@@ -268,7 +268,7 @@ define([
 				obj.setSpritePosition();
 
 				if (obj.stats)
-					obj.stats.updateHpSprite();
+					obj.stats.updateBars();
 			}
 		},
 
