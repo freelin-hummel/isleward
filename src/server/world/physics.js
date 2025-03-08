@@ -237,8 +237,12 @@ module.exports = {
 	hasLos: function (fromX, fromY, toX, toY) {
 		if (fromX === toX && fromY === toY)
 			return true;
-		else if (Math.abs(fromX - toX) <= 1 && Math.abs(fromY - toY) <= 1)
+		else if (Math.abs(fromX - toX) <= 1 && Math.abs(fromY - toY) <= 1) {
+			if (this.isTileBlocking(toX, toY))
+				return false;
+
 			return true;
+		}
 
 		const { width, height } = this;
 
