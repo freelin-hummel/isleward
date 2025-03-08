@@ -22,7 +22,7 @@ const cast = (cpnSpellbook, action, isAuto, config) => {
 	if (!action.target || action.target.nonSelectable)
 		return false;
 
-	const manaCost = config?.overrides?.manaCost;
+	const manaCost = config?.overrides?.manaCost ?? spell.manaCost;
 
 	let success = true;
 	if (!config?.ignoreCooldown && spell.cd > 0) {
