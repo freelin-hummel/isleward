@@ -53,6 +53,8 @@ const onCpnsReady = async function () {
 
 	await clientConfig.init();
 
+	await eventEmitter.emit('beforeMapThreadReady');
+
 	process.send({
 		method: 'onReady'
 	});

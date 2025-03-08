@@ -3,6 +3,7 @@ require('./globals');
 const server = require('./server/index');
 const components = require('./components/components');
 const mods = require('./misc/mods');
+const eventEmitter = require('./misc/events');
 const animations = require('./config/animations');
 const importedBalance = require('./config/balance');
 const skins = require('./config/skins');
@@ -54,6 +55,8 @@ const startup = {
 		await clientConfig.init();
 
 		importedBalance.initMainThread();
+
+		await eventEmitter.emit('beforeMainThreadReady');
 
 		await server.init();
 

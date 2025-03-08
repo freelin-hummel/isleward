@@ -7,6 +7,8 @@ module.exports = {
 
 	nodeEnv: process.env.NODE_ENV,
 
+	testUiAvailable: true ?? process.env.TEST_UI_AVAILABLE,
+
 	//Options:
 	// sqlite
 	// rethink
