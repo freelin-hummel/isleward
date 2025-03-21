@@ -414,7 +414,7 @@ define([
 
 		Object.entries(originalBuilders).forEach(([k, v]) => {
 			const useBuilder = _customLineBuilders[k] !== undefined ?
-				_customLineBuilders[k].bind(null, item) :
+				_customLineBuilders[k].bind(null, item, originalBuilders[k]) :
 				originalBuilders[k];
 
 			lineBuilders[k] = useBuilder;
