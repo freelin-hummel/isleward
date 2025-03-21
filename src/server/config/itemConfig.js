@@ -118,6 +118,10 @@ module.exports = {
 		return extend({}, itemConfig[id]);
 	},
 
+	getAllIds: () => {
+		return Object.keys(itemConfig);
+	},
+
 	add: ({ id, config }) => {
 		itemConfig[id] = config;
 	},
