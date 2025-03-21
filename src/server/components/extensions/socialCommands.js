@@ -25,7 +25,6 @@ let commandRoles = {
 	getGold: 10,
 	setLevel: 10,
 	godMode: 10,
-	clearInventory: 10,
 	completeQuests: 10,
 	getReputation: 10,
 	loseReputation: 10,
@@ -350,15 +349,6 @@ module.exports = {
 		Object.keys(eq.eq).forEach(function (slot) {
 			eq.unequip({ itemId: eq.eq[slot] });
 		});
-	},
-
-	clearInventory: function () {
-		let inventory = this.obj.inventory;
-
-		inventory.items
-			.filter(i => !i.eq)
-			.map(i => i.id)
-			.forEach(i => inventory.destroyItem({ itemId: i }, null, true));
 	},
 
 	getGold: function (amount) {
