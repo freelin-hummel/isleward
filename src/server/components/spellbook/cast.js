@@ -121,7 +121,7 @@ const cast = (cpnSpellbook, action, isAuto, config) => {
 		spell.consumeMana(config);
 
 		if (!config?.ignoreCooldown)
-			spell.setCd();
+			spell.setCd(success);
 	}
 
 	obj.fireEvent('afterCastSpell', {

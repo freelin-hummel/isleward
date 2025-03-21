@@ -511,6 +511,7 @@ module.exports = {
 
 			s.castTime = 0;
 			s.currentAction = null;
+			delete s.castingInfo;
 
 			if (!ignore || !ignore.castTimeMax)
 				this.obj.syncer.set(false, null, 'casting', 0);

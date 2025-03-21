@@ -1,4 +1,3 @@
-
 let combat = require('../../combat/combat');
 
 module.exports = {
@@ -10,6 +9,15 @@ module.exports = {
 	casting: false,
 	castTime: 0,
 	castTimeMax: 0,
+
+	/*
+		While casting a spell with castTimeMax > 0, we need to store {
+			castTimeMax,
+			usedSpeed
+		}
+		Check the comment above castBase for more info on this
+	*/
+	castingInfo: null,
 
 	needLos: false,
 	//Should damage/heals caused by this spell cause events to be fired on objects?
@@ -36,31 +44,67 @@ module.exports = {
 		return inRange;
 	},
 
+	/*
+		If this spell is instant cast, we cast it here. If not, we start casting. This function returns:
+		{
+			castTimeMax:
+				What was the cast time we used (influenced by attack/castSpeed and the beforeGetSpellCastTime event),
+			usedSpeed:
+				If we used attack/castSpeed to reduce the castTimeMax, how much of it did we use?
+				We need this to calculate what the cooldown will be
+		}
+	*/
 	castBase: function (action, config) {
 		if (!config?.ignoreCastTime) {
 			if (this.castTimeMax > 0) {
 				if ((!this.currentAction) || (this.currentAction.target !== action.target)) {
 					this.currentAction = action;
 
-					const speedModifier = this.obj.stats.values[this.isAttack ? 'attackSpeed' : 'castSpeed'];
-					const castTimeMax = Math.max(1, Math.ceil(this.castTimeMax * (1 - (speedModifier / 100))));
+					const { castTimeMax, usedSpeed } = this.calculateCastTimeMax({
+						isAttack: this.isAttack,
+						statValues: this.obj.stats.values,
+						castTimeMax: this.castTimeMax
+					});
 
 					const castEvent = {
 						spell: this,
-						castTimeMax: castTimeMax
+						castTimeMax
 					};
 					this.obj.fireEvent('beforeGetSpellCastTime', castEvent);
+
+					if (castEvent.castTimeMax === 0) {
+						if (this.cast(action)) {
+							return {
+								castTimeMax,
+								usedSpeed
+							};
+						}
+
+						return null;
+					}
 
 					this.currentAction.castTimeMax = castEvent.castTimeMax;
 					this.castTime = castEvent.castTimeMax;
 					this.obj.syncer.set(false, null, 'casting', 0);
+
+					this.castingInfo = {
+						castTimeMax,
+						usedSpeed
+					};
 				}
 
 				return null;
 			}
 		}
 
-		return this.cast(action);
+		if (this.cast(action)) {
+			return {
+				castTimeMax: config?.ignoreCastTime ? 0 : this.castTimeMax,
+				usedSpeed: 0
+			};
+		}
+
+		return null;
 	},
 
 	updateBase: function () {
@@ -87,7 +131,7 @@ module.exports = {
 
 				if (this.cast(action)) {
 					this.consumeMana();
-					this.setCd();
+					this.setCd(this.castingInfo);
 
 					this.obj.fireEvent('afterCastSpell', {
 						castSuccess: true,
@@ -123,12 +167,14 @@ module.exports = {
 			this.obj.syncer.setObject(true, 'stats', 'values', 'mana', stats.mana);
 	},
 
-	setCd: function () {
+	setCd: function ({ castTimeMax, usedSpeed }) {
 		let cdMax = this.cdMax;
 
 		//If a spell has no cast time, attack/cast speed start influencing its cooldown
-		if (this.castTimeMax === 0) {
-			const speedModifier = this.obj.stats.values[this.isAttack ? 'attackSpeed' : 'castSpeed'];
+		if (castTimeMax === 0) {
+			let speedModifier = this.obj.stats.values[this.isAttack ? 'attackSpeed' : 'castSpeed'];
+			speedModifier -= usedSpeed;
+
 			cdMax = Math.max(1, Math.ceil(cdMax * (1 - (speedModifier / 100))));
 		}
 
@@ -348,7 +394,39 @@ module.exports = {
 		return this.obj.spellbook.registerCallback(this.obj.id, callback, delay, destroyCallback, target ? target.id : null, destroyOnRezone);
 	},
 
+	calculateCastTimeMax: function ({ isAttack, statValues, castTimeMax: originalCastTime }) {
+		const speedModifier = statValues[isAttack ? 'attackSpeed' : 'castSpeed'];
+
+		let castTimeMax = Math.max(0, originalCastTime * (1 - (speedModifier / 100)));
+		if (castTimeMax > 1) {
+		//If remainder is less than 0.4, floor the value
+			if (castTimeMax - ~~castTimeMax < 0.4)
+				castTimeMax = ~~castTimeMax;
+			else
+				castTimeMax = Math.ceil(castTimeMax);
+		} else if (castTimeMax < 0.1) {
+		//If remainder is less than 0.1, make it 0
+			castTimeMax = 0;
+		} else
+			castTimeMax = Math.ceil(castTimeMax);
+
+		let usedSpeed = speedModifier === 0 ?
+			0 :
+			((1 - castTimeMax) / originalCastTime) * 100;
+
+		//Since speed < 1.4 jumps to 1, and speed < 0.1 jumps to 0, we need to compensate
+		if (usedSpeed > speedModifier)
+			usedSpeed = speedModifier;
+
+		return {
+			castTimeMax,
+			usedSpeed
+		};
+	},
+
 	die: function () {
+		delete this.castingInfo;
+
 		//We unregister callbacks where we are the source OR the target
 		this.obj.spellbook.unregisterCallback(this.obj.id);
 		this.obj.spellbook.unregisterCallback(this.obj.id, true);
