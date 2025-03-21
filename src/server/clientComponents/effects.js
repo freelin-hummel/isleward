@@ -8,7 +8,8 @@ define([
 	numbers
 ) {
 	const defaultBuffIcons = {
-		stunned: [4, 0]
+		stunned: [4, 0],
+		gainStat: [6, 1]
 	};
 
 	const effectBase = {
