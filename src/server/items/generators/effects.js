@@ -25,6 +25,12 @@ const rollValues = (rollsDefinition, result, blueprint) => {
 				result[fieldName] = range;
 
 			continue;
+		} else if (p.indexOf('a_') === 0) {
+			//a_ indicates that the roll value should be chosen from the array, for example
+			// a_spellName: ['smite', 'slash']
+			result[p.substr(2)] = range[~~(Math.random() * range.length)];
+
+			continue;
 		}
 
 		let value;
