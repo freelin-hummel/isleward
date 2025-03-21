@@ -305,27 +305,34 @@ define([
 
 				if (node) {
 					let percentageStats = [
-						'addCritChance',
-						'addCritMultiplier',
 						'addAttackCritChance',
 						'addAttackCritMultiplier',
+						'addCritChance',
+						'addCritMultiplier',
 						'addSpellCritChance',
 						'addSpellCritMultiplier',
-						'sprintChance',
-						'xpIncrease',
+						'addSpellDamage',
+						'attackSpeed',
 						'blockAttackChance',
 						'blockSpellChance',
-						'dodgeAttackChance',
-						'dodgeSpellChance',
-						'attackSpeed',
 						'castSpeed',
-						'itemQuantity',
-						'magicFind',
 						'catchChance',
 						'catchSpeed',
+						'dodgeAttackChance',
+						'dodgeSpellChance',
+						'elementArcanePercent',
+						'elementFirePercent',
+						'elementFrostPercent',
+						'elementHolyPercent',
+						'elementPoisonPercent',
+						'fishItems',
 						'fishRarity',
 						'fishWeight',
-						'fishItems'
+						'itemQuantity',
+						'magicFind',
+						'physicalPercent',
+						'sprintChance',
+						'xpIncrease'
 					];
 
 					let text = Object.keys(node.stats)
