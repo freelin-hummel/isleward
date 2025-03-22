@@ -1,5 +1,7 @@
 /* eslint-disable no-process-env */
 
+console.log(process.env.TEST_UI_AVAILABLE, typeof(process.env.TEST_UI_AVAILABLE));
+
 module.exports = {
 	version: '0.18.0',
 	port: process.env.IWD_PORT || 4000,
