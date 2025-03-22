@@ -34,7 +34,7 @@ define([
 			let w = this.obj.width || 1;
 			let h = this.obj.height || 1;
 
-			if (this.obj.nameSprite)
+			if (this.obj.nameSprite && w !== 1)
 				this.centerNameSprite();
 
 			let isFish = (this.nodeType === 'fish');
