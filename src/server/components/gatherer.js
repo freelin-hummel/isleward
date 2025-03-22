@@ -233,12 +233,11 @@ module.exports = {
 
 		this.updateServerActions(true);
 
-		let action = null;
+		let actionString = null;
 		if (nodeType === 'fish')
-			action = 'fish for';
+			actionString = 'fish';
 		else if (nodeType === 'herb')
-			action = 'gather the';
-		const actionString = `${action} ${gatherResult.nodeName}`;
+			actionString = `gather the ${gatherResult.nodeName}`;
 
 		this.sendAnnouncement(`Press U to ${actionString}`);
 
