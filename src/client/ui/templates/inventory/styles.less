@@ -362,3 +362,47 @@
 	}
 
 }
+
+.mobile .uiInventory,
+.mobile .uiStash {
+	width: 100% !important;
+	height: 100%;
+	left: 0px !important;
+	top: 0px !important;
+
+	.btnClose {
+		position: fixed;
+		z-index: 2;
+		right: 5px;
+		top: unset;
+		bottom: 5px;
+		width: 40px;
+		height: 40px;
+	}
+
+	.heading {
+		position: absolute;
+		right: 0px;
+		top: 0px;
+		width: calc(100% - 825px);
+	}
+
+	.menu-bar,
+	.footer {
+		position: absolute;
+		right: 0px;
+		top: 36px;
+		height: calc(100% - 36px);
+		width: calc(100% - 825px);
+		padding: 5px;
+		display: flex;
+		justify-content: center;
+		background-color: @blackB;
+	}
+
+	.grid {
+		max-height: unset;
+		height: 100%;
+	}
+
+}
