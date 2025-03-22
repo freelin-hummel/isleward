@@ -7,7 +7,7 @@ module.exports = {
 
 	nodeEnv: process.env.NODE_ENV,
 
-	testUiAvailable: false ?? process.env.TEST_UI_AVAILABLE === 'true',
+	testUiAvailable: process.env.TEST_UI_AVAILABLE === 'true',
 
 	//Options:
 	// sqlite
