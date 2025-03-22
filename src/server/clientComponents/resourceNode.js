@@ -34,6 +34,9 @@ define([
 			let w = this.obj.width || 1;
 			let h = this.obj.height || 1;
 
+			if (this.obj.nameSprite)
+				this.centerNameSprite();
+
 			let isFish = (this.nodeType === 'fish');
 
 			for (let i = x; i < x + w; i++) {
@@ -67,6 +70,13 @@ define([
 					this.obj.addComponent('particles', bpt);
 				}
 			}
+		},
+
+		centerNameSprite: function () {
+			const { obj: { x, y, width, height, nameSprite } } = this;
+
+			nameSprite.x = ~~((x * scale) + ((width * scale) / 2) - nameSprite.width / 2);
+			nameSprite.y = ~~((y * scale) + ((height * scale) / 2) - nameSprite.height / 2);
 		}
 	};
 });
