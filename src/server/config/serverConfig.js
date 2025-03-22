@@ -1,7 +1,5 @@
 /* eslint-disable no-process-env */
 
-console.log(process.env.TEST_UI_AVAILABLE, typeof(process.env.TEST_UI_AVAILABLE));
-
 module.exports = {
 	version: '0.18.0',
 	port: process.env.IWD_PORT || 4000,
@@ -9,7 +7,7 @@ module.exports = {
 
 	nodeEnv: process.env.NODE_ENV,
 
-	testUiAvailable: process.env.TEST_UI_AVAILABLE === 'true',
+	testUiAvailable: process.env.IWD_TEST_UI_AVAILABLE === 'true',
 
 	//Options:
 	// sqlite
