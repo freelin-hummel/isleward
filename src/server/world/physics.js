@@ -33,6 +33,8 @@ module.exports = {
 		
 		for (let id of idsOfCollidingObjects) {
 			const f = objects.objects.find(o => o.id + '' === id);
+			if (!f)
+				continue;
 
 			f.collisionEnter(obj);
 			obj.collisionEnter(f);
@@ -44,6 +46,8 @@ module.exports = {
 
 		for (let id of idsOfCollidingObjects) {
 			const f = objects.objects.find(o => o.id + '' === id);
+			if (!f)
+				continue;
 
 			f.collisionExit(obj);
 			obj.collisionExit(f);
