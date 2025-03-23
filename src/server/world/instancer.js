@@ -1,16 +1,18 @@
-let map = require('./map');
-let syncer = require('./syncer');
-let objects = require('../objects/objects');
-let spawners = require('./spawners');
-let physics = require('./physics');
-let resourceSpawner = require('./resourceSpawner');
-let spellCallbacks = require('../config/spells/spellCallbacks');
-let questBuilder = require('../config/quests/questBuilder');
-let events = require('../events/events');
-let scheduler = require('../misc/scheduler');
-let herbs = require('../config/herbs');
-let eventEmitter = require('../misc/events');
+//Imports
+const eventEmitter = require('../misc/events');
+const events = require('../events/events');
+const herbs = require('../config/herbs');
+const map = require('./map');
 const mods = require('../misc/mods');
+const objects = require('../objects/objects');
+const physics = require('./physics');
+const questBuilder = require('../config/quests/questBuilder');
+const resourceSpawner = require('./resourceSpawner');
+const scheduler = require('../misc/scheduler');
+const serverConfig = require('../config/serverConfig');
+const spawners = require('./spawners');
+const spellCallbacks = require('../config/spells/spellCallbacks');
+const syncer = require('./syncer');
 const transactions = require('../security/transactions');
 
 //Own helpers
@@ -158,8 +160,10 @@ module.exports = {
 
 		events.stopAll();
 
-		//Try a generation
-		const isValid = map.randomMap.generate();
+		//Try generating
+		const isValid = map.randomMap.generate({
+			timeLeftToTryInMs: serverConfig.msAllowedPerTickForMapGeneration
+		});
 
 		if (!isValid)
 			return;
