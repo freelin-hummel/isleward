@@ -256,33 +256,34 @@ yourmobname: {
 If a state has multiple sub-states and another state uses its options, that state will always have **all** options, not just a subset defined by one of the sub-states. In the following example, state `2` always has `1.1` and `1.2` as options:
 ```js
 yourmobname: {
-			msg: [{
-				chance: 90,
-				msg: 'Hi',
-				options: [1.1]
-			}, {
-				chance: 10,
-				msg: 'Oh, hello there!',
-				options: [1.1, 1.2]
-			}],
-			options: {
-				1.1: {
-					msg: 'How are you?',
-					goto: 2
-				},
-				1.2: {
-					msg: 'You seem happy today.',
-					goto: 2
-				}
+	1: {
+		msg: [{
+			chance: 90,
+			msg: 'Hi',
+			options: [1.1]
+		}, {
+			chance: 10,
+			msg: 'Oh, hello there!',
+			options: [1.1, 1.2]
+		}],
+		options: {
+			1.1: {
+				msg: 'How are you?',
+				goto: 2
+			},
+			1.2: {
+				msg: 'You seem happy today.',
+				goto: 2
 			}
-		},
-		2: {
-			msg: [{
-				msg: 'Good',
-				options: '$1'
-			}]
 		}
+	},
+	2: {
+		msg: [{
+			msg: 'Good',
+			options: '$1'
+		}]
 	}
+}
 ```
 
 ### Multiple goto's
@@ -322,7 +323,7 @@ yourmobname: {
 ### Prerequisites
 State options can have prerequisites that determine whether they should be available or not. In this example, option `1.1` becomes available if the player has an item of type `Sword` in their inventory:
 ```js
-{
+yourmobname: {
 	1: {
 		msg: 'Hi',
 		options: {
