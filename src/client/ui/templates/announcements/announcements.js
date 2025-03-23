@@ -9,19 +9,31 @@ define([
 	styles,
 	templateLine
 ) {
+	const maxTtl = 160;
+
 	return {
 		tpl: template,
 
 		message: null,
-		maxTtl: 160,
 
 		postRender: function () {
-			this.onEvent('onGetAnnouncement', this.onGetAnnouncement.bind(this));
+			[
+				'onGetAnnouncement',
+				'onRemoveAnnouncement'
+			].forEach(e => {
+				this.onEvent(e, this[e].bind(this));
+			});
 		},
 
-		onGetAnnouncement: function (e) {
+		onGetAnnouncement: function ({
+			msg,
+			ttl = maxTtl,
+			type,
+			zIndex,
+			top: marginTop
+		}) {
 			if (isMobile) {
-				if (['press g to', 'press u to'].some(f => e.msg.toLowerCase().indexOf(f) > -1))
+				if (['press g to', 'press u to'].some(f => msg.toLowerCase().indexOf(f) > -1))
 					return;
 			}
 
@@ -30,22 +42,30 @@ define([
 			let container = this.find('.list');
 
 			let html = templateLine
-				.replace('$MSG$', e.msg);
+				.replace('$MSG$', msg);
 
 			let el = $(html)
 				.appendTo(container);
 
-			if (e.type)
-				el.addClass(e.type);
-			if (e.zIndex)
-				el.css('z-index', e.zIndex);
-			if (e.top)
-				el.css('margin-top', e.top);
+			if (type)
+				el.addClass(type);
+			if (zIndex)
+				el.css('z-index', zIndex);
+			if (marginTop)
+				el.css('margin-top', marginTop);
 
 			this.message = {
-				ttl: e.ttl ?? this.maxTtl,
-				el: el
+				msg,
+				ttl,
+				el
 			};
+		},
+
+		onRemoveAnnouncement: function ({ msg }) {
+			if (this.message?.msg !== msg)
+				return;
+
+			this.clearMessage();
 		},
 
 		update: function () {

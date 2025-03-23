@@ -3,6 +3,7 @@ const eventEmitter = require('../misc/events');
 const events = require('../events/events');
 const herbs = require('../config/herbs');
 const map = require('./map');
+const messages = require('../misc/messages');
 const mods = require('../misc/mods');
 const objects = require('../objects/objects');
 const physics = require('./physics');
@@ -259,6 +260,12 @@ module.exports = {
 			data: {
 				getMap: [{
 					obj: map.clientMap,
+					to: [obj.serverId]
+				}],
+				onRemoveAnnouncement: [{
+					obj: {
+						msg: messages.threads.generatingNewMap
+					},
 					to: [obj.serverId]
 				}]
 			}
