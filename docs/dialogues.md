@@ -4,14 +4,14 @@
 
 ### Hard-coded
 1. In the map file, place your mob in the `mobs` layer and give it a name
-  * The case you use here will be used in-game
+	* The case you use here will be used in-game
 2. Still in the map file, place a rectangle around your mob in the `notices` layer and call it `talkYourMobName` 
-  * The name of the notice does not actually matter, we'll define the logic in the zone file
-  * If you call your mob `Ben` you can theoretically call your notice anything, like `spoonMonkey`, but standardizing on `talkYourMobName` is more maintainable
+	* The name of the notice does not actually matter, we'll define the logic in the zone file
+	* If you call your mob `Ben` you can theoretically call your notice anything, like `spoonMonkey`, but standardizing on `talkYourMobName` is more maintainable
 3. In your map's zone file, add an entry for the notice inside `objects`
-  * Note that in the zone file, names must always be lower case. I.e. `talkYourMobName` -> `talkyourmobname` and `YourMobName` -> `yourmobname`
-  * This entry will, when the player enters the rectangle you places in the `notices` layer, cause a player to start talking to the mob
-  * If your mob has a space in its name, the entry should look like this: `objects: { 'your mob name': { ... } }`
+	* Note that in the zone file, names must always be lower case. I.e. `talkYourMobName` -> `talkyourmobname` and `YourMobName` -> `yourmobname`
+	* This entry will, when the player enters the rectangle you places in the `notices` layer, cause a player to start talking to the mob
+	* If your mob has a space in its name, the entry should look like this: `objects: { 'your mob name': { ... } }`
 ```js
 objects: {
 	talkyourmobname: {
@@ -36,8 +36,8 @@ objects: {
 }
 ```
 4. In the same folder as your map, create a `dialogues.js` file if one does not exist yet
-  * Again, names must be in lower case
-  * We'll define how the dialogue objects (`{}`) in this file look in a later section in this document
+	* Again, names must be in lower case
+	* We'll define how the dialogue objects (`{}`) in this file look in a later section in this document
 ```js
 module.exports = {
 	yourmobname: {}
@@ -193,7 +193,7 @@ Dialogue objects (either within `dialogues.js` file or within programmatically c
 ```
 * In this example we have two states: `1` and `2`
 * State `1` has 1 option (something for the player to say/ask to the mob)
-  * When an option is chosen, the dialogue moves to the corresponding state
+	* When an option is chosen, the dialogue moves to the corresponding state
 * States with no options should still define `options: {}`
 * All states will receive the option `Goodbye` which stop the dialogue with the mob
 * Never use state `999` as this is used internally for the `Goodbye` options' target state
@@ -449,5 +449,5 @@ yourmobname: {
 ```
 
 * Whatever this method returns will be used as the message send to the player for that state, so make sure it's a string
-  * If your method doesn't return anything, the `msg` from the state definition will be used instead
+	* If your method doesn't return anything, the `msg` from the state definition will be used instead
 * Note that when a state has a method handler, the state must be defined with `msg: [{ msg: '', options: []]`. That is, it can not have a simple string message like `msg: '...'`
