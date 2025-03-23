@@ -2,10 +2,10 @@
 
 ## Adding dialogue to a mob
 
-### In a map file
-1. Place your mob in the `mobs` layer and give it a name
+### Hard-coded
+1. In the map file, place your mob in the `mobs` layer and give it a name
   * The case you use here will be used in-game
-2. Place a rectangle around your mob in the `notices` layer and call it `talkYourMobName` 
+2. Still in the map file, place a rectangle around your mob in the `notices` layer and call it `talkYourMobName` 
   * The name of the notice does not actually matter, we'll define the logic in the zone file
   * If you call your mob `Ben` you can theoretically call your notice anything, like `spoonMonkey`, but standardizing on `talkYourMobName` is more maintainable
 3. In your map's zone file, add an entry for the notice inside `objects`
@@ -114,6 +114,8 @@ const yourMod = {
 
 ### Add dialogue to an existing mob with existing dialogue
 The method described in this section can either be applied in the `onAfterBuildMob` event, as in the previous section, or at any other juncture where you have access to a mob that already has dialogue defined for it.
+
+That is, we can do it at startup, or dynamically later.
 
 Assume we have a mob with dialogue defined as follows:
 ```js
