@@ -1,17 +1,17 @@
 define([
+	'js/system/globals',
 	'js/system/events',
 	'js/system/client',
 	'html!ui/templates/workbench/template',
 	'css!ui/templates/workbench/styles',
-	'ui/shared/renderItem',
-	'js/misc/statTranslations'
+	'ui/shared/renderItem'
 ], function (
+	globals,
 	events,
 	client,
 	template,
 	styles,
-	renderItem,
-	statTranslations
+	renderItem
 ) {
 	return {
 		tpl: template,
@@ -284,6 +284,8 @@ define([
 		},
 
 		onCraft: function ({ recipe, resultMsg }) {
+			const { clientConfig: { statTranslations } } = globals;
+
 			this.onGetRecipe(true, recipe);
 		
 			if (resultMsg) {
@@ -295,7 +297,7 @@ define([
 				let msg = baseMsg; 
 
 				addStatMsgs.forEach(a => {
-					const statName = statTranslations.translate(a.stat);
+					const statName = statTranslations[a.stat];
 					msg += `<br />${(a.value > 0) ? '+' : ''}${a.value} ${statName}`;
 				});
 

@@ -1,23 +1,23 @@
 let zoom = 1;
 
 define([
+	'js/system/globals',
 	'js/system/events',
 	'js/system/client',
 	'html!ui/templates/passives/template',
 	'css!ui/templates/passives/styles',
 	'ui/templates/passives/constants',
 	'ui/templates/passives/temp',
-	'ui/templates/passives/input',
-	'js/misc/statTranslations'
+	'ui/templates/passives/input'
 ], function (
+	globals,
 	events,
 	client,
 	tpl,
 	styles,
 	constants,
 	temp,
-	input,
-	statTranslations
+	input
 ) {
 	return {
 		tpl: tpl,
@@ -283,6 +283,8 @@ define([
 
 		events: {
 			onMouseMove: function (pos) {
+				const { clientConfig: { statTranslations } } = globals;
+
 				if (this.mouse.x === pos.x && this.mouse.y === pos.y)
 					return;
 
@@ -337,7 +339,7 @@ define([
 
 					let text = Object.keys(node.stats)
 						.map(function (s) {
-							let statName = statTranslations.translate(s);
+							let statName = statTranslations[s];
 							let statValue = node.stats[s];
 							if (s.indexOf('CritChance') > -1)
 								statValue /= 20;

@@ -1,5 +1,7 @@
-let generator = require('../../../../items/generator');
+//Helpers
+const generator = require('../../../../items/generator');
 
+//Action
 module.exports = (obj, items) => {
 	const [itemA, itemB, itemC] = items;
 
@@ -53,7 +55,9 @@ module.exports = (obj, items) => {
 		currency: true,
 		name: 'Charged Arcane Idol'
 	});
-	idol.name = idol.name += ` of ${pickStat}`;
+
+	const pickStatName = clientConfig.config.statTranslations[pickStat];
+	idol.name = idol.name += ` of ${pickStatName}`;
 	idol.applyStat = pickStat;
 
 	//Give the Charged Idol to the player

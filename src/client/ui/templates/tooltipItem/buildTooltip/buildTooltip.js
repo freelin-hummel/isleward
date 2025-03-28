@@ -1,11 +1,9 @@
 define([
 	'js/input',
-	'js/misc/statTranslations',
 	'ui/templates/tooltipItem/buildTooltip/lineBuilders',
 	'ui/templates/tooltipItem/buildTooltip/getCompareItem'
 ], function (
 	input,
-	statTranslations,
 	lineBuilders,
 	getCompareItem
 ) {

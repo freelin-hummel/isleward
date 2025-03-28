@@ -1,8 +1,8 @@
 define([
-	'js/misc/statTranslations',
+	'js/system/globals',
 	'ui/templates/tooltipItem/buildTooltip/stringifyStatValue'
 ], function (
-	statTranslations,
+	globals,
 	stringifyStatValue
 ) {
 	let item = null;
@@ -47,6 +47,8 @@ define([
 		},
 
 		implicitStats: () => {
+			const { clientConfig: { statTranslations } } = globals;
+
 			if (!item.implicitStats)
 				return null;
 
@@ -85,7 +87,7 @@ define([
 
 			const html = tempImplicitStats
 				.map(({ stat, value }) => {
-					let statName = statTranslations.translate(stat);
+					let statName = statTranslations[stat];
 
 					const prettyValue = stringifyStatValue(stat, value);
 
@@ -111,6 +113,8 @@ define([
 		},
 
 		stats: () => {
+			const { clientConfig: { statTranslations } } = globals;
+
 			const tempStats = $.extend(true, {}, item.stats);
 			const enchantedStats = item.enchantedStats ?? {};
 			const infusedStats = item.infusedStats ?? {};
@@ -165,7 +169,7 @@ define([
 						statName = statName.substr(1);
 
 					const prettyValue = stringifyStatValue(statName, tempStats[s]);
-					statName = statTranslations.translate(statName);
+					statName = statTranslations[statName];
 
 					let rowClass = '';
 

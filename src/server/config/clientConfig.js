@@ -1,9 +1,15 @@
+//Plugins
 const { imageSizeFromFile } = require('image-size/fromFile');
 
+//Helpers
 const events = require('../misc/events');
 const fileLister = require('../misc/fileLister');
-const tos = require('./tos');
 
+//External Config
+const tos = require('./tos');
+const statTranslations = require('./statTranslations');
+
+//Config
 const config = {
 	logoPath: null,
 	loginBgGeneratorPath: null,
@@ -216,7 +222,8 @@ const config = {
 	sounds: {
 		ui: []
 	},
-	tos
+	tos,
+	statTranslations
 };
 
 module.exports = {
