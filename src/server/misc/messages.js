@@ -10,5 +10,8 @@ module.exports = {
 	},
 	createCharacter: {
 		nameLength: 'name must be between 3 and 12 characters'
+	},
+	threads: {
+		generatingNewMap: 'Generating a new map, please wait as this may take a few moments...'
 	}
 };

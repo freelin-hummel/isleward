@@ -29,6 +29,7 @@ const objects = require('../objects/objects');
 const { mapList } = require('./mapManager');
 const { registerCallback } = require('./atlas/registerCallback');
 const eventEmitter = require('../misc/events');
+const { threads: { generatingNewMap: msgGeneratingNewMap } } = require('../misc/messages');
 
 //Internals
 const threads = [];
@@ -224,7 +225,7 @@ const notifyWaitForThread = serverObj => {
 	serverObj.socket.emit('event', {
 		event: 'onGetAnnouncement',
 		data: {
-			msg: 'Generating a new map, please wait as this may take a few moments..',
+			msg: msgGeneratingNewMap,
 			ttl: 500
 		}
 	});

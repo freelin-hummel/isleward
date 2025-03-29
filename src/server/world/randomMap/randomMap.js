@@ -52,8 +52,10 @@ module.exports = {
 		generateMappings(this, map);
 	},
 
-	generate: function () {
-		const { instance } = this;
+	generate: function ({ timeLeftToTryInMs, totalTimeTried = 0 }) {
+		const { instance, templates } = this;
+
+		const timeStart = performance.now();
 
 		const { map } = instance;
 		map.clientMap.hiddenRooms = [];
@@ -62,21 +64,30 @@ module.exports = {
 		this.exitAreas = [];
 		this.bounds = [0, 0, 0, 0];
 
-		const hasEndRoom = this.templates.some(t => t.properties.end);
+		const hasEndRoom = templates.some(t => t.properties.end);
 		if (!hasEndRoom) {
 			/* eslint-disable-next-line no-console */
 			console.log(`Random map has no end room defined: ${map.name}`);
 
-			return;
+			timeLeftToTryInMs -= performance.now() - timeStart;
+			if (timeLeftToTryInMs > 0)
+				return this.generate({ timeLeftToTryInMs });
+
+			return false;
 		}
 
-		let startTemplate = this.templates.filter(t => t.properties.start);
+		let startTemplate = templates.filter(t => t.properties.start);
 		startTemplate = startTemplate[this.randInt(0, startTemplate.length)];
 
 		let startRoom = buildRoom(this, startTemplate);
 
-		if (!isValidDungeon(this))
+		if (!isValidDungeon(this)) {
+			timeLeftToTryInMs -= performance.now() - timeStart;
+			if (timeLeftToTryInMs > 0)
+				return this.generate({ timeLeftToTryInMs });
+
 			return false;
+		}
 
 		this.offsetRooms(startRoom);
 		buildMap(this, instance, startRoom);

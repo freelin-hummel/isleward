@@ -7,6 +7,10 @@ module.exports = {
 
 	nodeEnv: process.env.NODE_ENV,
 
+	//How many miliseconds per tick are we allowed to attempt random map generations
+	// We constrain it so that we don't go overboard with using the CPU
+	msAllowedPerTickForMapGeneration: 100,
+
 	testUiAvailable: process.env.IWD_TEST_UI_AVAILABLE === 'true',
 
 	//Options:
