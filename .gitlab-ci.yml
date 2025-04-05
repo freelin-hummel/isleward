@@ -14,24 +14,12 @@ audit:
     - merge_requests
     - master
 
-lint-server:
-  stage: test
-  script:
-    - cd src
-    - npm install
-    - cd server
-    - ../node_modules/.bin/eslint . 
-  only:
-    - merge_requests
-    - master
-
 lint-client:
   stage: test
   script:
-    - cd src
+    - cd src/client
     - npm install
-    - cd client
-    - ../node_modules/.bin/eslint . 
+    - npm run lint
   only:
     - merge_requests
     - master

@@ -566,13 +566,26 @@ pub mod physics {
                 &*self.graph,
                 from,
                 |finish| finish == to,
-                |_| 0,
+                |e| {
+                    let a = e.source();
+                    let b = e.target();
+                    let Coordinate { x: x1, y: y1 } = self.graph[a];
+                    let Coordinate { x: x2, y: y2 } = self.graph[b];
+
+                    if (x1 - x2).abs() == 1 && (y1 - y2).abs() == 1 {
+                        14 // √2 * 10, approximated
+                    } else {
+                        10
+                    }
+                },
                 |n| {
                     let Coordinate { x, y } = self.graph[n];
-                    *[(x - to_coord.x).abs(), (y - to_coord.y).abs()]
-                        .iter()
-                        .max()
-                        .unwrap()
+                    let dx = (x - to_coord.x).abs();
+                    let dy = (y - to_coord.y).abs();
+                    let diagonal_cost = 14; // √2 * 10, approximated
+                    let straight_cost = 10;
+
+                    diagonal_cost * dx.min(dy) + straight_cost * (dx - dx.min(dy) + dy - dx.min(dy))
                 },
             )
             .map(|(_, x)| x)

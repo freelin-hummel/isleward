@@ -1,0 +1,9 @@
+.gitignore
+./*.yaml
+./*.yml
+Dockerfile
+README.md
+serve.json
+**/.git
+.cache
+/pipelines/*

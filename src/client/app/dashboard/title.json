@@ -1,0 +1,14 @@
+{
+	"acceptPrps": {
+		"title": {
+			"type": "string",
+			"desc": "The title string"
+		}
+	},
+	"type": "label",
+	"prps": {
+		"caption": "%title%",
+		"fontSize": "32px",
+		"color": "themeRed"
+	}
+}
