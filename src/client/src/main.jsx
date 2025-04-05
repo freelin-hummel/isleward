@@ -1,5 +1,10 @@
-//import { createRoot } from 'react-dom/client';
+//Plugins
+import $ from 'jquery';
 
+//Globals
+import './js/misc/helpers';
+
+//System Imports
 import client from './js/system/client';
 import components from './js/components';
 import events from './js/system/events';
@@ -12,30 +17,9 @@ import renderer from './js/rendering/renderer';
 import resources from './js/resources';
 import sound from './js/sound/sound';
 import uiFactory from './ui/factory';
-import './js/misc/helpers';
-import $ from 'jquery';
 
+//Setting up jquery for global use
 window.$ = $;
-
-const urlParams = Object.fromEntries(window.location.search.substr(1).split('&').map(k => k.split('=')));
-
-window.isMobile = (
-	urlParams.forceMobile === 'true' ||
-		/Mobi|Android/i.test(navigator.userAgent) ||
-		(
-			navigator.platform === 'MacIntel' &&
-			navigator.maxTouchPoints > 1
-		)
-);
-
-window.scale = isMobile ? 32 : 40;
-window.scaleMult = isMobile ? 4 : 5;
-
-if (!window.navigator.vibrate)
-	window.navigator.vibrate = () => {};
-
-//const root = createRoot(document.getElementById('root'));
-//root.render();
 
 let fnQueueTick = null;
 
