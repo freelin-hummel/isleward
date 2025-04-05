@@ -12,7 +12,6 @@ RUN apt update && apt install -y node-less
 WORKDIR /app/static/
 
 COPY ./client/ ./client/
-COPY ./server/clientComponents/ ./server/clientComponents/
 COPY ./server/mods/ ./server/mods/
 
 WORKDIR /app/
