@@ -48,7 +48,8 @@ async fn main() {
         .init();
 
     let root_path =
-        Path::new(&env::var("SERVE_PATH").unwrap_or_else(|_| "../../".to_string())).to_path_buf();
+        Path::new(&env::var("SERVE_PATH").unwrap_or_else(|_| "../../dist/".to_string()))
+            .to_path_buf();
     info!("Root path: {root_path:?}");
 
     #[cfg(feature = "production")]
