@@ -16,7 +16,7 @@ export default {
 		let { icon, url } = config;
 
 		if (!url)
-			url = '../../../images/statusIcons.png';
+			url = 'images/statusIcons.png';
 
 		let imgX = icon[0] * -32;
 		let imgY = icon[1] * -32;

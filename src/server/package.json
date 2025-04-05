@@ -1,18 +1,26 @@
 {
-  "name": "isleward_server",
-  "version": "0.19.0",
-  "description": "isleward",
-  "dependencies": {
-    "bcrypt-nodejs": "0.0.3",
-    "compression": "^1.8.0",
-    "express": "4.21.2",
-    "fast-glob": "^3.3.3",
-    "image-size": "^2.0.0",
-    "less-middleware": "^2.2.1",
-    "rethinkdbdash": "^2.3.31",
-    "socket.io": "^4.8.1"
-  },
-  "devDependencies": {
-    "sqlite3": "^5.1.7"
-  }
+	"name": "@bigbadwaffle/isleward-server",
+	"version": "0.20.0",
+	"description": "The Coreward Client is an open-source, web-based MMO client designed to connect players to a Coreward server.",
+	"keywords": [
+		"coreward",
+		"isleward",
+		"bigbadwaffle"
+	],
+	"homepage": "https://play.isleward.com/",
+	"repository": "https://gitlab.com/Isleward/isleward.git",
+	"scripts": {
+		"start": "nodemon"
+	},
+	"dependencies": {
+		"bcrypt-nodejs": "0.0.3",
+		"express": "^5.1.0",
+		"image-size": "^2.0.2",
+		"rethinkdbdash": "^2.3.31",
+		"socket.io": "^4.8.1"
+	},
+	"devDependencies": {
+		"nodemon": "^3.1.9",
+		"sqlite3": "^5.1.7"
+	}
 }

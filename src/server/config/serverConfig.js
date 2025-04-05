@@ -1,8 +1,8 @@
 /* eslint-disable no-process-env */
 
 module.exports = {
-	version: '0.19.0',
-	port: process.env.IWD_PORT || 4000,
+	version: '0.20.0',
+	port: process.env.IWD_PORT || 5000,
 	startupMessage: 'Ready: Server',
 
 	nodeEnv: process.env.NODE_ENV,
@@ -11,7 +11,7 @@ module.exports = {
 	// We constrain it so that we don't go overboard with using the CPU
 	msAllowedPerTickForMapGeneration: 100,
 
-	testUiAvailable: true, //process.env.IWD_TEST_UI_AVAILABLE === 'true',
+	testUiAvailable: process.env.IWD_TEST_UI_AVAILABLE === 'true',
 
 	//Options:
 	// sqlite

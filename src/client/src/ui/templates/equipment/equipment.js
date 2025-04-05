@@ -239,7 +239,7 @@ export default {
 			.forEach(function (item, i) {
 				let sprite = item.sprite || [7, 0];
 
-				let spriteSheet = item.empty ? '../../../images/uiIcons.png' : item.spritesheet || '../../../images/items.png';
+				let spriteSheet = item.empty ? '/images/uiIcons.png' : item.spritesheet || '../../../images/items.png';
 				if (i > 0 && item.type === 'consumable')
 					spriteSheet = '../../../images/consumables.png';
 				let imgX = -sprite[0] * 64;

@@ -1,15 +1,17 @@
 {
-    "name": "iwd-opus",
-    "description": "",
-    "version": "1.0.0",
+    "name": "@bigbadwaffle/coreward-client",
+    "version": "0.20.0",
+    "description": "The Coreward Client is an open-source, web-based MMO client designed to connect players to a Coreward server.",
     "keywords": [
-        "opus-ui",
-        "example",
-        "opus"
+        "coreward",
+        "isleward",
+        "bigbadwaffle"
     ],
+    "homepage": "https://play.isleward.com/",
+    "repository": "https://gitlab.com/Isleward/isleward.git",
     "scripts": {
         "start-with-opus": "concurrently --kill-others \"nodemon node_modules/@intenda/opus-ui-packager/src/packager.js --includePaths=true\" \"npm run dev -- --host\"",
-        "start": "vite --port 3000",
+        "start": "vite --port 4000",
         "build-json": "node node_modules/@intenda/opus-ui-packager/src/packager.js",
         "build": "vite build",
         "lint": "eslint ."
@@ -21,16 +23,16 @@
         "howler": "^2.2.4",
         "jquery": "^3.7.1",
         "pixi.js": "^8.9.1",
-        "react": "^19.0.0",
-        "react-dom": "^19.0.0",
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0",
         "socket.io-client": "^4.8.1"
     },
     "devDependencies": {
         "@eslint/js": "^9.24.0",
         "@intenda/opus-ui-packager": ">=1.0.0 < 2.0.0",
         "@intenda/vite-plugin-opus-hot-reload": ">=2.0.0 < 3.0.0",
-        "@types/react": "^19.0.12",
-        "@types/react-dom": "^19.0.4",
+        "@types/react": "^19.1.0",
+        "@types/react-dom": "^19.1.0",
         "@vitejs/plugin-react": "^4.3.4",
         "babel-eslint": "^10.1.0",
         "concurrently": "^9.1.2",
@@ -40,7 +42,7 @@
         "fast-glob": "^3.3.3",
         "globals": "^16.0.0",
         "nodemon": "^3.1.9",
-        "vite": "6.2.2"
+        "vite": "6.2.5"
     },
     "nodemonConfig": {
         "ignore": [],
