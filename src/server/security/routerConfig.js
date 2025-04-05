@@ -519,7 +519,7 @@ const routerConfig = {
 					data: [
 						{
 							key: 'targetId',
-							dataType: 'integer'
+							dataType: 'integerOrString'
 						}
 					]
 				},
@@ -528,7 +528,7 @@ const routerConfig = {
 					data: [
 						{
 							key: 'targetId',
-							dataType: 'integer'
+							dataType: 'integerOrString'
 						}
 					]
 				}

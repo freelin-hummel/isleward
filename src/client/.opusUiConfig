@@ -1,0 +1,16 @@
+{
+	"opusPackagerConfig": {
+		"appDir": "app",
+		"packagedDir": "public",
+		"packagedFileName": "app"
+	},
+	"opusUiComponentLibraries": [
+
+	],
+	"opusUiEnsembles": [
+
+	],
+	"opusUiColorThemes": [
+		"colors"
+	]
+}

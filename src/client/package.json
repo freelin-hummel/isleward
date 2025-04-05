@@ -1,6 +1,54 @@
 {
-  "name": "isleward_client",
-  "version": "0.19.0",
-  "description": "isleward",
-  "devDependencies": {}
+    "name": "iwd-opus",
+    "description": "",
+    "version": "1.0.0",
+    "keywords": [
+        "opus-ui",
+        "example",
+        "opus"
+    ],
+    "scripts": {
+        "start-with-opus": "concurrently --kill-others \"nodemon node_modules/@intenda/opus-ui-packager/src/packager.js --includePaths=true\" \"npm run dev -- --host\"",
+        "start": "vite --port 3000",
+        "build-json": "node node_modules/@intenda/opus-ui-packager/src/packager.js",
+        "build": "vite build",
+        "lint": "eslint ."
+    },
+    "dependencies": {
+        "@barvynkoa/particle-emitter": "^0.0.1",
+        "@intenda/opus-ui": ">=2.0.0 < 3.0.0",
+        "@pixi/utils": "^7.4.3",
+        "howler": "^2.2.4",
+        "jquery": "^3.7.1",
+        "pixi.js": "^8.9.1",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "socket.io-client": "^4.8.1"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.24.0",
+        "@intenda/opus-ui-packager": ">=1.0.0 < 2.0.0",
+        "@intenda/vite-plugin-opus-hot-reload": ">=2.0.0 < 3.0.0",
+        "@types/react": "^19.0.12",
+        "@types/react-dom": "^19.0.4",
+        "@vitejs/plugin-react": "^4.3.4",
+        "babel-eslint": "^10.1.0",
+        "concurrently": "^9.1.2",
+        "eslint": "^9.24.0",
+        "eslint-plugin-prettier": "5.2.6",
+        "eslint-plugin-react": "^7.37.5",
+        "fast-glob": "^3.3.3",
+        "globals": "^16.0.0",
+        "nodemon": "^3.1.9",
+        "vite": "6.2.2"
+    },
+    "nodemonConfig": {
+        "ignore": [],
+        "watch": [
+            "app"
+        ],
+        "ext": "js,json,md",
+        "ignoreRoot": [],
+        "delay": 100
+    }
 }

@@ -1,0 +1,19 @@
+{
+    "type": "containerSimple",
+    "prps": {
+        "singlePage": true,
+        "backgroundColor": "themeBackground",
+        "mainAxisAlign": "center",
+        "crossAxisAlign": "center"
+    },
+    "wgts": [
+        {
+            "type": "customComponent",
+            "prps": {
+                "topText": "Opus UI Example Application",
+                "bottomText": "You have clicked this component %1 time(s)",
+                "color": "{theme.colors.themeWhite}"
+            }
+        }
+    ]
+}

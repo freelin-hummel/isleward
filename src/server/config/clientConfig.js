@@ -65,7 +65,8 @@ const config = {
 		},
 		tiles: {
 			default: 0.4,
-			max: 0.55,
+			min: 0.33,
+			maxAdd: 0.44,
 			5: 0.7,
 			6: 0.9,
 			23: 0.9,
@@ -105,7 +106,8 @@ const config = {
 		},
 		walls: {
 			default: 0.85,
-			max: 1,
+			min: 0.85,
+			maxAdd: 0.15,
 			84: 1,
 			103: 0.9,
 			107: 0.9,
@@ -230,27 +232,6 @@ module.exports = {
 	config,
 
 	init: async function () {
-		fileLister.getFolder('./clientComponents').forEach(f => {
-			if (!f.endsWith('.js')) return;
-
-			const type = f.split('.')[0];
-			const path = 'server/clientComponents/' + f;
-
-			config.clientComponents.push({
-				type,
-				path
-			});
-		});
-
-		config.clientComponents.push({
-			extends: 'effects',
-			path: 'server/clientComponents/effects/auras.js'
-		});
-		config.clientComponents.push({
-			extends: 'effects',
-			path: 'server/clientComponents/effects/shield.js'
-		});
-
 		await events.emit('onBeforeGetClientConfig', config);
 
 		//Deprecated
@@ -271,7 +252,7 @@ module.exports = {
 			if (atlasTextureDimensions[tex])
 				continue;
 
-			const path = tex.includes('.png') ? `../${tex}` : `../client/images/${tex}.png`;
+			const path = tex.includes('.png') ? `../${tex}` : `../client/public/images/${tex}.png`;
 			const dimensions = await imageSizeFromFile(path);
 
 			delete dimensions.type;
