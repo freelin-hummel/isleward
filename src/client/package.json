@@ -15,7 +15,7 @@
         "lint": "eslint ."
     },
     "dependencies": {
-        "@barvynkoa/particle-emitter": "^0.0.1",
+        "@bigbadwaffle/particle-emitter": "^0.0.4",
         "@intenda/opus-ui": ">=2.0.0 < 3.0.0",
         "@pixi/utils": "^7.4.3",
         "howler": "^2.2.4",

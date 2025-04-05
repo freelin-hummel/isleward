@@ -43,7 +43,7 @@ export default {
 					},
 					color: this.blueprint.color || {
 						start: ['ffeb38'],
-						end: ['ff6942', 'd43346']
+						end: ['ffeb38', '0000ff', 'ff0000']
 					},
 					alpha: {
 						start: maxAlpha,

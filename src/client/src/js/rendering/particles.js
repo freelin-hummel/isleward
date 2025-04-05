@@ -3,7 +3,7 @@
 import particleDefaults from './particleDefaults.js';
 
 import { Texture } from 'pixi.js';
-import * as particles from '@barvynkoa/particle-emitter';
+import * as particles from '@bigbadwaffle/particle-emitter';
 
 function transformParticleConfig (oldConfig) {
 	const newConfig = {
@@ -51,23 +51,49 @@ function transformParticleConfig (oldConfig) {
 		}
 	});
 
-	newConfig.behaviors.push({
-		type: 'scale',
-		config: {
-			scale: {
-				list: [
-					{
-						value: oldConfig.scale.start.min !== undefined ? (oldConfig.scale.start.min + oldConfig.scale.start.max) / 2 : oldConfig.scale.start,
-						time: 0
-					},
-					{
-						value: oldConfig.scale.end.min !== undefined ? (oldConfig.scale.end.min + oldConfig.scale.end.max) / 2 : oldConfig.scale.end,
-						time: 1
-					}
-				]
+	if (oldConfig.scale.start.min) {
+		newConfig.behaviors.push({
+			type: 'scale',
+			config: {
+				pickScale: {
+					list: [
+						{
+							value: {
+								min: oldConfig.scale.start.min,
+								max: oldConfig.scale.start.max
+							},
+							time: 0
+						},
+						{
+							value: {
+								min: oldConfig.scale.end.min,
+								max: oldConfig.scale.end.max
+							},
+							time: 1
+						}
+					]
+				}
 			}
-		}
-	});
+		});
+	} else {
+		newConfig.behaviors.push({
+			type: 'scale',
+			config: {
+				scale: {
+					list: [
+						{
+							value: oldConfig.scale.start,
+							time: 0
+						},
+						{
+							value: oldConfig.scale.end,
+							time: 1
+						}
+					]
+				}
+			}
+		});
+	}
 
 	newConfig.behaviors.push({
 		type: 'rotationStatic',
@@ -83,29 +109,44 @@ function transformParticleConfig (oldConfig) {
 	}
 	);
 
-	// 3) COLOR
-	// oldConfig.color could be { start: ["fc66f7", "a24eff"], end: ["933159", "393268"] } or single strings
 	if (oldConfig.color) {
-		// We'll just grab the FIRST color if it's an array
-		const startColor = Array.isArray(oldConfig.color.start)
-			? oldConfig.color.start[0]
-			: oldConfig.color.start;
-		const endColor = Array.isArray(oldConfig.color.end)
-			? oldConfig.color.end[0]
-			: oldConfig.color.end;
-
-		if (startColor && endColor) {
+		if (Array.isArray(oldConfig.color.start)) {
+			newConfig.behaviors.push({
+				type: 'color',
+				config: {
+					color: {
+						pickList: [
+							{
+								value: oldConfig.color.start,
+								time: 0
+							},
+							{
+								value: oldConfig.color.end,
+								time: 1
+							}
+						]
+					}
+				}
+			})
+		} else if (!oldConfig.color.end) {
+			newConfig.behaviors.push({
+				type: 'colorStatic',
+				config: {
+					color: oldConfig.color.start
+				}
+			});
+		} else {
 			newConfig.behaviors.push({
 				type: 'color',
 				config: {
 					color: {
 						list: [
 							{
-								value: startColor,
+								value: oldConfig.color.start,
 								time: 0
 							},
 							{
-								value: endColor,
+								value: oldConfig.color.end ?? oldConfig.color.start,
 								time: 1
 							}
 						]
@@ -115,24 +156,49 @@ function transformParticleConfig (oldConfig) {
 		}
 	}
 
-	newConfig.behaviors.push({
-		type: 'moveSpeed',
-		config: {
-			speed: {
-				list: [
-					{
-						value: (oldConfig.speed.start.min !== undefined ? (oldConfig.speed.start.min + oldConfig.speed.start.max) / 2 : oldConfig.speed.start),
-						time: 0
-					},
-					{
-						value: (oldConfig.speed.end.min !== undefined ? (oldConfig.speed.end.min + oldConfig.speed.end.max) / 2 : oldConfig.speed.end),
-						time: 1
-					}
-				]
-			},
-			minMult: 0.1
-		}
-	});
+	if (oldConfig.speed.start.min !== undefined) {
+		newConfig.behaviors.push({
+			type: 'moveSpeed',
+			config: {
+				pickSpeed: {
+					list: [
+						{
+							value: {
+								min: oldConfig.speed.start.min,
+								max: oldConfig.speed.start.max
+							},
+							time: 0
+						},
+						{
+							value: {
+								min: oldConfig.speed.end.min,
+								max: oldConfig.speed.end.max
+							},
+							time: 1
+						}
+					]
+				}
+			}
+		});
+	} else {
+		newConfig.behaviors.push({
+			type: 'moveSpeed',
+			config: {
+				speed: {
+					list: [
+						{
+							value: oldConfig.speed.start,
+							time: 0
+						},
+						{
+							value: oldConfig.speed.end,
+							time: 1
+						}
+					]
+				}
+			}
+		});
+	}
 
 	let spawnConfig = oldConfig.spawnCircle;
 	if (oldConfig.spawnType === 'rect')
@@ -258,7 +324,11 @@ export default {
 				console.log({
 					message: 'Particle emitter system crashed',
 					error,
-					emitter: e
+					emitter: e,
+					behaviors: e._origConfig.behaviors.map(b => ({
+						type: b.type,
+						config: b.config
+					}))
 				});
 
 				this.isActive = false;
