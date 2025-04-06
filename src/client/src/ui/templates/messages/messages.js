@@ -89,7 +89,7 @@ export default {
 
 		const channelName = channel.trim();
 
-		this.customChannels.spliceWhere(c => c === channel);
+		_.spliceWhere(this.customChannels, c => c === channel);
 		this.find(`[filter="${channelName}"]`).remove();
 
 		this.customChannels.push(channel);
@@ -105,7 +105,7 @@ export default {
 	},
 
 	onLeaveChannel (channel) {
-		this.customChannels.spliceWhere(c => c === channel);
+		_.spliceWhere(this.customChannels, c => c === channel);
 
 		this.find(`.filters div[filter="${channel}"]`).remove();
 	},
@@ -165,7 +165,7 @@ export default {
 
 		if (subType === 'privateIn' || subType === 'privateOut') {
 			const list = this.privateChannels;
-			list.spliceWhere(l => l === source || l === target);
+			_.spliceWhere(list, l => l === source || l === target);
 
 			//Newest sources are always at the end
 			list.push(source || target);
@@ -210,12 +210,12 @@ export default {
 			let el = $('<div class="list-message ' + m.class + '">' + message + '</div>')
 				.appendTo(container);
 
-			if (m.has('type'))
+			if (_.has(m, 'type'))
 				el.addClass(m.type);
 			else
 				el.addClass('info');
 
-			if (m.has('channel'))
+			if (_.has(m, 'channel'))
 				el.addClass(m.channel);
 
 			if (m.item) {

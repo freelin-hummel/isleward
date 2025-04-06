@@ -19,9 +19,7 @@ export default {
 		if (bar) {
 			if (percentage >= 100) {
 				bar.el.remove();
-				this.bars.spliceWhere(function (b) {
-					return (b === bar);
-				});
+				_.spliceWhere(this.bars, b => b === bar);
 			} else
 				bar.el.find('.bar').css('width', percentage + '%');
 		} else if (percentage < 100) {

@@ -24,8 +24,7 @@ export default {
 	onDeclineClick () {
 		browserStorage.set('tos_accepted_version', null);
 
-		/* eslint-disable-next-line no-self-assign */
-		window.location = window.location;
+		window.location.reload();
 	},
 
 	onAcceptClick (version) {

@@ -129,7 +129,7 @@ export default {
 			if (item === this.hoverItem)
 				this.hideTooltip();
 
-			items.spliceWhere(i => i.id === id);
+			_.spliceWhere(items, i => i.id === id);
 		});
 
 		if (this.shown)

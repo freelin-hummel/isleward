@@ -2,8 +2,8 @@
 import { Filter } from 'pixi.js';
 import { hex2rgb, rgb2hex } from '@pixi/utils';
 
-import vertex from './outline/vert.js';
-import fragment from './outline/frag.js';
+import vertex from './outline/vert';
+import fragment from './outline/frag';
 
 class OutlineFilter extends Filter {
 	constructor ({ thickness = 5, color = 0xFFFFFF, quality = 0.1, alpha = 1.0, knockout = false }) {

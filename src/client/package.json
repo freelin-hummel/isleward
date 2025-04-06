@@ -14,7 +14,8 @@
         "start": "vite --port 4000",
         "build-json": "node node_modules/@intenda/opus-ui-packager/src/packager.js",
         "build": "vite build",
-        "lint": "eslint ."
+        "lint": "npx eslint .",
+        "lint-fix": "npx eslint . --fix"
     },
     "dependencies": {
         "@bigbadwaffle/particle-emitter": "^0.0.4",

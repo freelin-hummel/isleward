@@ -1,4 +1,4 @@
-import renderer from '../rendering/renderer.js';
+import renderer from '../rendering/renderer';
 
 export default {
 	type: 'animation',

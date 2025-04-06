@@ -1,7 +1,7 @@
-import physics from '../misc/physics.js';
-import events from '../system/events.js';
-import config from '../config.js';
-import globals from '../system/globals.js';
+import physics from '../misc/physics';
+import events from '../system/events';
+import config from '../config';
+import globals from '../system/globals';
 import modAudio from '@modAudio';
 
 import { Howler, Howl } from 'howler';
@@ -73,6 +73,7 @@ export default {
 
 		const useVolume = volume * (1 - (Math.pow(distance, 2) / Math.pow(minDistance, 2)));
 
+		/* eslint-disable-next-line no-new */
 		new Howl({
 			src: [file],
 			volume: useVolume,
@@ -212,8 +213,8 @@ export default {
 		// move to a building interior, for example. Unfortunately, we can't have different volume settings for these kinds of entries.
 		// The one that starts playing first will get priority
 		const filesPlaying = [...playMusic.map(p => p.file), ...stopMusic.map(p => p.file)];
-		playMusic.spliceWhere(p => filesPlaying.filter(f => f === p.file).length > 1);
-		stopMusic.spliceWhere(p => filesPlaying.filter(f => f === p.file).length > 1);
+		_.spliceWhere(playMusic, p => filesPlaying.filter(f => f === p.file).length > 1);
+		_.spliceWhere(stopMusic, p => filesPlaying.filter(f => f === p.file).length > 1);
 
 		stopMusic.forEach(m => this.stopSoundHelper(m));
 		playMusic.forEach(m => this.playMusicHelper(m));
@@ -320,6 +321,6 @@ export default {
 	},
 
 	destroySoundEntry (soundEntry) {
-		this.sounds.spliceWhere(s => s === soundEntry);
+		_.spliceWhere(this.sounds, s => s === soundEntry);
 	}
 };

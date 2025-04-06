@@ -1,16 +1,16 @@
-import resources from '../resources.js';
-import events from '../system/events.js';
-import physics from '../misc/physics.js';
-import effects from './effects.js';
-import tileOpacity from './tileOpacity.js';
-import particles from './particles.js';
-import shaderOutline from './shaders/outline.js';
-import spritePool from './spritePool.js';
-import updateSprites from './helpers/updateSprites.js';
-import globals from '../system/globals.js';
-import renderLoginBackground from './helpers/renderLoginBackground.js';
-import resetRenderer from './helpers/resetRenderer.js';
-import { Application, Container, Sprite, Text, Graphics, Rectangle, Texture, AlphaFilter, RenderTexture } from 'pixi.js';
+import resources from '../resources';
+import events from '../system/events';
+import physics from '../misc/physics';
+import effects from './effects';
+import tileOpacity from './tileOpacity';
+import particles from './particles';
+import shaderOutline from './shaders/outline';
+import spritePool from './spritePool';
+import updateSprites from './helpers/updateSprites';
+import globals from '../system/globals';
+import renderLoginBackground from './helpers/renderLoginBackground';
+import resetRenderer from './helpers/resetRenderer';
+import { Application, Container, Sprite, Text as PixiText, Graphics, Rectangle, Texture, AlphaFilter, RenderTexture } from 'pixi.js';
 import 'pixi.js/advanced-blend-modes';
 
 const mRandom = Math.random.bind(Math);
@@ -112,7 +112,7 @@ const renderer = {
 
 		textureList.forEach(t => {
 			const tex = Texture.from(sprites[t]);
-			tex.baseTexture.scaleMode = 'nearest';
+			tex.source.scaleMode = 'nearest';
 
 			this.textures[t] = tex;
 		});
@@ -161,8 +161,7 @@ const renderer = {
 
 		let renderTexture = RenderTexture.create({
 			width: this.textures.tiles.width,
-			height: totalHeight/*,
-			preferredScale: SCALE_MODES.NEAREST*/
+			height: totalHeight
 		});
 		renderTexture.source.scaleMode = 'nearest';
 
@@ -172,7 +171,6 @@ const renderer = {
 		});
 
 		this.textures.sprites = renderTexture;
-		//this.textures.scaleMult = PIXI.SCALE_MODES.NEAREST;
 	},
 
 	toggleScreen () {
@@ -236,13 +234,6 @@ const renderer = {
 		if (!cached) {
 			let y = ~~(cell / 8);
 			let x = cell - (y * 8);
-
-			// Create a texture from the sprite sheet
-			/*	const baseTexture = PIXI.Texture.from(resources.sprites[baseTex]);
-			cached = new PIXI.Texture({
-				source: baseTexture.source,
-				frame: new PIXI.Rectangle(x * size, y * size, size, size)
-			});*/
 
 			cached = new Texture({
 				source: this.textures[baseTex],
@@ -656,14 +647,16 @@ const renderer = {
 		const { text, visible, x, y, parent: spriteParent, layerName } = obj;
 		const { fontSize = 14, color = 0xF2F5F5 } = obj;
 
-		const textSprite = new Text({
+		const textSprite = new PixiText({
 			text,
 			style: {
 				fontFamily: 'bitty',
 				fontSize,
 				fill: color,
-				stroke: 0x2d2136,
-				strokeThickness: 4
+				stroke: {
+					color: '#2d2136',
+					width: 4
+				}
 			}
 		});
 

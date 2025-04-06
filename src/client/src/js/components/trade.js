@@ -29,9 +29,7 @@ export default {
 		}
 
 		if (blueprint.removeItems) {
-			this.itemList.items.spliceWhere(function (b) {
-				return (blueprint.removeItems.indexOf(b.id) > -1);
-			});
+			_.spliceWhere(this.itemList.items, b => blueprint.removeItems.indexOf(b.id) > -1);
 			redraw = true;
 			delete blueprint.removeItems;
 		}

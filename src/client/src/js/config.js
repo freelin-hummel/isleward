@@ -1,4 +1,4 @@
-import browserStorage from './system/browserStorage.js';
+import browserStorage from './system/browserStorage';
 
 const config = {
 	showNames: true,

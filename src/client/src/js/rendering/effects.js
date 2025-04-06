@@ -6,7 +6,7 @@ export default {
 	},
 
 	unregister (cpn) {
-		this.list.spliceWhere(l => l === cpn);
+		_.spliceWhere(this.list, l => l === cpn);
 	},
 
 	render () {

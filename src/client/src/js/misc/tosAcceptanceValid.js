@@ -1,5 +1,5 @@
-import browserStorage from '../system/browserStorage.js';
-import globals from '../system/globals.js';
+import browserStorage from '../system/browserStorage';
+import globals from '../system/globals';
 
 export default () => {
 	const acceptedVersion = browserStorage.get('tos_accepted_version');

@@ -146,11 +146,11 @@ export default (container, item, useEl, manageTooltip, getItemContextConfig, sho
 			height: `${size}px`
 		});
 
-	if (item.quantity > 1 || item.eq || item.active || item.has('quickSlot')) {
+	if (item.quantity > 1 || item.eq || item.active || _.has(item, 'quickSlot')) {
 		let elQuantity = itemEl.find('.quantity');
 		let txtQuantity = item.quantity;
 		if (!txtQuantity)
-			txtQuantity = item.has('quickSlot') ? 'QS' : 'EQ';
+			txtQuantity = _.has(item, 'quickSlot') ? 'QS' : 'EQ';
 
 		elQuantity.html(txtQuantity);
 
@@ -169,7 +169,7 @@ export default (container, item, useEl, manageTooltip, getItemContextConfig, sho
 			itemEl.addClass('no-equip');
 	}
 
-	if (item.has('quality'))
+	if (_.has(item, 'quality'))
 		itemEl.addClass(`quality-${item.quality}`);
 
 	if (manageTooltip)

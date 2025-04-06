@@ -1,4 +1,4 @@
-import globals from './system/globals.js';
+import globals from './system/globals';
 import modImages from '@modImages';
 
 const resources = {
@@ -16,30 +16,24 @@ const resources = {
 				fullList.push(k);
 		});
 
-		await Promise.all(fullList.map(name => {
+		await Promise.all(fullList.map(r => {
 			return new Promise(resolve => {
 				const sprite = new Image();
 
-				if (name.includes('server/')) {
-					// Load from the base64 object
-					const base64 = modImages[name];
+				if (r.includes('server/')) {
+					const base64 = modImages[r];
 					if (!base64)
-						console.error(`❌ Could not find a base64 entry for: ${name}`);
-					else {
-						// Prepend "data:image/png;base64,"
+						console.error(`❌ Could not find a base64 entry for: ${r}`);
+					else
 						sprite.src = `data:image/png;base64,${base64}`;
-					}
-				} else {
-					// Load from your local images/ folder
-					sprite.src = `images/${name}.png`;
-				}
+				} else
+					sprite.src = `images/${r}.png`;
 
-				// Store it in the sprites object
-				sprites[name] = sprite;
+				sprites[r] = sprite;
 
 				sprite.onload = resolve;
 				sprite.onerror = () => {
-					console.error(`❌ Failed to load image: ${name}`);
+					console.error(`❌ Failed to load image: ${r}`);
 					resolve();
 				};
 			});

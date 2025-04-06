@@ -1,8 +1,8 @@
-import objBase from './objBase.js';
-import events from '../system/events.js';
-import renderer from '../rendering/renderer.js';
-import sound from '../sound/sound.js';
-import config from '../config.js';
+import objBase from './objBase';
+import events from '../system/events';
+import renderer from '../rendering/renderer';
+import sound from '../sound/sound';
+import config from '../config';
 
 export default {
 	objects: [],
@@ -97,7 +97,7 @@ export default {
 	onGetObject (obj) {
 		//Things like attacks don't have ids
 		let exists = null;
-		if (obj.has('id'))
+		if (_.has(obj, 'id'))
 			exists = this.objects.find(({ id, destroyed }) => id === obj.id && !destroyed);
 
 		if (!exists)

@@ -1,28 +1,3 @@
-Object.defineProperty(Object.prototype, 'has', {
-	enumerable: false,
-	writable: true,
-	value (prop) {
-		/* eslint-disable-next-line no-prototype-builtins */
-		return (this.hasOwnProperty(prop) && this[prop] !== undefined && this[prop] !== null);
-	}
-});
-
-if (!String.prototype.padStart) {
-	 
-	String.prototype.padStart = function padStart (targetLength, padString) {
-		targetLength = targetLength >> 0;
-		padString = String(typeof padString !== 'undefined' ? padString : ' ');
-		if (this.length >= targetLength)
-			return String(this);
-
-		targetLength = targetLength - this.length;
-		if (targetLength > padString.length)
-			padString += padString.repeat(targetLength / padString.length);
-
-		return padString.slice(0, targetLength) + String(this);
-	};
-}
-
 window._ = {
 	get2dArray (w, h, def) {
 		def = def || 0;
@@ -41,6 +16,36 @@ window._ = {
 		}
 
 		return result;
+	},
+
+	spliceWhere (array, filter) {
+		for (let i = array.length - 1; i >= 0; i--) {
+			if (filter(array[i], i, array))
+				array.splice(i, 1);
+		}
+	},
+
+	spliceFirstWhere (array, filter) {
+		for (let i = 0; i < array.length; i++) {
+			if (filter(array[i], i, array)) {
+				const [ value ] = array.splice(i, 1);
+
+				return value;
+			}
+		}
+	},
+
+	has (obj, key) {
+		return (
+			Object.prototype.hasOwnProperty.call(obj, key) &&
+			obj[key] !== undefined &&
+			this[key] !== null
+		);
+	},
+
+	log (msg) {
+		/* eslint-disable-next-line no-console */
+		console.log(msg);
 	},
 
 	toggleFullScreen () {

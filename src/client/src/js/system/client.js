@@ -1,4 +1,4 @@
-import events from './events.js';
+import events from './events';
 import { io } from 'socket.io-client';
 
 let client = {
@@ -57,8 +57,7 @@ let client = {
 	},
 
 	onDisconnect () {
-		/* eslint-disable-next-line no-self-assign */
-		window.location = window.location;
+		window.location.reload();
 	},
 
 	onHandshake () {
@@ -97,7 +96,7 @@ let client = {
 
 		onGetObject (eventName, msgs) {
 			const prepend = msgs.filter(o => o.self);
-			msgs.spliceWhere(o => prepend.some(p => p === o));
+			_.spliceWhere(msgs, o => prepend.some(p => p === o));
 			msgs.unshift.apply(msgs, prepend);
 
 			this.processAction.default(eventName, msgs);

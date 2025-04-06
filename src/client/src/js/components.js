@@ -1,5 +1,5 @@
-import events from './system/events.js';
-import globals from './system/globals.js';
+import events from './system/events';
+import globals from './system/globals';
 
 import modComponents from '@modComponents';
 
@@ -9,44 +9,44 @@ const extenders = [];
 
 //Internal
 const componentList = [
-		'animation',
-		'attackAnimation',
-		'bumpAnimation',
-		'chatter',
-		'chest',
-		'dialogue',
-		'effects',
-		'events',
-		'explosion',
-		'fadeInOut',
-		'flash',
-		'gatherer',
-		'inventory',
-		'keyboardMover',
-		'light',
-		'lightningEffect',
-		'lightPatch',
-		'mouseMover',
-		'moveAnimation',
-		'particles',
-		'passives',
-		'pather',
-		'player',
-		'projectile',
-		'quests',
-		'reputation',
-		'resourceNode',
-		'serverActions',
-		'social',
-		'sound',
-		'spellbook',
-		'stash',
-		'stats',
-		'touchMover',
-		'trade',
-		'whirlwind',
-		'/effects/auras',
-		'/effects/shield'
+	'animation',
+	'attackAnimation',
+	'bumpAnimation',
+	'chatter',
+	'chest',
+	'dialogue',
+	'effects',
+	'events',
+	'explosion',
+	'fadeInOut',
+	'flash',
+	'gatherer',
+	'inventory',
+	'keyboardMover',
+	'light',
+	'lightningEffect',
+	'lightPatch',
+	'mouseMover',
+	'moveAnimation',
+	'particles',
+	'passives',
+	'pather',
+	'player',
+	'projectile',
+	'quests',
+	'reputation',
+	'resourceNode',
+	'serverActions',
+	'social',
+	'sound',
+	'spellbook',
+	'stash',
+	'stats',
+	'touchMover',
+	'trade',
+	'whirlwind',
+	'/effects/auras',
+	'/effects/shield'
 ].map(c => {
 	return {
 		type: c,
@@ -88,7 +88,7 @@ export default {
 		const fullList = [
 			...componentList,
 			...globals.clientConfig.clientComponents
-		]
+		];
 
 		await Promise.all(
 			fullList.map(async ({ type, path }) => {
@@ -97,19 +97,19 @@ export default {
 				if (path.includes('/effects/')) {
 					const effectName = path.split('/').pop().replace('.js', '');
 					importedComponent = await import(`./components/effects/${effectName}.js`);
-
 				} else if (path.indexOf('server/mods/') === 0) {
 					const componentName = path.split('/').pop();
 					importedComponent = modComponents[componentName];
-
-				} else {
+				} else
 					importedComponent = await import(`./components/${type}.js`);
-				}
 
 				const cpn = importedComponent.default;
 				if (cpn.type) templates.push(cpn);
 				if (cpn.extends) {
-					extenders.push({ extends: cpn.extends, cpn });
+					extenders.push({
+						extends: cpn.extends,
+						cpn
+					});
 				}
 			})
 		);

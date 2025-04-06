@@ -78,8 +78,7 @@ export default {
 	},
 
 	logOut () {
-		/* eslint-disable-next-line no-self-assign */
-		window.location = window.location;
+		window.location.reload();
 	},
 
 	onKeyDown (key) {

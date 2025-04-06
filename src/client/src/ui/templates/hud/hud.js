@@ -44,7 +44,7 @@ export default {
 	},
 
 	useQuickItem () {
-		const quickItem = this.items.find(f => f.has('quickSlot'));
+		const quickItem = this.items.find(f => _.has(f, 'quickSlot'));
 		if (!quickItem)
 			return;
 
@@ -83,7 +83,7 @@ export default {
 		if (!this.items)
 			return;
 
-		const quickItem = this.items.find(f => f.has('quickSlot'));
+		const quickItem = this.items.find(f => _.has(f, 'quickSlot'));
 		if (!quickItem)
 			return;
 
@@ -123,7 +123,7 @@ export default {
 		},
 
 		onDestroyItems (itemIds) {
-			const quickItem = this.items.find(f => f.has('quickSlot'));
+			const quickItem = this.items.find(f => _.has(f, 'quickSlot'));
 			if (!quickItem || itemIds.includes(quickItem.id)) {
 				this.find('.quickItem')
 					.hide()
@@ -138,7 +138,7 @@ export default {
 		onGetItems (items) {
 			this.items = items;
 
-			const quickItem = items.find(f => f.has('quickSlot'));
+			const quickItem = items.find(f => _.has(f, 'quickSlot'));
 			this.quickItem = quickItem;
 			if (!quickItem) {
 				const oldQuickItem = this.find('.quickItem').data('item');

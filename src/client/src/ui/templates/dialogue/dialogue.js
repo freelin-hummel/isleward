@@ -16,18 +16,14 @@ export default {
 		if (isMobile && msg.msg.includes('(U to'))
 			return;
 
-		this.text.spliceWhere(function (t) {
-			return (t.src === msg.src);
-		});
+		_.spliceWhere(this.text, t => t.src === msg.src);
 
 		this.text.push(msg);
 		this.setText();
 	},
 
 	onRemoveDialogue (msg) {
-		this.text.spliceWhere(function (t) {
-			return (t.src === msg.src);
-		});
+		_.spliceWhere(this.text, t => t.src === msg.src);
 
 		this.setText();
 	},

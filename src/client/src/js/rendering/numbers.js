@@ -1,7 +1,7 @@
-import events from '../system/events.js';
-import objects from '../objects/objects.js';
-import renderer from './renderer.js';
-import config from '../config.js';
+import events from '../system/events';
+import objects from '../objects/objects';
+import renderer from './renderer';
+import config from '../config';
 
 //Defaults
 const MOVE_SPEED = 0.5;

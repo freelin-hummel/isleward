@@ -315,7 +315,7 @@ export default {
 			if (item.useText)
 				menuItems.use.text = item.useText;
 			ctxConfig.push(menuItems.use);
-			if (!item.has('quickSlot'))
+			if (!_.has(item, 'quickSlot'))
 				ctxConfig.push(menuItems.quickSlot);
 		} else if (item.slot) {
 			ctxConfig.push(menuItems.equip);
@@ -492,7 +492,7 @@ export default {
 			if (item === this.hoverItem)
 				this.hideTooltip();
 
-			this.items.spliceWhere(i => i.id === id);
+			_.spliceWhere(this.items, i => i.id === id);
 		});
 
 		if (this.shown)

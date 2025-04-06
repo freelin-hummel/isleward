@@ -1,5 +1,5 @@
-import events from './system/events.js';
-import renderer from './rendering/renderer.js';
+import events from './system/events';
+import renderer from './rendering/renderer';
 
 const input = {
 	axes: {
@@ -73,6 +73,7 @@ const input = {
 			.on('touchend', this.events.touch.touchEnd.bind(this))
 			.on('touchcancel', this.events.touch.touchCancel.bind(this));
 
+		//Todo, add shake plugin
 		//if (isMobile)
 		//	require(['plugins/shake.js'], this.onLoadShake.bind(this));
 	},
@@ -82,7 +83,7 @@ const input = {
 	},
 
 	unBlacklistKeys (list) {
-		this.blacklistedKeys.spliceWhere(d => list.includes(d));
+		_.spliceWhere(this.blacklistedKeys, d => list.includes(d));
 	},
 
 	whitelistKeys (list) {
@@ -90,7 +91,7 @@ const input = {
 	},
 
 	unWhitelistKeys (list) {
-		this.whitelistedKeys.spliceWhere(d => list.includes(d));
+		_.spliceWhere(this.whitelistedKeys, d => list.includes(d));
 	},
 
 	onLoadShake (shake) {
@@ -121,7 +122,7 @@ const input = {
 	},
 
 	isKeyDown (key, noConsume) {
-		if (this.keys.has(key)) {
+		if (_.has(this.keys, key)) {
 			if (noConsume)
 				return true;
 
@@ -173,7 +174,7 @@ const input = {
 
 	events: {
 		keyboard: {
-			 
+
 			keyDown (e) {
 				if (!this.enabled)
 					return;
@@ -191,7 +192,7 @@ const input = {
 				if (!this.isKeyAllowed(key))
 					return;
 
-				if (this.keys.has(key))
+				if (_.has(this.keys, key))
 					this.keys[key] = 2;
 				else {
 					this.keys[key] = 1;

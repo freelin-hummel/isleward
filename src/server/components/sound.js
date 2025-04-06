@@ -10,7 +10,7 @@ module.exports = {
 
 	simplified: null,
 
-	buildSimplified: function () {
+	buildSimplified () {
 		const s = Object.fromEntries(
 			serializeProps
 				.map(p => {
@@ -32,7 +32,7 @@ module.exports = {
 		this.simplified = s;
 	},
 
-	simplify: function () {
+	simplify () {
 		if (!this.simplified)
 			this.buildSimplified();
 

@@ -114,13 +114,13 @@ export default {
 		});
 
 		items
-			.filter(item => item.has('quickSlot') || (item.eq && (item.slot || item.has('runeSlot'))))
+			.filter(item => _.has(item, 'quickSlot') || (item.eq && (item.slot || _.has(item, 'runeSlot'))))
 			.forEach(item => {
 				let slot = item.slot;
-				if (item.has('runeSlot')) {
+				if (_.has(item, 'runeSlot')) {
 					let runeSlot = item.runeSlot;
 					slot = 'rune-' + runeSlot;
-				} else if (item.has('quickSlot'))
+				} else if (_.has(item, 'quickSlot'))
 					slot = 'quick-' + item.quickSlot;
 
 				slot = item.equipSlot || slot;
@@ -162,7 +162,7 @@ export default {
 	},
 
 	unequipItem (item) {
-		const isQuickslot = item.has('quickSlot');
+		const isQuickslot = _.has(item, 'quickSlot');
 		const method = isQuickslot ? 'setQuickSlot' : 'unequip';
 		const data = isQuickslot ? { slot: item.quickSlot } : { itemId: item.id };
 
@@ -213,7 +213,7 @@ export default {
 				if (isRune)
 					return (!item.slot && item.spell && !item.eq);
 				else if (isConsumable)
-					return (item.type === 'consumable' && !item.has('quickSlot'));
+					return (item.type === 'consumable' && !_.has(item, 'quickSlot'));
 
 				let checkSlot = (slot.indexOf('finger') === 0) ? 'finger' : slot;
 				if (slot === 'oneHanded')

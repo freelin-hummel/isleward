@@ -15,7 +15,7 @@ export default {
 		if (this.obj.self)
 			events.emit('onGetStats', this.values);
 
-		if (this.obj.has('serverId'))
+		if (_.has(this.obj, 'serverId'))
 			events.emit('onGetPartyStats', this.obj.serverId, this.values);
 
 		let obj = this.obj;
@@ -152,7 +152,7 @@ export default {
 		if (this.obj.self)
 			events.emit('onGetStats', this.values, blueprint);
 
-		if (this.obj.has('serverId'))
+		if (_.has(this.obj, 'serverId'))
 			events.emit('onGetPartyStats', this.obj.serverId, this.values);
 
 		this.updateBars();

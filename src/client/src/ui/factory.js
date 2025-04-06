@@ -1,8 +1,8 @@
-import uiBase from './uiBase.js';
-import events from '../js/system/events.js';
-import client from '../js/system/client.js';
-import globals from '../js/system/globals.js';
-import tosAcceptanceValid from '../js/misc/tosAcceptanceValid.js';
+import uiBase from './uiBase';
+import events from '../js/system/events';
+import client from '../js/system/client';
+import globals from '../js/system/globals';
+import tosAcceptanceValid from '../js/misc/tosAcceptanceValid';
 
 import modUis from '@modUis';
 

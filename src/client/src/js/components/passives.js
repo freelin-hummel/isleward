@@ -15,19 +15,17 @@ export default {
 		let rerender = false;
 
 		if (blueprint.tickNodes) {
-			blueprint.tickNodes.forEach(function (n) {
+			blueprint.tickNodes.forEach(n => {
 				this.selected.push(n);
-			}, this);
+			});
 
 			rerender = true;
 		}
 
 		if (blueprint.untickNodes) {
-			blueprint.untickNodes.forEach(function (n) {
-				this.selected.spliceWhere(function (s) {
-					return (s === n);
-				});
-			}, this);
+			blueprint.untickNodes.forEach(n => {
+				_.spliceWhere(this.selected, s => s === n);
+			});
 
 			rerender = true;
 		}

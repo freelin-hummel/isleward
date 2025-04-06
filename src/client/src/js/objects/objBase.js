@@ -1,7 +1,7 @@
-import components from '../components.js';
-import renderer from '../rendering/renderer.js';
-import events from '../system/events.js';
-import config from '../config.js';
+import components from '../components';
+import renderer from '../rendering/renderer';
+import events from '../system/events';
+import config from '../config';
 
 export default {
 	components: [],
@@ -43,9 +43,7 @@ export default {
 		if (!cpn)
 			return;
 
-		this.components.spliceWhere(c => {
-			return c === cpn;
-		});
+		_.spliceWhere(this.components, c => c === cpn);
 
 		delete this[type];
 	},

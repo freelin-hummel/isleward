@@ -1,4 +1,5 @@
 //Plugins
+/* eslint-disable-next-line no-shadow */
 import $ from 'jquery';
 
 //Globals
@@ -71,52 +72,6 @@ const main = {
 
 		$('.loader-container').remove();
 
-		Array.prototype.spliceWhere = function (callback, thisArg) {
-			let T = thisArg;
-			let O = Object(this);
-			let len = O.length >>> 0;
-
-			let k = 0;
-
-			while (k < len) {
-				let kValue;
-
-				if (k in O) {
-					kValue = O[k];
-
-					if (callback.call(T, kValue, k, O)) {
-						O.splice(k, 1);
-						k--;
-					}
-				}
-				k++;
-			}
-		};
-
-		 
-		Array.prototype.spliceFirstWhere = function (callback, thisArg) {
-			let T = thisArg;
-			let O = Object(this);
-			let len = O.length >>> 0;
-
-			let k = 0;
-
-			while (k < len) {
-				let kValue;
-
-				if (k in O) {
-					kValue = O[k];
-
-					if (callback.call(T, kValue, k, O)) {
-						O.splice(k, 1);
-
-						return kValue;
-					}
-				}
-				k++;
-			}
-		};
-
 		this.update();
 	},
 
@@ -140,14 +95,13 @@ const main = {
 };
 
 (async () => {
-	if (window.isMobile) {
+	if (window.isMobile) 
 		$('.ui-container').addClass('mobile');
 
-		//If we're on an ios device, we need to load longPress since that polyfills contextmenu for us
-		//Todo check and fix ios long press
-		//if (window._.isIos())
-		//	await loadLongPress();
-	}
+	//If we're on an ios device, we need to load longPress since that polyfills contextmenu for us
+	//Todo check and fix ios long press
+	//if (window._.isIos())
+	//	await loadLongPress();
 
 	if (window.location.search.includes('hideMonetization'))
 		$('.ui-container').addClass('hideMonetization');

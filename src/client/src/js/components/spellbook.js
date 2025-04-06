@@ -45,7 +45,7 @@ export default {
 
 	extend (blueprint) {
 		if (blueprint.removeSpells) {
-			blueprint.removeSpells.forEach(r => this.spells.spliceWhere(s => s.id === r));
+			blueprint.removeSpells.forEach(r => _.spliceWhere(this.spells, s => s.id === r));
 			events.emit('onGetSpells', this.spells);
 		}
 

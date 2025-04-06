@@ -15,7 +15,6 @@ export default {
 	coordinates: [],
 
 	async init () {
-
 		if (!this.source) {
 			this.obj.destroyed = true;
 

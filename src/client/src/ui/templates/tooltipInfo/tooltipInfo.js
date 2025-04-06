@@ -29,7 +29,6 @@ export default {
 		if (mob.stats.values.level - 5 >= window.player.stats.values.level)
 			html = '<font class="color-red">' + html + '</font>';
 		if (mob.aggro) {
-			//TODO: Figure this out some other wayh since factions interact in different ways now
 			if (mob.aggro.faction === 'hostile')
 				html += '<br />aggressive';
 		}

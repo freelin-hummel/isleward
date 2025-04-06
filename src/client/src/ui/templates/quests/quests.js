@@ -108,7 +108,7 @@ export default {
 			return;
 
 		q.el.remove();
-		this.quests.spliceWhere(f => f.id === id);
+		_.spliceWhere(this.quests, f => f.id === id);
 	},
 
 	toggleButtons (e) {

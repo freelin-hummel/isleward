@@ -4,6 +4,7 @@ import spritePool from '../spritePool';
 
 const mRandom = Math.random.bind(Math);
 
+/* eslint-disable-next-line max-lines-per-function */
 const updateSprites = renderer => {
 	if (renderer.titleScreen)
 		return;
@@ -63,7 +64,7 @@ const updateSprites = renderer => {
 
 					sprite.visible = false;
 					spritePool.store(sprite);
-					rendered.spliceWhere(s => s === sprite);
+					_.spliceWhere(rendered, s => s === sprite);
 				}
 
 				if (cell.visible) {
@@ -90,7 +91,7 @@ const updateSprites = renderer => {
 
 					sprite.visible = false;
 					spritePool.store(sprite);
-					rendered.spliceWhere(s => s === sprite);
+					_.spliceWhere(rendered, s => s === sprite);
 				}
 
 				if (!cell.visible) {

@@ -100,9 +100,7 @@ export default {
 			return;
 
 		e.el.remove();
-		this.list.spliceWhere(function (l) {
-			return (l.id === id);
-		});
+		_.spliceWhere(this.list, l => l.id === id);
 	},
 
 	toggleButtons (e) {

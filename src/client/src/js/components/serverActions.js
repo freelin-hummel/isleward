@@ -34,7 +34,7 @@ export default {
 	extend (blueprint) {
 		if (blueprint.addActions) {
 			blueprint.addActions.forEach(a => {
-				this.actions.spliceWhere(f => f.key === a.key);
+				_.spliceWhere(this.actions, f => f.key === a.key);
 
 				let exists = this.actions.some(ta => {
 					return (ta.action.data.targetId === a.action.data.targetId && ta.action.cpn === a.action.cpn && ta.action.method === a.action.method);
@@ -50,8 +50,12 @@ export default {
 
 		if (blueprint.removeActions) {
 			blueprint.removeActions.forEach(a => {
-				this.actions.spliceWhere(ta => {
-					return (ta.action.data.targetId === a.action.data.targetId && ta.action.cpn === a.action.cpn && ta.action.method === a.action.method);
+				_.spliceWhere(this.actions, ta => {
+					return (
+						ta.action.data.targetId === a.action.data.targetId &&
+						ta.action.cpn === a.action.cpn &&
+						ta.action.method === a.action.method
+					);
 				});
 			});
 

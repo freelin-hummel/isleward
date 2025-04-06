@@ -1,4 +1,4 @@
-import events from '../js/system/events.js';
+import events from '../js/system/events';
 
 export default {
 	centeredX: false,

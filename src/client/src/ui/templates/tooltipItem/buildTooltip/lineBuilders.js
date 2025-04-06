@@ -291,7 +291,7 @@ const lineBuilders = {
 		return abilityValues;
 	},
 
-	requires: (className) => {
+	requires: className => {
 		if (!item.requires && !item.level && (!item.factions || !item.factions.length))
 			return null;
 
