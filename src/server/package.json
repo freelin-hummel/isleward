@@ -10,7 +10,9 @@
 	"homepage": "https://play.isleward.com/",
 	"repository": "https://gitlab.com/Isleward/isleward.git",
 	"scripts": {
-		"start": "nodemon"
+		"start": "nodemon",
+		"lint": "npx eslint .",
+		"lint-fix": "npx eslint . --fix"
 	},
 	"dependencies": {
 		"bcrypt-nodejs": "0.0.3",
@@ -21,6 +23,10 @@
 	},
 	"devDependencies": {
 		"nodemon": "^3.1.9",
-		"sqlite3": "^5.1.7"
+		"sqlite3": "^5.1.7",
+		"globals": "^16.0.0",
+		"babel-eslint": "^10.1.0",
+		"eslint": "^9.24.0",
+		"eslint-plugin-prettier": "5.2.6"
 	}
 }

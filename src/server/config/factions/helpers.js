@@ -13,7 +13,9 @@ const getFactionBlueprint = factionId => {
 	let res = null;
 	try {
 		res = factions.getFaction(factionId);
-	} catch (e) {}
+	} catch (e) {
+		console.error('Failed to load faction', factionId, e);
+	}
 
 	if (!res)
 		return;

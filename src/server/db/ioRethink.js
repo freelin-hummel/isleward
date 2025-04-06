@@ -22,7 +22,8 @@ module.exports = {
 		try {
 			await r.dbCreate(serverConfig.dbName).run();
 		} catch (e) {
-
+			if (!e.message.includes('already exists'))
+				console.error('Failed to create database', e);
 		}
 
 		for (const table of tableNames) {
@@ -307,7 +308,17 @@ module.exports = {
 					info
 				}
 			});
-		} catch (e) {}
+		} catch {
+			console.error('Could not insert error into database');
+			console.error({
+				date: new Date(),
+				sourceModule,
+				sourceMethod,
+				error: error.toString(),
+				stack: error.stack.toString(),
+				info
+			});
+		}
 
 		if (process.send) {
 			process.send({

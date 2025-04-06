@@ -5,11 +5,12 @@ import globals from 'globals';
 
 export default defineConfig([
 	globalIgnores([
-		'dist/**/*.*'
+		'dist/**/*.*',
+		'vitePlugins/temp/**/*.*'
 	]),
 	{
 		...js.configs.recommended,
-		files: ['vite.config.js', 'vitePlugins/dist/*.*'],
+		files: ['vite.config.js', 'vitePlugins/*.js'],
 
 		languageOptions: {
 			ecmaVersion: 'latest',

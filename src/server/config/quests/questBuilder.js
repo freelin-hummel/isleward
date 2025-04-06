@@ -29,6 +29,9 @@ module.exports = {
 			zoneTemplate = require(`../../${zone.path}/${zoneName}/quests.js`);
 		} catch (e) {
 			zoneTemplate = globalQuests;
+
+			if (!e.message.includes('Cannot find module'))
+				console.error('Failed to load quest zone template', e);
 		}
 
 		if (!zoneTemplate)

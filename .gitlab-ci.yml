@@ -24,6 +24,16 @@ lint-client:
     - merge_requests
     - master
 
+lint-server:
+  stage: test
+  script:
+    - cd src/server
+    - npm install
+    - npm run lint
+  only:
+    - merge_requests
+    - master
+
 build-image-latest:
   stage: build
   image: docker:latest

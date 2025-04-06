@@ -55,7 +55,6 @@ Object.defineProperty(Object.prototype, 'has', {
 	enumerable: false,
 	writable: true,
 	value: function (prop) {
-		//eslint-disable-next-line no-undefined
 		return (this.hasOwnProperty(prop) && this[prop] !== undefined && this[prop] !== null);
 	}
 });

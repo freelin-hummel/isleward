@@ -4,6 +4,12 @@ import globals from 'globals';
 import prettierPlugin from 'eslint-plugin-prettier';
 
 export default defineConfig([
+	globalIgnores([
+		'mods/**/ui/**/*',
+		'mods/**/clientComponents/**/*',
+		'mods/**/clientModules/**/*',
+		'config/passiveTree.js'
+	]),
 	{
 		...js.configs.recommended,
 
@@ -70,7 +76,7 @@ export default defineConfig([
 		rules: {
 			'comma-dangle': ['error', 'never'],
 			'no-cond-assign': ['error', 'always'],
-			'no-console': 'warn',
+			'no-console': ['error', { allow: ['warn', 'error'] }],
 			'no-constant-condition': 'error',
 			'no-control-regex': 'error',
 			'no-debugger': 'warn',
@@ -195,8 +201,5 @@ export default defineConfig([
 			'no-const-assign': 'error',
 			'no-var': 'error'
 		}
-	},
-	{ files: ['clientComponents/**/*'] },
-	{ files: ['mods/**/ui/*', 'mods/**/clientComponents/**/*'] },
-	{ files: ['mods/**/ui/**/*'] }
+	}
 ]);

@@ -1,4 +1,4 @@
-FROM rust:1.82-bullseye as rust
+FROM rust:1.82-bullseye AS rust
 
 RUN apt install -y wget
 

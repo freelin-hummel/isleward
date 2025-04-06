@@ -14,6 +14,8 @@ module.exports = {
 				return fs.statSync(fsPath.join(path, file)).isDirectory();
 			});
 		} catch (e) {
+			console.error('Failed to read folder', path, e);
+
 			return [];
 		}
 	}

@@ -149,8 +149,8 @@ const onMessage = (thread, message) => {
 
 			global[message.module][message.method](message);
 		} catch (e) {
-			/* eslint-disable-next-line no-console */
-			console.log('No global method found', message.module, message.method);
+			console.error('Calling global method failed', message.module, message.method, e);
+
 			process.exit();
 		}
 	} else if (message.event === 'onCrashed') {

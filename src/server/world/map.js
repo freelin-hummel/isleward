@@ -86,13 +86,17 @@ module.exports = {
 			this.zoneConfig = require('../' + this.path + '/' + this.name + '/zone');
 		} catch (e) {
 			this.zoneConfig = globalZone;
+
+			console.error('Failed to load zone config', e);
 		}
 		events.emit('onAfterGetZone', this.name, this.zoneConfig);
 
 		let chats = null;
 		try {
 			chats = require('../' + this.path + '/' + this.name + '/chats');
-		} catch (e) {}
+		} catch (e) {
+			console.error('Failed to load zone chats', e);
+		}
 
 		if (chats) {
 			if (this.zoneConfig.chats)
@@ -104,7 +108,10 @@ module.exports = {
 		let dialogues = null;
 		try {
 			dialogues = require('../' + this.path + '/' + this.name + '/dialogues');
-		} catch (e) {}
+		} catch (e) {
+			console.error('Failed to load zone dialogues', e);
+		}
+
 		events.emit('onBeforeGetDialogue', this.name, dialogues);
 		if (dialogues)
 			this.zoneConfig.dialogues = dialogues;

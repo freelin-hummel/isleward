@@ -3,7 +3,6 @@ const { imageSizeFromFile } = require('image-size/fromFile');
 
 //Helpers
 const events = require('../misc/events');
-const fileLister = require('../misc/fileLister');
 
 //External Config
 const tos = require('./tos');
