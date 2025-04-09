@@ -1,5 +1,17 @@
-import '../misc/helpers';
+window.addons = {
+	addons: [],
+	events: null,
 
-window.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+	register (addon) {
+		this.addons.push(addon);
 
-window.addons = window.addons || { init () {} };
+		if (this.events)
+			addon.init(this.events);
+	},
+
+	init (events) {
+		this.events = events;
+
+		this.addons.forEach(a => a.init(this.events));
+	}
+};
