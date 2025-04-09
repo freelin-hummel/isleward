@@ -325,6 +325,9 @@ const messageAllThreads = message => {
 };
 
 const returnWhenThreadsIdle = async () => {
+	if (threads.length === 0)
+		return;
+
 	return new Promise(res => {
 		let doneCount = 0;
 
