@@ -1,21 +1,25 @@
-FROM rust:1.82-bullseye as rust
+FROM rust:1.86-bookworm AS rust
 
 WORKDIR /source
-
-COPY ./rust-server/ .
-
+COPY . .
 RUN cargo b --release --features production
 
-FROM debian:bullseye-slim
+FROM node:lts-bookworm-slim AS node
 
-RUN apt update && apt install -y node-less
-WORKDIR /app/static/
+RUN npm install less -g
+WORKDIR /node
+COPY ../ .
+RUN for file in $(find . -name '*.less*'); do echo "Processing $file"; lessc -x --strict-imports $file $(dirname $file)/$(basename $file .less).css ; done
+WORKDIR /node/client
+RUN npm i
+RUN npm run build
 
-COPY ./client/ ./client/
-COPY ./server/mods/ ./server/mods/
+FROM debian:bookworm-slim
+
+WORKDIR /app/static/client
+COPY --from=node ./node/client/dist/. .
 
 WORKDIR /app/
-
 COPY --from=rust /source/target/release/rust-server .
 RUN chmod +x rust-server
 
