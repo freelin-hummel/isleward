@@ -6,9 +6,14 @@ let client = {
 
 	async init () {
 		return new Promise(res => {
-			this.socket = io({
+			const socketArgs = [{
 				transports: ['websocket']
-			});
+			}];
+
+			if (window.location.hostname === 'localhost')
+				socketArgs.splice(0, 0, 'http://localhost:5000');
+
+			this.socket = io(...socketArgs);
 
 			this.socket.on('connect', this.onConnected.bind(this, res));
 			this.socket.on('handshake', this.onHandshake.bind(this));
