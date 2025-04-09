@@ -1,12 +1,12 @@
-FROM rust:1.82-bullseye AS rust
+FROM rust:1.86-bookworm AS rust
 
 RUN apt install -y wget
 
 WORKDIR /dl
-RUN wget https://nodejs.org/dist/v20.18.0/node-v20.18.0-linux-x64.tar.xz
+RUN wget https://nodejs.org/dist/v22.14.0/node-v22.14.0-linux-x64.tar.xz
 
-RUN tar -xf node-v20.18.0-linux-x64.tar.xz
-RUN mv /dl/node-v20.18.0-linux-x64 /node
+RUN tar -xf node-v22.14.0-linux-x64.tar.xz
+RUN mv /dl/node-v22.14.0-linux-x64 /node
 RUN cp /node/bin/* /usr/bin/
 
 WORKDIR /source
@@ -16,10 +16,10 @@ RUN /node/bin/npm i
 RUN /node/bin/npm run build
 
 # Base image on Node.js latest LTS
-FROM node:lts-bullseye-slim
+FROM node:lts-bookworm-slim
 
 # Create app directory
-WORKDIR /usr/src/isleward
+WORKDIR /app/isleward
 
 # Bundle app source
 COPY . .
@@ -31,7 +31,7 @@ COPY --from=rust /source/package*.json ./src/rust-modules/
 COPY --from=rust /source/rust-modules.linux-x64-gnu.node ./src/rust-modules/
 
 # Change directory to src/server/
-WORKDIR /usr/src/isleward/src/server/
+WORKDIR /app/isleward/src/server/
 
 # Install only production npm modules specified in package.json
 RUN npm ci --omit=dev
