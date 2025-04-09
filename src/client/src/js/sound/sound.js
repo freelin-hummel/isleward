@@ -73,6 +73,8 @@ export default {
 
 		const useVolume = volume * (1 - (Math.pow(distance, 2) / Math.pow(minDistance, 2)));
 
+		file = file.indexOf('server/mods') === 0 ? modAudio[file] : file;
+
 		/* eslint-disable-next-line no-new */
 		new Howl({
 			src: [file],
