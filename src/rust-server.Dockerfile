@@ -1,14 +1,14 @@
 FROM rust:1.86-bookworm AS rust
 
 WORKDIR /source
-COPY . .
+COPY ./rust-server .
 RUN cargo b --release --features production
 
 FROM node:lts-bookworm-slim AS node
 
 RUN npm install less -g
 WORKDIR /node
-COPY ../ .
+COPY . .
 RUN for file in $(find . -name '*.less*'); do echo "Processing $file"; lessc -x --strict-imports $file $(dirname $file)/$(basename $file .less).css ; done
 WORKDIR /node/client
 RUN npm i
