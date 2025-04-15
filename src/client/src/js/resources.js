@@ -1,5 +1,8 @@
 import globals from './system/globals';
+import events from './system/events';
 import modImages from '@modImages';
+
+let loadedCount = 0;
 
 const resources = {
 	sprites: {},
@@ -31,7 +34,17 @@ const resources = {
 
 				sprites[r] = sprite;
 
-				sprite.onload = resolve;
+				sprite.onload = () => {
+					loadedCount++;
+
+					events.emit('loaderProgress', {
+						type: 'resources',
+						progress: loadedCount / fullList.length
+					});
+
+					resolve();
+				};
+
 				sprite.onerror = () => {
 					console.error(`❌ Failed to load image: ${r}`);
 					resolve();

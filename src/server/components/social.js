@@ -176,20 +176,19 @@ module.exports = {
 				onGetParty: [party],
 				onGetMessages: [{
 					messages: messages
-				}]
+				}],
+				onPartyDisband: [{}]
 			});
 		}, this);
 
 		this.obj.socket.emit('events', {
-			onGetParty: [
-				[]
-			],
 			onGetMessages: [{
 				messages: {
 					class: 'q0',
 					message: 'you have left the party'
 				}
-			}]
+			}],
+			onPartyDisband: [{}]
 		});
 
 		if ((this.isPartyLeader) && (this.party.length >= 2)) {

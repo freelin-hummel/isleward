@@ -1,11 +1,13 @@
 import events from './system/events';
 import globals from './system/globals';
 
-import modComponents from '@modComponents';
+let modComponents;
 
 //Store templates here after loading them
 const templates = [];
 const extenders = [];
+
+let loadedCount = 0;
 
 //Internal
 const componentList = [
@@ -85,6 +87,8 @@ const buildComponents = () => {
 //Export
 export default {
 	async init () {
+		modComponents = (await import('@modComponents')).default;
+
 		const fullList = [
 			...componentList,
 			...globals.clientConfig.clientComponents
@@ -111,6 +115,13 @@ export default {
 						cpn
 					});
 				}
+
+				loadedCount++;
+
+				events.emit('loaderProgress', {
+					type: 'components',
+					progress: loadedCount / fullList.length
+				});
 			})
 		);
 
