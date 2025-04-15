@@ -7,8 +7,6 @@ import pluginModComponents from './vitePlugins/buildModComponents';
 import pluginModImages from './vitePlugins/buildModImages';
 import pluginModModules from './vitePlugins/buildModModules';
 
-const pluginHotReload = require('@intenda/vite-plugin-opus-hot-reload/src/plugin');
-
 export default defineConfig(() => {
 	const { tempFile: modAudio } = pluginModAudio();
 	const { tempFile: modComponents } = pluginModComponents();
@@ -18,8 +16,7 @@ export default defineConfig(() => {
 
 	return {
 		plugins: [
-			react(),
-			pluginHotReload()
+			react()
 		],
 		resolve: {
 			alias: {
