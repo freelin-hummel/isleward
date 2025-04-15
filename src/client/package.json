@@ -10,16 +10,13 @@
     "homepage": "https://play.isleward.com/",
     "repository": "https://gitlab.com/Isleward/isleward.git",
     "scripts": {
-        "start-with-opus": "concurrently --kill-others \"nodemon node_modules/@intenda/opus-ui-packager/src/packager.js --includePaths=true\" \"npm run dev -- --host\"",
         "start": "vite --port 4000",
-        "build-json": "node node_modules/@intenda/opus-ui-packager/src/packager.js",
         "build": "vite build",
         "lint": "npx eslint .",
         "lint-fix": "npx eslint . --fix"
     },
     "dependencies": {
         "@bigbadwaffle/particle-emitter": "^0.0.4",
-        "@intenda/opus-ui": "2.6.0",
         "@pixi/utils": "^7.4.3",
         "howler": "^2.2.4",
         "jquery": "^3.7.1",
@@ -30,8 +27,6 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.24.0",
-        "@intenda/opus-ui-packager": ">=1.0.0 < 2.0.0",
-        "@intenda/vite-plugin-opus-hot-reload": ">=2.0.0 < 3.0.0",
         "@types/react": "^19.1.0",
         "@types/react-dom": "^19.1.0",
         "@vitejs/plugin-react": "^4.3.4",
