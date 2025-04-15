@@ -5,6 +5,9 @@ import $ from 'jquery';
 //Globals
 import './js/misc/helpers';
 
+//UIs
+import Loader from './ui/templates/loader/loader';
+
 //System Imports
 import client from './js/system/client';
 import components from './js/components';
@@ -56,21 +59,17 @@ const main = {
 
 		$(window).on('contextmenu', this.onContextMenu.bind(this));
 
-		sound.init();
-
 		objects.init();
 		await renderer.init();
 		input.init();
 
 		numbers.init();
 
-		uiFactory.init();
+		await uiFactory.init();
 		extraClientModules.init();
 
 		fnQueueTick = getQueueTick(this.update.bind(this));
 		fnQueueTick();
-
-		$('.loader-container').remove();
 
 		this.update();
 	},
@@ -118,9 +117,20 @@ const main = {
 
 	globals.clientConfig = clientConfig;
 
+	await uiFactory.preInit();
+
+	await uiFactory.buildFromConfig({
+		type: 'loader',
+		path: 'loader',
+		template: Loader
+	});
+
+	$('.loader-container').remove();
+
 	await Promise.all([
 		resources.init(),
-		components.init()
+		components.init(),
+		sound.init()
 	]);
 
 	events.emit('onResourcesLoaded');

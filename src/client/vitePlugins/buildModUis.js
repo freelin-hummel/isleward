@@ -1,5 +1,3 @@
- 
-
 import path from 'path';
 import fs from 'fs';
 import fg from 'fast-glob';
@@ -32,8 +30,12 @@ function buildModUisFileContent (aliases) {
 
 		const fileName = absolutePath.split('/').pop();
 
-		imports.push(`import * as ${varName} from '${absolutePath}/${fileName}.js';`);
-		objectEntries.push(`  '${aliasName}': ${varName}`);
+		let extension = 'js';
+		if (fs.existsSync(path.join(absolutePath, `${fileName}.jsx`)))
+			extension = 'jsx';
+
+		imports.push(`import * as ${varName} from '${absolutePath}/${fileName}.${extension}';`);
+		objectEntries.push(`${aliasName}: ${varName}`);
 	}
 
 	return `

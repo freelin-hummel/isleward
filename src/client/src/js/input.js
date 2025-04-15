@@ -172,9 +172,18 @@ const input = {
 		return result;
 	},
 
+	//Used by UIs when they cause keyUp events to never fire (due to them making some input focused likely)
+	fakeKeyUp (key) {
+		if (!this.enabled)
+			return;
+
+		delete this.keys[key];
+
+		events.emit('onKeyUp', key);
+	},
+
 	events: {
 		keyboard: {
-
 			keyDown (e) {
 				if (!this.enabled)
 					return;

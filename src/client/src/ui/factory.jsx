@@ -1,10 +1,13 @@
+import React, { useState, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
+
 import uiBase from './uiBase';
 import events from '../js/system/events';
 import client from '../js/system/client';
 import globals from '../js/system/globals';
 import tosAcceptanceValid from '../js/misc/tosAcceptanceValid';
 
-import modUis from '@modUis';
+let modUis;
 
 //Some UIs are strings. In these cases, the path should default to the client/ui/templates folder
 const setUiTypes = list => {
@@ -22,11 +25,48 @@ const setUiTypes = list => {
 	});
 };
 
+const Factory = ({ setComponentSetter }) => {
+	const [components, setComponents] = useState([]);
+
+	useEffect(() => setComponentSetter(setComponents), []);
+
+	return (
+		<>
+			{components.map(({ Component, type }) => {
+				return (
+					<Component key={type} />
+				);
+			})}
+		</>
+	);
+};
+
 export default {
-	uis: [],
 	ingameUisBuilt: false,
 
-	init () {
+	uis: [],
+	reactUis: [],
+
+	reactRoot: null,
+	setComponents: null,
+
+	async preInit () {
+		return new Promise(res => {
+			this.reactRoot = createRoot(document.getElementById('react-root'));
+
+			this.reactRoot.render(
+				<Factory setComponentSetter={setter => {
+					this.setComponents = setter;
+
+					res();
+				}} />
+			);
+		});
+	},
+
+	async init () {
+		modUis = (await import('@modUis')).default;
+
 		events.on('onBuildIngameUis', this.onBuildIngameUis.bind(this));
 		events.on('onUiKeyDown', this.onUiKeyDown.bind(this));
 		events.on('onResize', this.onResize.bind(this));
@@ -91,13 +131,33 @@ export default {
 		const fullPath = `${path}/${type}`;
 
 		try {
-			let template;
+			let template = config.template;
 
-			if (path.indexOf('server/') === 0)
-				template = modUis[type].default;
-			else {
-				const importedModule = await import(`./templates/${type}/${type}.js`);
-				template = importedModule.default;
+			if (!template) {
+				if (path.indexOf('server/') === 0)
+					template = modUis[type].default;
+				else {
+					const importedModule = await import(`./templates/${type}/${type}.js`);
+					template = importedModule.default;
+				}
+			}
+
+			//React/Opus components are functions. Legacy ones are objects
+			if (typeof(template) === 'function') {
+				const Component = template;
+
+				this.reactUis.push({
+					type,
+					Component
+				});
+
+				this.setComponents([...this.reactUis]);
+
+				this.uis.push({
+					type
+				});
+
+				return;
 			}
 
 			const ui = $.extend(true, { type }, uiBase, template);
@@ -197,6 +257,9 @@ export default {
 		});
 
 		this.ingameUisBuilt = false;
+
+		this.reactUis.length = 0;
+		this.setComponents([...this.reactUis]);
 	},
 
 	getUi (type) {

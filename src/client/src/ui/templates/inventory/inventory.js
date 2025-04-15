@@ -141,7 +141,7 @@ export default {
 			cpn: 'social',
 			method: 'chat',
 			data: {
-				message: '{' + item.name + '}',
+				message: '',
 				item,
 				type: 'global'
 			}

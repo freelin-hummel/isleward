@@ -2,9 +2,7 @@ const events = require('../../misc/events');
 const profanities = require('../../misc/profanities');
 const canChat = require('./canChat');
 
-const sendRegularMessage = async ({ obj }, msg) => {
-	const charname = obj.auth.charname;
-
+const getChatStyles = async obj => {
 	const msgEvent = {
 		username: obj.account,
 		tagPrefix: null,
@@ -19,25 +17,19 @@ const sendRegularMessage = async ({ obj }, msg) => {
 
 	await events.emit('onBeforeGetChatStyles', msgEvent);
 
-	const { emojiTag } = msgEvent;
+	return {
+		class: msgEvent.msgStyle ?? 'color-grayB',
+		emojiTag: msgEvent.emojiTag,
+		namePrefix: msgEvent.namePrefix,
+		nameSuffix: msgEvent.nameSuffix,
+		tagPrefix: msgEvent.tagPrefix,
+		tagSuffix: msgEvent.tagSuffix,
+		tags: msgEvent.tags
+	};
+};
 
-	let usePrefix = '';
-	if (emojiTag) {
-		const imgX = (-emojiTag.sprite[0] * emojiTag.spriteSize);
-		const imgY = (-emojiTag.sprite[1] * emojiTag.spriteSize);
-		const backgroundPosition = `${imgX}px ${imgY}px`;
-
-		usePrefix = `<div class='emojiTag' style='background: url("${emojiTag.spritesheet}")  no-repeat scroll ${backgroundPosition} / auto;'></div>`;
-	} else if (msgEvent.tags.length > 0)
-		usePrefix = `${msgEvent.tagPrefix}${msgEvent.tags.join(' ')}${msgEvent.tagSuffix} `;
-
-	let useCharName = charname;
-	if (msgEvent.namePrefix)
-		useCharName = `${msgEvent.namePrefix}${useCharName}`;
-	if (msgEvent.nameSuffix)
-		useCharName = `${useCharName}${msgEvent.nameSuffix}`;
-
-	const finalMessage = `${usePrefix}${useCharName}: ${msg.data.message}`;
+const sendRegularMessage = async ({ obj }, msg) => {
+	const finalMessage = msg.data.message;
 
 	const item = msg.data.item ? JSON.parse(JSON.stringify(msg.data.item).replace(/(<([^>]+)>)/ig, '')) : undefined;
 
@@ -45,11 +37,11 @@ const sendRegularMessage = async ({ obj }, msg) => {
 		event: 'onGetMessages',
 		data: {
 			messages: [{
-				class: msgEvent.msgStyle ?? 'color-grayB',
 				message: finalMessage,
 				item,
 				type: 'chat',
-				source: obj.name
+				source: obj.name,
+				...(await getChatStyles(obj))
 			}]
 		}
 	};
@@ -57,7 +49,7 @@ const sendRegularMessage = async ({ obj }, msg) => {
 	cons.emit('event', eventMsg);
 };
 
-const sendPartyMessage = ({ party, obj }, msg) => {
+const sendPartyMessage = async ({ party, obj }, msg) => {
 	if (!party) {
 		obj.socket.emit('events', {
 			onGetMessages: [{
@@ -75,16 +67,19 @@ const sendPartyMessage = ({ party, obj }, msg) => {
 	let charname = obj.auth.charname;
 	let message = msg.data.message;
 
+	const chatStyles = await getChatStyles(obj);
+
 	party.forEach(p => {
 		let player = cons.players.find(c => c.id === p);
 
 		player.socket.emit('events', {
 			onGetMessages: [{
 				messages: [{
-					class: 'color-tealC',
-					message: '(party: ' + charname + '): ' + message,
+					message,
 					type: 'chat',
-					source: obj.name
+					subType: 'party',
+					source: charname,
+					...chatStyles
 				}]
 			}]
 		});
@@ -99,7 +94,7 @@ const sendCustomChannelMessage = (cpnSocial, msg) => {
 	if (!channel)
 		return;
 
-	if (!cpnSocial.isInChannel(obj, channel)) {
+	if (channel !== 'trade' && !cpnSocial.isInChannel(obj, channel)) {
 		obj.socket.emit('events', {
 			onGetMessages: [{
 				messages: [{
@@ -112,12 +107,11 @@ const sendCustomChannelMessage = (cpnSocial, msg) => {
 		return;
 	}
 
-	const sendMessage = `[${channel}] ${obj.auth.charname}: ${message}`;
 	const eventData = {
 		onGetMessages: [{
 			messages: [{
 				class: 'color-grayB',
-				message: sendMessage,
+				message,
 				type: 'chat',
 				subType: 'custom',
 				channel: channel.trim(),
@@ -127,7 +121,7 @@ const sendCustomChannelMessage = (cpnSocial, msg) => {
 	};
 
 	cons.players.forEach(p => {
-		if (!cpnSocial.isInChannel(p, channel))
+		if (channel !== 'trade' && !cpnSocial.isInChannel(p, channel))
 			return;
 
 		p.socket.emit('events', eventData);
@@ -149,9 +143,10 @@ const sendPrivateMessage = ({ obj: { name: sourceName, socket } }, msg) => {
 		data: {
 			messages: [{
 				class: 'color-yellowB',
-				message: '(you to ' + targetName + '): ' + message,
+				message,
 				type: 'chat',
 				subType: 'privateOut',
+				source: sourceName,
 				target: targetName
 			}]
 		}
@@ -162,10 +157,11 @@ const sendPrivateMessage = ({ obj: { name: sourceName, socket } }, msg) => {
 		data: {
 			messages: [{
 				class: 'color-yellowB',
-				message: '(' + sourceName + ' to you): ' + message,
+				message,
 				type: 'chat',
 				subType: 'privateIn',
-				source: sourceName
+				source: sourceName,
+				target: targetName
 			}]
 		}
 	});
@@ -178,7 +174,10 @@ const sendErrorMsg = (cpnSocial, msgString) => {
 module.exports = async (cpnSocial, msg) => {
 	const { data: msgData } = msg;
 
-	if (!msgData.message)
+	if (msgData.item)
+		msgData.message = msgData.item.name;
+
+	if (!msgData.message && !msgData.item)
 		return;
 
 	const { obj, maxChatLength, messageHistory } = cpnSocial;

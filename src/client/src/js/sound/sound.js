@@ -2,9 +2,10 @@ import physics from '../misc/physics';
 import events from '../system/events';
 import config from '../config';
 import globals from '../system/globals';
-import modAudio from '@modAudio';
 
 import { Howler, Howl } from 'howler';
+
+let modAudio;
 
 const globalVolume = 0.3;
 
@@ -15,6 +16,10 @@ const globalScopes = ['ui'];
 const minDistance = 10;
 const fadeDuration = 1800;
 
+let loadTotal = 0;
+let loadedCount = 0;
+let promiseResolver;
+
 Howler.volume(globalVolume);
 
 export default {
@@ -24,28 +29,49 @@ export default {
 
 	currentMusic: null,
 
-	init () {
-		events.on('onToggleAudio', this.onToggleAudio.bind(this));
-		events.on('onPlaySound', this.playSound.bind(this));
-		events.on('onPlaySoundAtPosition', this.onPlaySoundAtPosition.bind(this));
-		events.on('onManipulateVolume', this.onManipulateVolume.bind(this));
+	async init () {
+		modAudio = (await import('@modAudio')).default;
 
-		const { clientConfig: { sounds: loadSounds } } = globals;
+		return new Promise(_promiseResolver => {
+			promiseResolver = _promiseResolver;
 
-		Object.values(loadSounds).forEach(soundList => {
-			soundList.forEach(({ name: soundName, file }) => {
-				file = file.indexOf('server/mods') === 0 ? modAudio[file] : file;
+			events.on('onToggleAudio', this.onToggleAudio.bind(this));
+			events.on('onPlaySound', this.playSound.bind(this));
+			events.on('onPlaySoundAtPosition', this.onPlaySoundAtPosition.bind(this));
+			events.on('onManipulateVolume', this.onManipulateVolume.bind(this));
 
-				this.addSound({
-					name: soundName,
-					file,
-					scope: 'ui',
-					autoLoad: true
+			const { clientConfig: { sounds: loadSounds } } = globals;
+
+			Object.values(loadSounds).forEach(soundList => {
+				soundList.forEach(({ name: soundName, file }) => {
+					loadTotal++;
+
+					file = file.indexOf('server/mods') === 0 ? modAudio[file] : file;
+
+					this.addSound({
+						name: soundName,
+						file,
+						scope: 'ui',
+						autoLoad: true,
+						notifyLoadDone: true
+					});
 				});
 			});
+
+			this.onToggleAudio(config.playAudio);
+		});
+	},
+
+	notifyLoadDone () {
+		loadedCount++;
+
+		events.emit('loaderProgress', {
+			type: 'sounds',
+			progress: loadedCount / loadTotal
 		});
 
-		this.onToggleAudio(config.playAudio);
+		if (loadedCount === loadTotal)
+			promiseResolver();
 	},
 
 	//Fired when a character rezones
@@ -228,7 +254,7 @@ export default {
 	},
 
 	addSound (
-		{ name: soundName, scope, file, volume = 1, x, y, w, h, area, music, defaultMusic, autoLoad, loop }
+		{ name: soundName, scope, file, volume = 1, x, y, w, h, area, music, defaultMusic, autoLoad, loop, notifyLoadDone }
 	) {
 		if (this.sounds.some(s => s.file === file)) {
 			if (window.player?.x !== undefined)
@@ -248,7 +274,7 @@ export default {
 
 		let sound = null;
 		if (autoLoad)
-			sound = this.loadSound(file, loop);
+			sound = this.loadSound(file, loop, false, volume, notifyLoadDone);
 
 		if (music)
 			volume = 0;
@@ -276,7 +302,7 @@ export default {
 		return soundEntry;
 	},
 
-	loadSound (file, loop = false, autoplay = false, volume = 1) {
+	loadSound (file, loop = false, autoplay = false, volume = 1, notifyLoadDone = false) {
 		const sound = new Howl({
 			src: [file],
 			volume,
@@ -284,6 +310,9 @@ export default {
 			autoplay,
 			html5: loop
 		});
+
+		if (notifyLoadDone)
+			sound.once('load', this.notifyLoadDone(file));
 
 		return sound;
 	},
