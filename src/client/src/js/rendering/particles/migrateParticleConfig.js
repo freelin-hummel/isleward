@@ -164,9 +164,27 @@ const buildMoveSpeed = oldConfig => {
 		};
 };
 
+const buildBurst = oldConfig => {
+	if (oldConfig.spawnType !== 'burst')
+		return null;
+
+	return {
+		type: 'spawnBurst',
+		config: {
+			spacing: 1,
+			start: 0,
+			distance: 5
+		}
+	};
+};
+
 const buildSpawnShape = oldConfig => {
+	let spawnType = oldConfig.spawnType;
+	if (spawnType === 'burst')
+		spawnType = 'circle';
+
 	let spawnConfig = oldConfig.spawnCircle;
-	if (oldConfig.spawnType === 'rect' || oldConfig.spawnType === 'ring')
+	if (spawnType === 'rect')
 		spawnConfig = oldConfig.spawnRect;
 
 	if (spawnConfig.r !== undefined) {
@@ -177,7 +195,7 @@ const buildSpawnShape = oldConfig => {
 	return {
 		type: 'spawnShape',
 		config: {
-			type: oldConfig.spawnType,
+			type: spawnType,
 			data: spawnConfig
 		}
 	};
@@ -202,7 +220,8 @@ const migrateParticleConfig = oldConfig => {
 		buildAlpha(oldConfig),
 		buildScale(oldConfig),
 		buildRotationStatic(),
-		buildNoRotation()
+		buildNoRotation(),
+		buildBurst(oldConfig)
 	);
 
 	const colorBehavior = buildColor(oldConfig);
@@ -213,6 +232,8 @@ const migrateParticleConfig = oldConfig => {
 		buildMoveSpeed(oldConfig),
 		buildSpawnShape(oldConfig)
 	);
+
+	_.spliceWhere(newConfig.behaviors, f => !f);
 
 	return newConfig;
 };
