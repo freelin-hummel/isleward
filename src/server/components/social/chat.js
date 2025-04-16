@@ -86,7 +86,7 @@ const sendPartyMessage = async ({ party, obj }, msg) => {
 	});
 };
 
-const sendCustomChannelMessage = (cpnSocial, msg) => {
+const sendCustomChannelMessage = async (cpnSocial, msg) => {
 	const { obj } = cpnSocial;
 
 	const { data: { message, subType: channel } } = msg;
@@ -107,15 +107,17 @@ const sendCustomChannelMessage = (cpnSocial, msg) => {
 		return;
 	}
 
+	const chatStyles = await getChatStyles(obj);
+
 	const eventData = {
 		onGetMessages: [{
 			messages: [{
-				class: 'color-grayB',
 				message,
 				type: 'chat',
 				subType: 'custom',
 				channel: channel.trim(),
-				source: obj.name
+				source: obj.name,
+				...chatStyles
 			}]
 		}]
 	};
@@ -128,7 +130,8 @@ const sendCustomChannelMessage = (cpnSocial, msg) => {
 	});
 };
 
-const sendPrivateMessage = ({ obj: { name: sourceName, socket } }, msg) => {
+const sendPrivateMessage = async ({ obj }, msg) => {
+	const { name: sourceName, socket } = obj;
 	const { data: { message, subType: targetName } } = msg;
 
 	if (targetName === sourceName)
@@ -138,16 +141,18 @@ const sendPrivateMessage = ({ obj: { name: sourceName, socket } }, msg) => {
 	if (!target)
 		return;
 
+	const chatStyles = await getChatStyles(obj);
+
 	socket.emit('event', {
 		event: 'onGetMessages',
 		data: {
 			messages: [{
-				class: 'color-yellowB',
 				message,
 				type: 'chat',
 				subType: 'privateOut',
 				source: sourceName,
-				target: targetName
+				target: targetName,
+				...chatStyles
 			}]
 		}
 	});
@@ -156,12 +161,12 @@ const sendPrivateMessage = ({ obj: { name: sourceName, socket } }, msg) => {
 		event: 'onGetMessages',
 		data: {
 			messages: [{
-				class: 'color-yellowB',
 				message,
 				type: 'chat',
 				subType: 'privateIn',
 				source: sourceName,
-				target: targetName
+				target: targetName,
+				...chatStyles
 			}]
 		}
 	});

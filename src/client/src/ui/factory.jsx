@@ -83,7 +83,7 @@ export default {
 
 			await Promise.all(
 				globals.clientConfig.uiList
-					.filter(u => u.autoLoadOnPlay !== false)
+					.filter(u => u.autoLoadOnPlay !== false && u.type !== 'tutorial')
 					.map(u => {
 						return new Promise(res => {
 							const doneCheck = () => {
@@ -94,7 +94,7 @@ export default {
 									return;
 								}
 
-								setTimeout(doneCheck, 100);
+								setTimeout(doneCheck, 10);
 							};
 
 							this.buildFromConfig(u);
