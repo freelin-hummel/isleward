@@ -7,6 +7,10 @@ import client from '../js/system/client';
 import globals from '../js/system/globals';
 import tosAcceptanceValid from '../js/misc/tosAcceptanceValid';
 
+import * as opusUi from '@intenda/opus-ui';
+
+window.opusUi = opusUi;
+
 let modUis;
 
 //Some UIs are strings. In these cases, the path should default to the client/ui/templates folder
