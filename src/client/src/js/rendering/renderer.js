@@ -301,7 +301,7 @@ const renderer = {
 		let alpha = tileOpacity.map(c);
 		let canFlip = tileOpacity.canFlip(c);
 
-		let tile = new Particle(this.getTexture('sprites', c));
+		let tile = new Sprite(this.getTexture('sprites', c));
 
 		tile.alpha = alpha;
 		tile.position.x = i * scale;

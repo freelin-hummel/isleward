@@ -1,5 +1,0 @@
-* Add time to chat when not shown
-* Enter with an empty message should also close the chat ui
-* When mention popup is visible, tab should auto-complete
-* Scroll to bottom even while typing?
-* Scroll to bottom when switching tabs
