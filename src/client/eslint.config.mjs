@@ -50,6 +50,7 @@ export default defineConfig([
 			...react.configs.flat.recommended.rules,
 
 			'react/prop-types': 'off',
+			'react/react-in-jsx-scope': 'off',
 			'comma-dangle': ['error', 'never'],
 			'no-cond-assign': ['error', 'always'],
 			'no-console': ['error', { allow: ['warn', 'error'] }],

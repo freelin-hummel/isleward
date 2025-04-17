@@ -54,7 +54,4 @@ let events = {
 	}
 };
 
-if (window.addons)
-	window.addons.init(events);
-
 export default events;

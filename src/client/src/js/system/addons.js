@@ -1,17 +1,50 @@
 window.addons = {
 	addons: [],
-	events: null,
 
-	register (addon) {
-		this.addons.push(addon);
+	ready: false,
 
-		if (this.events)
-			addon.init(this.events);
+	addonProps: {
+		clientRequest: null,
+		events: null,
+		isKeyDown: null,
+		objects: null,
+		rendererLayers: null
 	},
 
-	init (events) {
-		this.events = events;
+	register (addon) {
+		const entry = {
+			addon,
+			ready: false
+		};
 
-		this.addons.forEach(a => a.init(this.events));
+		this.addons.push(entry);
+
+		if (this.ready)
+			this.initAddon(entry);
+	},
+
+	init (props) {
+		Object.keys(this.addonProps).forEach(k => {
+			this.addonProps[k] = props[k];
+		});
+
+		this.ready = true;
+
+		this.addons.forEach(a => {
+			if (a.ready)
+				return;
+
+			this.initAddon(a);
+		});
+	},
+
+	initAddon (addon) {
+		try {
+			addon.addon.init({ ...this.addonProps });
+
+			addon.ready = true;
+		} catch (e) {
+			console.error('Failed to initialize addon', e);
+		}
 	}
 };

@@ -1,8 +1,35 @@
+import { Particle } from 'pixi.js';
+
 import events from '../../system/events';
 import tileOpacity from '../tileOpacity';
 import spritePool from '../spritePool';
+import _renderer from '../renderer';
 
 const mRandom = Math.random.bind(Math);
+
+const buildParticle = (useTile, _x, _y) => {
+	let alpha = tileOpacity.map(useTile);
+
+	const texture = _renderer.getTexture('sprites', useTile);
+	const frame = texture.frame;
+	const scaleFactor = scale / frame.width;
+
+	let flipX = mRandom() < 0.5;
+	let x = _x * scale;
+	if (flipX)
+		x += scale;
+
+	let particle = new Particle({
+		texture,
+		x,
+		y: _y * scale,
+		scaleX: flipX ? -scaleFactor : scaleFactor,
+		scaleY: scaleFactor,
+		alpha
+	});
+
+	return particle;
+};
 
 /* eslint-disable-next-line max-lines-per-function */
 const updateSprites = renderer => {
@@ -34,7 +61,6 @@ const updateSprites = renderer => {
 	let addedSprite = false;
 
 	const checkHidden = renderer.isHidden.bind(renderer);
-	const buildTile = renderer.buildTile.bind(renderer);
 
 	const newVisible = [];
 	const newHidden = [];
@@ -135,16 +161,16 @@ const updateSprites = renderer => {
 
 				let tile = spritePool.getSprite(flipped + c);
 				if (!tile) {
-					tile = buildTile(c, i, j);
-					container.addChild(tile);
+					tile = buildParticle(c, i, j);
+					container.addParticle(tile);
 					tile.type = c;
 					tile.sheetNum = tileOpacity.getSheetNum(c);
 					addedSprite = true;
 				} else {
-					tile.position.x = i * scale;
-					tile.position.y = j * scale;
+					tile.x = i * scale;
+					tile.y = j * scale;
 					if (flipped !== '')
-						tile.position.x += scale;
+						tile.x += scale;
 					tile.visible = true;
 				}
 

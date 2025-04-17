@@ -10,7 +10,7 @@ import updateSprites from './helpers/updateSprites';
 import globals from '../system/globals';
 import renderLoginBackground from './helpers/renderLoginBackground';
 import resetRenderer from './helpers/resetRenderer';
-import { Application, Container, Sprite, Text as PixiText, Graphics, Rectangle, Texture, AlphaFilter, RenderTexture } from 'pixi.js';
+import { Application, Container, ParticleContainer, Sprite, Text as PixiText, Graphics, Rectangle, Texture, AlphaFilter, RenderTexture } from 'pixi.js';
 import 'pixi.js/advanced-blend-modes';
 
 const mRandom = Math.random.bind(Math);
@@ -101,8 +101,21 @@ const renderer = {
 
 		let layers = this.layers;
 		Object.keys(layers).forEach(l => {
-			layers[l] = new Container({ isRenderGroup: true });
-			layers[l].layer = (l === 'tileSprites') ? 'tiles' : l;
+			if (l === 'tileSprites') {
+				layers[l] = new ParticleContainer({
+					dynamicProperties: {
+						position: false,
+						scale: false,
+						rotation: false,
+						color: false,
+						alpha: false
+					}
+				});
+				layers[l].layer = 'tiles';
+			} else {
+				layers[l] = new Container({ isRenderGroup: true });
+				layers[l].layer = l;
+			}
 
 			this.app.stage.addChild(layers[l]);
 		});
@@ -177,14 +190,12 @@ const renderer = {
 		let isFullscreen = (window.innerHeight === screen.height);
 
 		if (isFullscreen) {
-			let doc = document;
-			(doc.cancelFullscreen || doc.msCancelFullscreen || doc.mozCancelFullscreen || doc.webkitCancelFullScreen).call(doc);
+			document.exitFullscreen();
 
 			return 'Windowed';
 		}
 
-		let el = $('body')[0];
-		(el.requestFullscreen || el.msRequestFullscreen || el.mozRequestFullscreen || el.webkitRequestFullscreen).call(el);
+		$('body')[0].requestFullscreen();
 
 		return 'Fullscreen';
 	},
@@ -193,7 +204,7 @@ const renderer = {
 		this.titleScreen = true;
 		this.staticCamera = false;
 
-		this.layers.tileSprites.removeChildren();
+		this.layers.tileSprites.removeParticles();
 
 		renderLoginBackground(this);
 	},
@@ -260,7 +271,15 @@ const renderer = {
 		let container = this.layers.tileSprites;
 		this.app.stage.removeChild(container);
 
-		this.layers.tileSprites = container = new Container({ isRenderGroup: true });
+		this.layers.tileSprites = container = new ParticleContainer({
+			dynamicProperties: {
+				position: false,
+				scale: false,
+				rotation: false,
+				color: false,
+				alpha: false
+			}
+		});
 		container.layer = 'tiles';
 		this.app.stage.addChild(container);
 
@@ -282,7 +301,7 @@ const renderer = {
 		let alpha = tileOpacity.map(c);
 		let canFlip = tileOpacity.canFlip(c);
 
-		let tile = new Sprite(this.getTexture('sprites', c));
+		let tile = new Particle(this.getTexture('sprites', c));
 
 		tile.alpha = alpha;
 		tile.position.x = i * scale;

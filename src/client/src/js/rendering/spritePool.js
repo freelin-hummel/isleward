@@ -17,7 +17,7 @@ export default {
 	store: function (sprite) {
 		let pool = this.pool;
 		let type = sprite.type;
-		if (sprite.scale.x < 0)
+		if (sprite.scaleX < 0)
 			type = 'flip' + type;
 		let list = pool[type];
 		if (!list) 

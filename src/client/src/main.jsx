@@ -68,6 +68,16 @@ const main = {
 		await uiFactory.init();
 		extraClientModules.init();
 
+		if (window.addons) {
+			window.addons.init({
+				clientRequest: client.request.bind(client),
+				events,
+				isKeyDown: input.isKeyDown.bind(input),
+				objects,
+				rendererLayers: renderer.layers
+			});
+		}
+
 		fnQueueTick = getQueueTick(this.update.bind(this));
 		fnQueueTick();
 
