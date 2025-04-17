@@ -33,7 +33,7 @@ export default {
 	},
 
 	onRemoveEvent (id) {
-		let l = this.list.spliceFirstWhere(f => f.id === id);
+		let l = _.spliceFirstWhere(this.list, f => f.id === id);
 		if (l)
 			l.el.remove();
 	},

@@ -67,7 +67,7 @@ export default {
 	removeBar (bar) {
 		this.removeSprites(this.bars.find(b => b === bar));
 
-		this.bars.spliceFirstWhere(b => b === bar);
+		_.spliceFirstWhere(this.bars, b => b === bar);
 	},
 
 	removeSprites (bar) {

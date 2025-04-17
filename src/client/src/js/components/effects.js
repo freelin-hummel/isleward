@@ -76,7 +76,7 @@ export default {
 				if (effect.destroy)
 					effect.destroy();
 
-				this.effects.spliceFirstWhere(e => e.id === removeId);
+				_.spliceFirstWhere(this.effects, e => e.id === removeId);
 			});
 		}
 		if (blueprint.extendEffects) {
