@@ -7,14 +7,13 @@ import _renderer from '../renderer';
 
 const mRandom = Math.random.bind(Math);
 
-const buildParticle = (useTile, _x, _y) => {
+const buildParticle = (useTile, _x, _y, flipX) => {
 	let alpha = tileOpacity.map(useTile);
 
 	const texture = _renderer.getTexture('sprites', useTile);
 	const frame = texture.frame;
 	const scaleFactor = scale / frame.width;
 
-	let flipX = mRandom() < 0.5;
 	let x = _x * scale;
 	if (flipX)
 		x += scale;
@@ -161,7 +160,7 @@ const updateSprites = renderer => {
 
 				let tile = spritePool.getSprite(flipped + c);
 				if (!tile) {
-					tile = buildParticle(c, i, j);
+					tile = buildParticle(c, i, j, flipped === 'flip');
 					container.addParticle(tile);
 					tile.type = c;
 					tile.sheetNum = tileOpacity.getSheetNum(c);
