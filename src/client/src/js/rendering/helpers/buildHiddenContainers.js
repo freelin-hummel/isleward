@@ -1,8 +1,8 @@
 import { Container, Sprite, Graphics } from 'pixi.js';
 
 import events from '../../system/events';
-
 import physics from '../../misc/physics';
+import objects from '../../objects/objects';
 
 const createTexture = renderer => {
 	const tmp = new Graphics()
@@ -107,6 +107,9 @@ export const updateHiddenContainers = renderer => {
 		}
 	};
 
+	let playerInHider = false;
+	let playerWasInterior = false;
+
 	hiddenContainers.forEach(h => {
 		const {
 			room: { x: rx, y: ry, width, height, area, discovered, interior },
@@ -128,6 +131,8 @@ export const updateHiddenContainers = renderer => {
 				if (interior && controlsMask) {
 					h.controlsMask = false;
 					renderer.interiorMask.clear();
+
+					playerWasInterior = true;
 				}
 			}
 
@@ -159,6 +164,8 @@ export const updateHiddenContainers = renderer => {
 
 				renderer.app.stage.mask = maskG;
 			}
+
+			playerInHider = true;
 		}
 	});
 
@@ -172,6 +179,12 @@ export const updateHiddenContainers = renderer => {
 		events.emit('onTilesVisible', newVisible, true);
 	if (newHidden.length > 0)
 		events.emit('onTilesVisible', newHidden, false);
+
+	//When we exit an iterior, objets will never know that new tiles have become visible
+	// unless we immediately enter another hider. Instead of marking each other tile in the
+	// world as visible, we just tell it that we have exited an interior so it can check ALL objects
+	if (playerWasInterior && !playerInHider)
+		objects.recalcVisibility();
 };
 
 export default buildHiddenContainers;

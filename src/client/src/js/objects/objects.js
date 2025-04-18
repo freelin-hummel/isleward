@@ -314,5 +314,16 @@ export default {
 
 			ns.visible = show;
 		}
+	},
+
+	recalcVisibility () {
+		let objects = this.objects;
+		for (let i = 0; i < this.objects.length; i++) {
+			const obj = objects[i];
+			if (!obj.sprite)
+				continue;
+
+			obj.updateVisibility();
+		}
 	}
 };
