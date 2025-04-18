@@ -180,7 +180,7 @@ const buildBurst = oldConfig => {
 
 const buildSpawnShape = oldConfig => {
 	let spawnType = oldConfig.spawnType;
-	if (spawnType === 'burst')
+	if (spawnType === 'burst' || spawnType === 'ring')
 		spawnType = 'circle';
 
 	let spawnConfig = oldConfig.spawnCircle;
@@ -190,6 +190,11 @@ const buildSpawnShape = oldConfig => {
 	if (spawnConfig.r !== undefined) {
 		spawnConfig.radius = spawnConfig.r;
 		delete spawnConfig.r;
+	}
+
+	if (spawnConfig.minR !== undefined) {
+		spawnConfig.innerRadius = spawnConfig.minR;
+		delete spawnConfig.minR;
 	}
 
 	return {
@@ -207,7 +212,7 @@ const migrateParticleConfig = oldConfig => {
 		lifetime: { ...oldConfig.lifetime },
 		frequency: oldConfig.frequency,
 		spawnChance: oldConfig.chance,
-		particlesPerWave: oldConfig.particlesPerWave ?? 5,
+		particlesPerWave: oldConfig.particlesPerWave ?? 3,
 		emitterLifetime: oldConfig.emitterLifetime,
 		maxParticles: 1000,
 		pos: { ...oldConfig.pos },
