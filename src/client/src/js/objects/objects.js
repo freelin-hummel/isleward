@@ -160,8 +160,8 @@ export default {
 		});
 
 		if (obj.self) {
-			events.emit('onGetPlayer', obj);
 			window.player = obj;
+			events.emit('onGetPlayer', obj);
 
 			sound.unload(obj.zoneId);
 

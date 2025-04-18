@@ -6,11 +6,12 @@ import tileOpacity from './tileOpacity';
 import particles from './particles';
 import shaderOutline from './shaders/outline';
 import spritePool from './spritePool';
-import updateSprites from './helpers/updateSprites';
+import buildHiddenContainers, { updateHiddenContainers } from './helpers/buildHiddenContainers';
+import renderMap, { buildParticle } from './helpers/renderMap';
 import globals from '../system/globals';
 import renderLoginBackground from './helpers/renderLoginBackground';
 import resetRenderer from './helpers/resetRenderer';
-import { Application, Container, ParticleContainer, Sprite, Text as PixiText, Graphics, Rectangle, Texture, AlphaFilter, RenderTexture } from 'pixi.js';
+import { Application, Container, ParticleContainer, Sprite, Text as PixiText, Graphics, Texture, RenderTexture } from 'pixi.js';
 import 'pixi.js/advanced-blend-modes';
 
 const mRandom = Math.random.bind(Math);
@@ -21,6 +22,8 @@ const particleEngines = {};
 const renderer = {
 	stage: null,
 	layers: {
+		tileSprites: null,
+		hiders: null,
 		particlesUnder: null,
 		objects: null,
 		mobs: null,
@@ -29,10 +32,10 @@ const renderer = {
 		effects: null,
 		particles: null,
 		lightPatches: null,
-		lightBeams: null,
-		tileSprites: null,
-		hiders: null
+		lightBeams: null
 	},
+
+	interiorMask: null,
 
 	titleScreen: false,
 
@@ -69,6 +72,8 @@ const renderer = {
 
 	hiddenRooms: null,
 
+	hiddenContainers: [],
+
 	staticCamera: false,
 
 	app: null,
@@ -85,6 +90,11 @@ const renderer = {
 		document.querySelector('.canvas-container').appendChild(this.app.canvas);
 
 		events.on('onGetMap', this.onGetMap.bind(this));
+		events.on('onGetPlayer', () => {
+			renderMap(this);
+			this.buildHiddenContainers();
+		});
+
 		events.on('onToggleFullscreen', this.toggleScreen.bind(this));
 		events.on('onMoveSpeedChange', this.adaptCameraMoveSpeed.bind(this));
 		events.on('resetRenderer', resetRenderer.bind(this));
@@ -113,6 +123,9 @@ const renderer = {
 		});
 
 		this.app.stage.addChild(...Object.values(layers));
+
+		this.interiorMask = new Graphics();
+		renderer.app.stage.addChild(this.interiorMask);
 
 		const textureList = globals.clientConfig.textureList;
 		const sprites = resources.sprites;
@@ -258,34 +271,14 @@ const renderer = {
 	},
 
 	clean () {
-		this.app.stage.removeChild(this.layers.hiders);
-		this.layers.hiders = new Container();
-		this.layers.hiders.layer = 'hiders';
-		this.app.stage.addChild(this.layers.hiders);
+		this.layers.hiders.removeChildren();
 
-		let container = this.layers.tileSprites;
-		this.app.stage.removeChild(container);
+		this.hiddenContainers.length = 0;
 
-		this.layers.tileSprites = container = new ParticleContainer({
-			dynamicProperties: {
-				position: false
-			}
-		});
-		container.layer = 'tiles';
-		this.app.stage.addChild(container);
+		this.layers.tileSprites.removeParticles(0, this.layers.tileSprites.particleChildren.length);
+		this.layers.tileSprites.update();
 
-		this.app.stage.children.sort((a, b) => {
-			if (a.layer === 'hiders')
-				return 1;
-			else if (b.layer === 'hiders')
-				return -1;
-			else if (a.layer === 'tiles')
-				return -1;
-			else if (b.layer === 'tiles')
-				return 1;
-
-			return 0;
-		});
+		renderer.interiorMask.clear();
 	},
 
 	buildTile (c, i, j) {
@@ -306,6 +299,10 @@ const renderer = {
 		}
 
 		return tile;
+	},
+
+	buildHiddenContainers () {
+		buildHiddenContainers(this);
 	},
 
 	onGetMap (msg) {
@@ -338,15 +335,6 @@ const renderer = {
 		this.hiddenRooms = hiddenRooms;
 
 		this.sprites = _.get2dArray(w, h, 'array');
-
-		this.app.stage.children.sort((a, b) => {
-			if (a.layer === 'tiles')
-				return -1;
-			else if (b.layer === 'tiles')
-				return 1;
-
-			return 0;
-		});
 
 		if (this.zoneId !== null) {
 			events.emit('onRezone', {
@@ -381,6 +369,10 @@ const renderer = {
 		// but flushForTarget clears the event right after and the event is never received.
 		// We emit it again here to make sure the speed is reset after entering the new zone.
 		events.emit('onMoveSpeedChange', 0);
+	},
+
+	updateHiddenContainers () {
+		updateHiddenContainers(this);
 	},
 
 	/*
@@ -431,7 +423,7 @@ const renderer = {
 
 		const staticCamera = window.staticCamera ?? this.staticCamera;
 		if (staticCamera && staticPosition === undefined) {
-			this.updateSprites();
+			updateHiddenContainers(this);
 
 			return;
 		}
@@ -453,7 +445,8 @@ const renderer = {
 			};
 		}
 
-		this.updateSprites();
+		// Call updateSprites to handle the hiders layer
+		updateHiddenContainers(this);
 	},
 
 	isVisible (x, y) {
@@ -519,10 +512,6 @@ const renderer = {
 		);
 	},
 
-	updateSprites () {
-		updateSprites(this);
-	},
-
 	update () {
 		effects.render();
 	},
@@ -569,10 +558,6 @@ const renderer = {
 				stage.x = -~~this.pos.x;
 				stage.y = -~~this.pos.y;
 			}
-
-			let halfScale = scale / 2;
-			if (Math.abs(stage.x - this.lastUpdatePos.x) > halfScale || Math.abs(stage.y - this.lastUpdatePos.y) > halfScale)
-				this.updateSprites();
 
 			events.emit('onSceneMove');
 		}
@@ -785,17 +770,8 @@ const renderer = {
 		map[x][y].forEach(m => {
 			m--;
 
-			let tile = spritePool.getSprite(m);
-			if (!tile) {
-				tile = this.buildTile(m, x, y);
-				container.addChild(tile);
-				tile.type = m;
-				tile.sheetNum = tileOpacity.getSheetNum(m);
-			} else {
-				tile.position.x = x * scale;
-				tile.position.y = y * scale;
-				tile.visible = true;
-			}
+			const tile = buildParticle(m, x, y);
+			container.addParticle(tile);
 
 			cell.push(tile);
 			cell.visible = true;
@@ -831,15 +807,14 @@ const renderer = {
 
 					let tile = spritePool.getSprite(flipped + m);
 					if (!tile) {
+						tile = buildParticle(m, x, y, flipped === 'flip');
+						container.addParticle(tile);
 						tile = this.buildTile(m, x, y);
-						container.addChild(tile);
 						tile.type = m;
 						tile.sheetNum = tileOpacity.getSheetNum(m);
 					} else {
 						tile.position.x = x * scale;
 						tile.position.y = y * scale;
-						if (flipped !== '')
-							tile.position.x += scale;
 						tile.visible = true;
 					}
 

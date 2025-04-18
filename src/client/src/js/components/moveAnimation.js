@@ -113,6 +113,7 @@ export default {
 			source.setSpritePosition();
 		}
 
-		renderer.updateSprites();
+		if (source.player)
+			renderer.updateHiddenContainers();
 	}
 };
