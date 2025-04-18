@@ -95,7 +95,8 @@ module.exports = {
 		try {
 			chats = require('../' + this.path + '/' + this.name + '/chats');
 		} catch (e) {
-			console.error('Failed to load zone chats', e);
+			if (!e.message.includes('Cannot find module'))
+				console.error('Failed to load zone chats', e);
 		}
 
 		if (chats) {
@@ -109,7 +110,8 @@ module.exports = {
 		try {
 			dialogues = require('../' + this.path + '/' + this.name + '/dialogues');
 		} catch (e) {
-			console.error('Failed to load zone dialogues', e);
+			if (!e.message.includes('Cannot find module'))
+				console.error('Failed to load zone dialogues', e);
 		}
 
 		events.emit('onBeforeGetDialogue', this.name, dialogues);
