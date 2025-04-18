@@ -42,6 +42,8 @@ const renderer = {
 	showTilesW: 0,
 	showTilesH: 0,
 
+	mapRendered: false,
+
 	pos: {
 		x: 0,
 		y: 0
@@ -95,30 +97,22 @@ const renderer = {
 
 		window.addEventListener('resize', this.onResize.bind(this));
 
-		const container = new Container({ isRenderGroup: true });
-
-		this.app.stage.addChild(container);
-
 		let layers = this.layers;
 		Object.keys(layers).forEach(l => {
 			if (l === 'tileSprites') {
 				layers[l] = new ParticleContainer({
 					dynamicProperties: {
-						position: false,
-						scale: false,
-						rotation: false,
-						color: false,
-						alpha: false
+						position: false
 					}
 				});
 				layers[l].layer = 'tiles';
 			} else {
-				layers[l] = new Container({ isRenderGroup: true });
+				layers[l] = new Container();
 				layers[l].layer = l;
 			}
-
-			this.app.stage.addChild(layers[l]);
 		});
+
+		this.app.stage.addChild(...Object.values(layers));
 
 		const textureList = globals.clientConfig.textureList;
 		const sprites = resources.sprites;
@@ -145,13 +139,14 @@ const renderer = {
 
 		this.app.ticker.add(() => {
 			particleLayers.forEach(p => particleEngines[p].update());
+			this.updateCamera();
 		});
 	},
 
 	buildSpritesTexture () {
 		const { clientConfig: { atlasTextureDimensions, atlasTextures } } = globals;
 
-		let container = new Container({ isRenderGroup: true });
+		let container = new Container();
 
 		let totalHeight = 0;
 		atlasTextures.forEach(t => {
@@ -264,7 +259,7 @@ const renderer = {
 
 	clean () {
 		this.app.stage.removeChild(this.layers.hiders);
-		this.layers.hiders = new Container({ isRenderGroup: true });
+		this.layers.hiders = new Container();
 		this.layers.hiders.layer = 'hiders';
 		this.app.stage.addChild(this.layers.hiders);
 
@@ -273,11 +268,7 @@ const renderer = {
 
 		this.layers.tileSprites = container = new ParticleContainer({
 			dynamicProperties: {
-				position: false,
-				scale: false,
-				rotation: false,
-				color: false,
-				alpha: false
+				position: false
 			}
 		});
 		container.layer = 'tiles';
@@ -323,6 +314,8 @@ const renderer = {
 
 		this.map = map;
 
+		this.mapRendered = false;
+
 		this.titleScreen = false;
 		physics.init(collisionMap);
 
@@ -341,9 +334,6 @@ const renderer = {
 
 		this.clean();
 		spritePool.clean();
-
-		this.app.stage.filters = [new AlphaFilter()];
-		this.app.stage.filterArea = new Rectangle(0, 0, Math.max(w * scale, this.width), Math.max(h * scale, this.height));
 
 		this.hiddenRooms = hiddenRooms;
 
@@ -535,7 +525,9 @@ const renderer = {
 
 	update () {
 		effects.render();
+	},
 
+	updateCamera () {
 		let time = +new Date();
 
 		if (this.moveTo) {
@@ -589,7 +581,7 @@ const renderer = {
 	},
 
 	buildContainer (obj) {
-		let container = new Container({ isRenderGroup: true });
+		let container = new Container();
 		this.layers[obj.layerName || obj.sheetName].addChild(container);
 
 		return container;

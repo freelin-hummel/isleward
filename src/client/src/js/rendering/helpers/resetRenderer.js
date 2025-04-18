@@ -1,5 +1,5 @@
 import spritePool from '../spritePool';
-import { Container } from 'pixi.js';
+import { Container, ParticleContainer } from 'pixi.js';
 
 const resetRenderer = function () {
 	let map = this.map;
@@ -9,14 +9,19 @@ const resetRenderer = function () {
 	const { app: { stage } } = this;
 
 	stage.removeChild(this.layers.hiders);
-	this.layers.hiders = new Container({ isRenderGroup: true });
+	this.layers.hiders = new Container();
 	this.layers.hiders.layer = 'hiders';
 	stage.addChild(this.layers.hiders);
 
 	let container = this.layers.tileSprites;
 	stage.removeChild(container);
 
-	this.layers.tileSprites = container = new Container({ isRenderGroup: true });
+	this.layers.tileSprites = container = new ParticleContainer({
+		dynamicProperties: {
+			position: false
+		}
+	});
+
 	container.layer = 'tiles';
 	stage.addChild(container);
 

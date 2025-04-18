@@ -35,9 +35,10 @@ const updateSprites = renderer => {
 	if (renderer.titleScreen)
 		return;
 
-	const player = window.player;
-	if (!player)
+	if (renderer.mapRendered)
 		return;
+
+	renderer.mapRendered = true;
 
 	const { w, h, width, height, app: { stage }, map, sprites } = renderer;
 
@@ -49,8 +50,8 @@ const updateSprites = renderer => {
 
 	const container = renderer.layers.tileSprites;
 
-	const sw = renderer.showTilesW;
-	const sh = renderer.showTilesH;
+	const sw = renderer.w;
+	const sh = renderer.h;
 
 	let lowX = Math.max(0, x - sw + 1);
 	let lowY = Math.max(0, y - sh + 2);
@@ -87,7 +88,7 @@ const updateSprites = renderer => {
 				for (let k = 0; k < rLen; k++) {
 					const sprite = nonFakeRendered[k];
 
-					sprite.visible = false;
+					container.removeParticle(sprite);
 					spritePool.store(sprite);
 					_.spliceWhere(rendered, s => s === sprite);
 				}
@@ -114,7 +115,7 @@ const updateSprites = renderer => {
 				for (let k = 0; k < rLen; k++) {
 					const sprite = fakeRendered[k];
 
-					sprite.visible = false;
+					container.removeParticle(sprite);
 					spritePool.store(sprite);
 					_.spliceWhere(rendered, s => s === sprite);
 				}
@@ -170,7 +171,7 @@ const updateSprites = renderer => {
 					tile.y = j * scale;
 					if (flipped !== '')
 						tile.x += scale;
-					tile.visible = true;
+					container.addParticle(tile);
 				}
 
 				if (isFake)
@@ -210,7 +211,7 @@ const updateSprites = renderer => {
 			let lLen = list.length;
 			for (let k = 0; k < lLen; k++) {
 				let sprite = list[k];
-				sprite.visible = false;
+				container.removeParticle(sprite);
 				spritePool.store(sprite);
 			}
 			spriteRow[j] = [];
@@ -221,7 +222,9 @@ const updateSprites = renderer => {
 	events.emit('onTilesVisible', newHidden, false);
 
 	if (addedSprite)
-		container.children.sort((a, b) => a.z - b.z);
+		container.particleChildren.sort((a, b) => a.z - b.z);
+
+	container.update();
 };
 
 export default updateSprites;

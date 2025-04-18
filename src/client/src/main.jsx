@@ -93,9 +93,9 @@ const main = {
 		}
 
 		objects.update();
-		renderer.update();
 		uiFactory.update();
 		numbers.update();
+		renderer.update();
 
 		this.lastRender = time;
 
