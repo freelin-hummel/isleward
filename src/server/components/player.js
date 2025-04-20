@@ -130,6 +130,11 @@ module.exports = {
 
 		obj.aggro.die();
 
+		obj.instance.eventEmitter.emit('playerDied', {
+			obj,
+			source
+		});
+
 		let level = obj.stats.values.level;
 		let spawns = obj.spawn;
 		let spawnPos = spawns.filter(s => ((s.maxLevel && s.maxLevel >= level) || !s.maxLevel));
