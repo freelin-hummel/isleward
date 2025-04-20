@@ -8,7 +8,7 @@ import fragment from './tint/frag.js';
 class TintFilter extends Filter {
 	constructor ({ color = 0xFFFFFF } = {}) {
 		super(vertex, fragment, {
-			uColor: new Float32Array([1, 1, 1, 1]) // Initialize color uniform
+			uColor: new Float32Array([1, 1, 1, 1])
 		});
 
 		// Store the initial color
@@ -34,7 +34,7 @@ class TintFilter extends Filter {
 
 	set color (value) {
 		// Set the color uniform from a hex value
-		this._color = value; // Keep track of the hex value if needed
+		this._color = value;
 		hex2rgb(value, this.uniforms.uColor);
 	}
 }
