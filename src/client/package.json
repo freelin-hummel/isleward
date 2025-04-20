@@ -21,6 +21,7 @@
         "@pixi/utils": "^7.4.3",
         "howler": "^2.2.4",
         "jquery": "^3.7.1",
+        "pixi-filters": "^6.1.2",
         "pixi.js": "^8.9.1",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",

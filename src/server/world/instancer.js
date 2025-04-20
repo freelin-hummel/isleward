@@ -90,6 +90,8 @@ module.exports = {
 		this.clientAck = clientAck;
 		eventEmitter.on('removeObject', unstageZoneIn);
 
+		eventEmitter.emit('afterZoneReady', this.zoneName);
+
 		process.send({
 			method: 'onInitialized'
 		});

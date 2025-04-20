@@ -170,18 +170,18 @@ export default {
 
 	offEvent (eventCallback) {
 		for (let e in this.eventCallbacks) {
-			this.eventCallbacks[e].forEach(function (c) {
+			this.eventCallbacks[e].forEach(c => {
 				if (c === eventCallback)
 					events.off(e, c);
-			}, this);
+			});
 		}
 	},
 
 	offEvents () {
 		for (let e in this.eventCallbacks) {
-			this.eventCallbacks[e].forEach(function (c) {
+			this.eventCallbacks[e].forEach(c => {
 				events.off(e, c);
-			}, this);
+			});
 		}
 	},
 

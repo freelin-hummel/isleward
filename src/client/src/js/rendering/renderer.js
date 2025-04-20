@@ -4,7 +4,7 @@ import physics from '../misc/physics';
 import effects from './effects';
 import tileOpacity from './tileOpacity';
 import particles from './particles';
-import shaderOutline from './shaders/outline';
+import { OutlineFilter } from 'pixi-filters';
 import spritePool from './spritePool';
 import buildHiddenContainers, { updateHiddenContainers } from './helpers/buildHiddenContainers';
 import renderMap, { buildParticle } from './helpers/renderMap';
@@ -624,7 +624,12 @@ const renderer = {
 	},
 
 	addFilter (sprite, config) {
-		const filter = new shaderOutline(config);
+		let filter;
+
+		if (config.type === 'outline')
+			filter = new OutlineFilter(config);
+		else
+			filter = new OutlineFilter(config);
 
 		if (!sprite.filters)
 			sprite.filters = [filter];

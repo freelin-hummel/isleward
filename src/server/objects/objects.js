@@ -338,7 +338,6 @@ module.exports = {
 
 		for (let i = 0; i < len; i++) {
 			let o = objects[i];
-
 			//If object A causes object B (layer in the list) to rezone, we won't find it here
 			if (!o) {
 				len--;
