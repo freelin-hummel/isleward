@@ -26,7 +26,8 @@ export default {
 				}
 			}
 
-			l.renderManual();
+			if (l.renderManual)
+				l.renderManual();
 		}
 	}
 };

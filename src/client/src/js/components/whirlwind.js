@@ -1,4 +1,4 @@
-import effects from '../rendering/effects';
+import objects from '../objects/objects';
 
 export default {
 	type: 'whirlwind',
@@ -26,14 +26,12 @@ export default {
 
 			setTimeout(this.spawnThing.bind(this, x, y), wait);
 		});
-
-		effects.register(this);
 	},
 
 	spawnThing (x, y) {
 		const { frames: frameCount, row, col, spriteSheet, frameDelay } = this;
 
-		this.objects.buildObject({
+		objects.buildObject({
 			x,
 			y,
 			components: [{
@@ -45,9 +43,5 @@ export default {
 				frameDelay
 			}]
 		});
-	},
-
-	destroy () {
-		effects.unregister(this);
 	}
 };
