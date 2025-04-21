@@ -5,7 +5,7 @@ import fs from 'fs';
 import fg from 'fast-glob';
 
 function gatherModAudio (modsRoot) {
-	const matchedFiles = fg.sync('**/audio/**/*.{ogg,mp3}', { cwd: modsRoot });
+	const matchedFiles = fg.sync('**/audio/**/*.{ogg,mp3,wav}', { cwd: modsRoot });
 	const aliases = {};
 
 	for (const file of matchedFiles) {
