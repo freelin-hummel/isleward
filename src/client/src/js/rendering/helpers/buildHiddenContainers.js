@@ -6,9 +6,8 @@ import objects from '../../objects/objects';
 
 const createTexture = renderer => {
 	const tmp = new Graphics()
-		.beginFill(0x2d2136)
-		.drawRect(0, 0, 40, 40)
-		.endFill();
+		.rect(0, 0, 40, 40)
+		.fill(0x2d2136);
 
 	const rectTexture = renderer.app.renderer.generateTexture(tmp);
 
