@@ -20,7 +20,8 @@ const doSaveAll = async (res, config, err, compareResult) => {
 			messages: [{
 				class: 'color-blueA',
 				message: config.msg,
-				type: 'chat'
+				type: 'chat',
+				isSystemMessage: true
 			}]
 		}
 	});

@@ -502,7 +502,8 @@ module.exports = {
 				messages: [{
 					class: 'color-blueA',
 					message: msg,
-					type: 'chat'
+					type: 'chat',
+					isSystemMessage: true
 				}]
 			}
 		});
