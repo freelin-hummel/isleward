@@ -1,6 +1,9 @@
+import resources from '../../../js/resources';
+
 import events from '../../../js/system/events';
 import client from '../../../js/system/client';
 import template from './template.html?raw';
+
 import './styles.css';
 
 export default {
@@ -58,6 +61,8 @@ export default {
 		let spriteY = -costume[1] * 8;
 
 		let spritesheet = skin.spritesheet || '../../../images/characters.png';
+		if (spritesheet.indexOf('server/mods') === 0)
+			spritesheet = resources.sprites[spritesheet]?.src;
 
 		this.find('.sprite')
 			.css('background', 'url("' + spritesheet + '") ' + spriteX + 'px ' + spriteY + 'px');
