@@ -317,7 +317,17 @@ module.exports = {
 				.map(c => `/${c}`)
 		].join('<br />');
 	
-		this.sendMessage(msg, 'color-yellowB');
+		this.obj.socket.emit('event', {
+			event: 'onGetMessages',
+			data: {
+				messages: [{
+					class: 'color-yellowB',
+					message: msg,
+					type: 'chat',
+					renderAsHtml: true
+				}]
+			}
+		});
 	},
 
 	isInChannel: function (character, channel) {
