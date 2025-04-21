@@ -126,7 +126,8 @@ export default {
 		const { sound } = soundEntry;
 
 		if (!sound) {
-			const { file, loop } = soundEntry;
+			let { file, loop } = soundEntry;
+			file = file.indexOf('server/mods') === 0 ? modAudio[file] : file;
 
 			soundEntry.sound = this.loadSound(file, loop, true, volume);
 
