@@ -107,7 +107,6 @@ export const updateHiddenContainers = renderer => {
 		}
 	};
 
-	let playerInHider = false;
 	let playerWasInterior = false;
 
 	hiddenContainers.forEach(h => {
@@ -164,8 +163,6 @@ export const updateHiddenContainers = renderer => {
 
 				renderer.app.stage.mask = maskG;
 			}
-
-			playerInHider = true;
 		}
 	});
 
@@ -180,10 +177,10 @@ export const updateHiddenContainers = renderer => {
 	if (newHidden.length > 0)
 		events.emit('onTilesVisible', newHidden, false);
 
-	//When we exit an iterior, objets will never know that new tiles have become visible
-	// unless we immediately enter another hider. Instead of marking each other tile in the
-	// world as visible, we just tell it that we have exited an interior so it can check ALL objects
-	if (playerWasInterior && !playerInHider)
+	//When we exit an iterior, objects will never know that new tiles have become visible
+	// Instead of marking each other tile in the world as visible, we just tell it that we
+	// have exited an interior so it can check ALL objects
+	if (playerWasInterior)
 		objects.recalcVisibility();
 };
 
