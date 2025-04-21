@@ -120,7 +120,11 @@ export default (container, item, useEl, manageTooltip, getItemContextConfig, sho
 			spritesheet = 'images/consumables.png';
 		else if (item.type === 'skin')
 			spritesheet = 'images/characters.png';
-	} else if (spritesheet.indexOf('server/mods') === 0)
+	}
+
+	const spriteSheetBeforeMapping = spritesheet;
+
+	if (spritesheet.indexOf('server/mods') === 0)
 		spritesheet = resources.sprites[spritesheet]?.src;
 
 	let size = 64;
@@ -131,8 +135,8 @@ export default (container, item, useEl, manageTooltip, getItemContextConfig, sho
 	if (item.spriteSize)
 		size = item.spriteSize;
 
-	if (spriteSizes[spritesheet])
-		size = spriteSizes[spritesheet];
+	if (spriteSizes[spriteSheetBeforeMapping])
+		size = spriteSizes[spriteSheetBeforeMapping];
 
 	const imgX = (-item.sprite[0] * size);
 	const imgY = (-item.sprite[1] * size);
