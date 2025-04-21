@@ -25,20 +25,6 @@ const mitigateArmor = ({ element, tgtValues, srcValues }, result) => {
 	result.amount *= armorMultiplier;
 };
 
-const mitigatePvp = ({ source, target, srcValues }, result) => {
-	const isPvp = (
-		(source.player || (source.follower && source.follower.master && source.follower.master.player)) &&
-		(target.player || (target.follower && target.follower.master && target.follower.master.player))
-	);
-
-	if (!isPvp)
-		return;
-
-	const multiplier = 1 / pow(2, srcValues.level / 5);
-
-	result.amount *= multiplier;
-};
-
 //Method
 const mitigate = (config, result) => {
 	const { blocked, dodged } = result; 
@@ -49,7 +35,6 @@ const mitigate = (config, result) => {
 
 	mitigateResistances(config, result);
 	mitigateArmor(config, result);
-	mitigatePvp(config, result);
 };
 
 //Exports
