@@ -73,8 +73,8 @@ build-image-stable:
     - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_TAG_ALIAS -t $IMAGE_TAG_REF -t $IMAGE_TAG_ALIAS .
     - docker push $IMAGE_TAG_REF
     - docker push $IMAGE_TAG_ALIAS
-  only:
-    - tags
+  rules:
+    - when: never
 
 build-static-server-image-latest:
   stage: build
@@ -109,5 +109,5 @@ build-static-server-image-stable:
     - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_TAG_ALIAS -f src/rust-server.Dockerfile -t $IMAGE_TAG_REF -t $IMAGE_TAG_ALIAS src/
     - docker push $IMAGE_TAG_REF
     - docker push $IMAGE_TAG_ALIAS
-  only:
-    - tags
+  rules:
+    - when: never
