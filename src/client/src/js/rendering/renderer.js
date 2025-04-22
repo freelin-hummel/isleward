@@ -639,9 +639,15 @@ const renderer = {
 		return filter;
 	},
 
-	removeFilter (sprite) {
-		if (sprite.filters)
-			sprite.filters = null;
+	removeFilter (sprite, filterToRemove) {
+		if (!filterToRemove) {
+			sprite.filters = [];
+
+			return;
+		}
+
+		const newFilters = (sprite.filters || []).filter(f => f !== filterToRemove);
+		sprite.filters = newFilters.length ? newFilters : null;
 	},
 
 	buildText (obj) {

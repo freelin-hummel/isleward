@@ -39,4 +39,10 @@ const shieldEffect = {
 	}
 };
 
-export default { templates: { shield: shieldEffect } };
+export default {
+	extends: 'effects',
+
+	extendBaseComponent (base) {
+		base.templates.shield = shieldEffect;
+	}
+};

@@ -76,7 +76,9 @@ const buildComponents = () => {
 	templates.forEach(t => {
 		const extensions = extenders.filter(e => e.extends === t.type);
 
-		extensions.forEach(e => $.extend(true, t, e.tpl));
+		extensions.forEach(e => {
+			e.cpn.extendBaseComponent(t);
+		});
 
 		t.eventList = {};
 		t.hookEvent = hookEvent;
@@ -108,7 +110,10 @@ export default {
 					importedComponent = await import(`./components/${type}.js`);
 
 				const cpn = importedComponent.default;
-				if (cpn.type) templates.push(cpn);
+
+				if (cpn.type)
+					templates.push(cpn);
+
 				if (cpn.extends) {
 					extenders.push({
 						extends: cpn.extends,

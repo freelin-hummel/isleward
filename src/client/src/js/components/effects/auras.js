@@ -19,106 +19,108 @@ const buffIcons = {
 	holyVengeance: [4, 0]
 };
 
-let templates = {};
+export default {
+	extends: 'effects',
 
-Object.keys(auras).forEach(type => {
-	let cell = auras[type];
+	extendBaseComponent: base => {
+		Object.keys(auras).forEach(type => {
+			let cell = auras[type];
 
-	templates[type] = {
-		sprite: null,
+			base.templates[type] = {
+				sprite: null,
 
-		alpha: 0,
-		alphaDir: 0.0025,
+				alpha: 0,
+				alphaDir: 0.0025,
 
-		alphaMax: 0.6,
-		alphaMin: 0.35,
+				alphaMax: 0.6,
+				alphaMin: 0.35,
 
-		alphaCutoff: 0.4,
+				alphaCutoff: 0.4,
 
-		init () {
-			this.sprite = renderer.buildObject({
-				layerName: 'effects',
-				sheetName: 'auras',
-				x: this.obj.x,
-				y: this.obj.y + 1,
-				w: scale * 3,
-				h: scale * 3,
-				cell
-			});
+				init () {
+					this.sprite = renderer.buildObject({
+						layerName: 'effects',
+						sheetName: 'auras',
+						x: this.obj.x,
+						y: this.obj.y + 1,
+						w: scale * 3,
+						h: scale * 3,
+						cell
+					});
 
-			this.defaultDamageText();
+					this.defaultDamageText();
 
-			if (this.self && buffIcons[type]) {
-				events.emit('onGetEffectIcon', {
-					id: this.id,
-					icon: buffIcons[type]
-				});
-			}
-		},
+					if (this.self && buffIcons[type]) {
+						events.emit('onGetEffectIcon', {
+							id: this.id,
+							icon: buffIcons[type]
+						});
+					}
+				},
 
-		getAlpha () {
-			let listAuras = this.obj.effects.effects.filter(e => auras[e.type]);
-			let first = listAuras[0];
+				getAlpha () {
+					let listAuras = this.obj.effects.effects.filter(e => auras[e.type]);
+					let first = listAuras[0];
 
-			// The first aura in the list should do all the updating so that all auras pulse together
-			if (first === this) {
-				this.alpha += this.alphaDir;
-				if ((this.alphaDir > 0) && (this.alpha >= this.alphaMax)) {
-					this.alpha = this.alphaMax;
-					this.alphaDir *= -1;
-				} else if ((this.alphaDir < 0) && (this.alpha <= this.alphaMin)) {
-					this.alpha = this.alphaMin;
-					this.alphaDir *= -1;
+					// The first aura in the list should do all the updating so that all auras pulse together
+					if (first === this) {
+						this.alpha += this.alphaDir;
+						if ((this.alphaDir > 0) && (this.alpha >= this.alphaMax)) {
+							this.alpha = this.alphaMax;
+							this.alphaDir *= -1;
+						} else if ((this.alphaDir < 0) && (this.alpha <= this.alphaMin)) {
+							this.alpha = this.alphaMin;
+							this.alphaDir *= -1;
+						}
+					} else {
+						this.alpha = first.alpha;
+						this.alphaDir = first.alphaDir;
+					}
+
+					let useAlpha = this.alpha;
+					if (useAlpha < this.alphaCutoff)
+						useAlpha = 0;
+					else {
+						useAlpha -= this.alphaCutoff;
+						useAlpha /= (this.alphaMax - this.alphaCutoff);
+					}
+
+					return useAlpha;
+				},
+
+				update () {
+					let useAlpha = this.getAlpha();
+
+					let x = this.obj.x;
+					let y = this.obj.y;
+
+					renderer.setSpritePosition({
+						x,
+						y: y + 1,
+						sprite: this.sprite
+					});
+
+					this.sprite.alpha = useAlpha;
+
+					this.sprite.visible = this.obj.isVisible;
+				},
+
+				destroy () {
+					renderer.destroyObject({
+						layerName: 'effects',
+						sprite: this.sprite
+					});
+
+					this.defaultDamageText(true);
+
+					if (this.self && buffIcons[type])
+						events.emit('onRemoveEffectIcon', { id: this.id });
+				},
+
+				setVisible (visible) {
+					this.sprite.visible = visible;
 				}
-			} else {
-				this.alpha = first.alpha;
-				this.alphaDir = first.alphaDir;
-			}
-
-			let useAlpha = this.alpha;
-			if (useAlpha < this.alphaCutoff)
-				useAlpha = 0;
-			else {
-				useAlpha -= this.alphaCutoff;
-				useAlpha /= (this.alphaMax - this.alphaCutoff);
-			}
-
-			return useAlpha;
-		},
-
-		update () {
-			let useAlpha = this.getAlpha();
-
-			let x = this.obj.x;
-			let y = this.obj.y;
-
-			renderer.setSpritePosition({
-				x,
-				y: y + 1,
-				sprite: this.sprite
-			});
-
-			this.sprite.alpha = useAlpha;
-
-			this.sprite.visible = this.obj.isVisible;
-		},
-
-		destroy () {
-			renderer.destroyObject({
-				layerName: 'effects',
-				sprite: this.sprite
-			});
-
-			this.defaultDamageText(true);
-
-			if (this.self && buffIcons[type])
-				events.emit('onRemoveEffectIcon', { id: this.id });
-		},
-
-		setVisible (visible) {
-			this.sprite.visible = visible;
-		}
-	};
-});
-
-export default { templates: { ...templates } };
+			};
+		});
+	}
+};
