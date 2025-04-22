@@ -1,5 +1,6 @@
 import events from '../../../js/system/events';
 import client from '../../../js/system/client';
+import resources from '../../../js/resources';
 import template from './template.html?raw';
 import renderItem from '../../shared/renderItem';
 import './styles.css';
@@ -242,6 +243,9 @@ export default {
 				let spriteSheet = item.empty ? '/images/uiIcons.png' : item.spritesheet || '../../../images/items.png';
 				if (i > 0 && item.type === 'consumable')
 					spriteSheet = '../../../images/consumables.png';
+				else if (spriteSheet.indexOf('server/mods') === 0)
+					spriteSheet = resources.sprites[spriteSheet]?.src;
+
 				let imgX = -sprite[0] * 64;
 				let imgY = -sprite[1] * 64;
 
