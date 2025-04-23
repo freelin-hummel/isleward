@@ -456,19 +456,24 @@ pub mod physics {
         }
 
         #[napi]
-        pub fn get_cell(&self, x: i32, y: i32) -> Option<Vec<String>> {
-            let x: usize = x.try_into().unwrap();
-            if x >= self.cells.len() {
-                return None;
-            }
-            let row: &[Vec<PhysicsObject>] = &self.cells[x];
-            let y: usize = y.try_into().unwrap();
-            if y >= row.len() {
-                return None;
+        pub fn get_cell(&self, x: i32, y: i32) -> Vec<String> {
+            if x < 0 || y < 0 {
+                return Vec::new();
             }
 
-            let cell: &[PhysicsObject] = &row[y];
-            return Some(cell.iter().map(|x| x.id.to_string()).collect());
+            let x = x as usize;
+            if x >= self.cells.len() {
+                return Vec::new();
+            }
+
+            let row = &self.cells[x];
+            let y = y as usize;
+            if y >= row.len() {
+                return Vec::new();
+            }
+
+            // valid cell → collect IDs as strings
+            row[y].iter().map(|obj| obj.id.to_string()).collect()
         }
 
         #[napi]

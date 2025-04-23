@@ -63,9 +63,11 @@ module.exports = {
 
 	cast: function (action) {
 		const { frames, row, col, delay, obj, spriteSheet } = this;
-		const { id, instance, x: playerX, y: playerY } = obj;
+		const { id, instance, x: playerX, y: playerY, instance: { physics } } = obj;
 
-		const coordinates = coordinateDeltas[this.range - 1].map(([x, y]) => [x + playerX, y + playerY]);
+		const coordinates = coordinateDeltas[this.range - 1]
+			.map(([x, y]) => [x + playerX, y + playerY])
+			.filter(([x, y]) => !physics.isTileBlocking(x, y));
 
 		const blueprint = {
 			caster: id,
