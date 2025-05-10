@@ -11,6 +11,7 @@ import renderMap, { buildParticle } from './helpers/renderMap';
 import globals from '../system/globals';
 import renderLoginBackground from './helpers/renderLoginBackground';
 import resetRenderer from './helpers/resetRenderer';
+import * as pixi from 'pixi.js';
 import { Application, Container, ParticleContainer, Sprite, Text as PixiText, Graphics, Texture, RenderTexture } from 'pixi.js';
 import 'pixi.js/advanced-blend-modes';
 
@@ -20,6 +21,9 @@ const particleLayers = ['particlesUnder', 'particles'];
 const particleEngines = {};
 
 const renderer = {
+	//We store this here so that mods can use it
+	pixi,
+
 	stage: null,
 	layers: {
 		tileSprites: null,
