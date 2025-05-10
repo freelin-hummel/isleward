@@ -91,10 +91,7 @@ export default {
 	async init () {
 		modComponents = (await import('@modComponents')).default;
 
-		const fullList = [
-			...componentList,
-			...globals.clientConfig.clientComponents
-		];
+		const fullList = [ ...componentList ];
 
 		globals.clientConfig.clientComponents.forEach(c => {
 			_.spliceWhere(fullList, f => f.type === c.type);
