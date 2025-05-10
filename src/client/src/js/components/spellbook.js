@@ -101,17 +101,16 @@ export default {
 			});
 		}
 
-		this.target = target || this.hoverTarget;
+		const newTarget = target ?? this.hoverTarget;
 
-		if (this.target) {
-			this.targetSprite.x = this.target.x * scale;
-			this.targetSprite.y = this.target.y * scale;
+		this.setTarget(newTarget);
+	},
 
-			this.targetSprite.visible = true;
-		} else
-			this.targetSprite.visible = false;
+	setTarget (obj) {
+		this.target = obj;
+		this.targetSprite.visible = !!this.target;
 
-		events.emit('onSetTarget', this.target, e);
+		events.emit('onSetTarget', this.target, null);
 	},
 
 	tabTarget (ignoreIfSet) {
@@ -119,10 +118,7 @@ export default {
 
 		let closest = objects.getClosest(window.player.x, window.player.y, 10, input.isKeyDown('shift'), compareAgainst);
 
-		this.target = closest;
-		this.targetSprite.visible = !!this.target;
-
-		events.emit('onSetTarget', this.target, null);
+		this.setTarget(closest);
 	},
 
 	onKeyDown (key) {
