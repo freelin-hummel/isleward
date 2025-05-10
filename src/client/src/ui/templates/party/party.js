@@ -101,11 +101,11 @@ export default {
 		if (!party)
 			return;
 
-		party.forEach(p => {
-			if (p === window.player.serverId)
+		party.forEach(serverId => {
+			if (serverId === window.player.serverId)
 				return;
 
-			let player = globals.onlineList.find(o => o.id === p);
+			let player = globals.onlineList.find(o => o.id === serverId);
 			let playerName = player ? player.name : 'unknown';
 			let level = 'level: ' + (player ? player.level : '?');
 
@@ -115,17 +115,26 @@ export default {
 
 			let el = $(html)
 				.appendTo(container)
-				.attr('memberId', p)
-				.on('contextmenu', this.showContext.bind(this, playerName, p));
+				.attr('memberId', serverId)
+				.on('contextmenu', this.showContext.bind(this, playerName, serverId))
+				.on('click', this.targetPartyMember.bind(this, serverId));
 
 			if (player.zoneId !== window.player.zoneId)
 				el.addClass('differentZone');
 
 			//Find stats
-			let memberObj = objects.objects.find(o => o.serverId === p);
+			let memberObj = objects.objects.find(o => o.serverId === serverId);
 			if ((memberObj) && (memberObj.stats))
-				this.onGetPartyStats(p, memberObj.stats.values);
+				this.onGetPartyStats(serverId, memberObj.stats.values);
 		});
+	},
+
+	targetPartyMember (id) {
+		const memberObj = objects.objects.find(o => o.serverId === id);
+		if (!memberObj)
+			return;
+
+		window.player.spellbook.setTarget(memberObj);
 	},
 
 	showContext (charName, id, e) {

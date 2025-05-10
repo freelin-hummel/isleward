@@ -1,6 +1,5 @@
 //Prebound Methods
 const max = Math.max.bind(Math);
-const pow = Math.pow.bind(Math);
 
 //Helpers
 const mitigateResistances = ({ elementName, noMitigate, tgtValues }, result) => {

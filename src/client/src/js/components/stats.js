@@ -1,8 +1,5 @@
 import events from '../system/events';
-import renderer from '../rendering/renderer';
-
-const barPadding = scaleMult;
-const barHeight = scaleMult;
+import { buildBar, updateBar } from './stats/bars';
 
 export default {
 	type: 'stats',
@@ -18,48 +15,41 @@ export default {
 		if (_.has(this.obj, 'serverId'))
 			events.emit('onGetPartyStats', this.obj.serverId, this.values);
 
-		let obj = this.obj;
+		this.buildHpBar();
+	},
 
-		this.addBar({
+	buildHpBar (renderInLayer = 'effects') {
+		const { obj, bars } = this;
+
+		const bar = buildBar({
+			obj,
 			color: 0x802343,
 			innerColor: 0xd43346,
+			layerName: renderInLayer,
 			calcPercent: () => (this.values.hp / this.values.hpMax),
 			isVisible: () => (this.values.hp < this.values.hpMax) && (!obj.sprite || obj.sprite.visible)
 		});
 
-		this.updateBars();
+		//If we render this in the effects layer, we assume it's a normal bar (not one controlled by some outside source)
+		if (renderInLayer === 'effects') {
+			bars.push(bar);
+
+			this.updateBars();
+		} else {
+			bar.visible = true;
+
+			updateBar(bar);
+		}
+
+		return bar;
 	},
 
 	addBar (config) {
-		let obj = this.obj;
+		const { obj, bars } = this;
 
-		let { color, innerColor, calcPercent, isVisible } = config;
+		const bar = buildBar(obj, config);
 
-		let sprite = renderer.buildRectangle({
-			layerName: 'effects',
-			x: obj.x * scale,
-			y: obj.y * scale,
-			w: 1,
-			h: 1,
-			color
-		});
-		let spriteInner = renderer.buildRectangle({
-			layerName: 'effects',
-			x: obj.x,
-			y: obj.y,
-			w: 1,
-			h: 1,
-			color: innerColor
-		});
-
-		let bar = {
-			sprite,
-			spriteInner,
-			calcPercent,
-			isVisible
-		};
-
-		this.bars.push(bar);
+		bars.push(bar);
 
 		return bar;
 	},
@@ -71,64 +61,30 @@ export default {
 	},
 
 	removeSprites (bar) {
-		renderer.destroyObject({
-			sprite: bar.sprite,
-			layerName: 'effects'
-		});
-
-		renderer.destroyObject({
-			sprite: bar.spriteInner,
-			layerName: 'effects'
-		});
+		bar.container.parent.removeChild(bar.container);
 	},
 
 	updateBars () {
-		const { obj: { x, y, dead, sprite } } = this;
+		const { obj } = this;
 
-		if (dead)
+		if (obj.dead)
 			return;
 
 		let barIndex = 0;
 
 		this.bars.forEach(bar => {
-			const percent = bar.calcPercent();
+			let barVisible = true;
+			if (typeof(bar.isVisible) === 'function')
+				barVisible = bar.isVisible();
 
-			//By default, hp sprites are 10px higher than the owner object's sprite. Keeping in
-			// mind that bigger sprites always have their 'origin' in the bottom middle tile
-			const spriteHeight = sprite ? sprite.height : scale;
-			const spriteWidth = sprite ? sprite.width : scale;
+			bar.visible = barVisible;
 
-			const xOffset = -(spriteWidth - scale) / 2;
-			const yOffset = -(spriteHeight - scale) - ((barIndex + 1) * scaleMult * 2);
+			bar.index = barIndex;
 
-			const barWidth = spriteWidth - (barPadding * 2);
+			updateBar(bar);
 
-			const newX = (x * scale) + barPadding + xOffset;
-			const newY = (y * scale) + yOffset;
-
-			renderer.moveRectangle({
-				sprite: bar.sprite,
-				x: newX,
-				y: newY,
-				w: barWidth,
-				h: barHeight
-			});
-
-			renderer.moveRectangle({
-				sprite: bar.spriteInner,
-				x: newX,
-				y: newY,
-				w: percent * barWidth,
-				h: barHeight
-			});
-
-			const isVisible = bar.isVisible ? bar.isVisible() : true;
-
-			if (isVisible)
+			if (barVisible)
 				barIndex++;
-
-			bar.sprite.visible = isVisible;
-			bar.spriteInner.visible = isVisible;
 		});
 	},
 
