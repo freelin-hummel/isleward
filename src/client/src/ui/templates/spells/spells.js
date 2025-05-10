@@ -76,7 +76,7 @@ export default {
 	},
 
 	onDblClickSpell (hotkey, e) {
-		window.player.spellbook.tabTarget(true);
+		window.player.spellbook.tabTarget();
 
 		return this.onClickSpell(hotkey, e);
 	},
