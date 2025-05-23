@@ -1,4 +1,39 @@
-/* eslint-disable-next-line max-lines-per-function */
+const targetIsOutOfRange = (action, spell, obj) => {
+	if (spell.range === null || spell.range === undefined)
+		return false;
+
+	const distance = Math.max(Math.abs(action.target.x - obj.x), Math.abs(action.target.y - obj.y));
+	let range = spell.range;
+	if ((spell.useWeaponRange) && (obj.player)) {
+		const weapon = obj.inventory.findItem(obj.equipment.eq.oneHanded) || obj.inventory.findItem(obj.equipment.eq.twoHanded);
+		if (weapon)
+			range = weapon.range || 1;
+	}
+
+	return distance > range;
+};
+
+const castAuto = (cpnSpellbook, action, isAuto, config, spell) => {
+	if (!action.target || action.target.nonSelectable || action.target.destroyed)
+		return false;
+
+	const currentAutoSpell = cpnSpellbook.spells.find(s => !!s.autoActive);
+
+	if (currentAutoSpell && action.target === spell.autoActive.target.id)
+		currentAutoSpell.setAuto(null);
+	else {
+		spell.setAuto({
+			target: action.target,
+			spell: spell.id
+		});
+	}
+
+	const syncSpell = spell.simplify();
+	spell.obj.syncer.setArray(true, 'spellbook', 'getSpells', syncSpell);
+
+	return true;
+};
+ 
 const cast = (cpnSpellbook, action, isAuto, config) => {
 	const { obj, physics, spells } = cpnSpellbook;
 
@@ -15,6 +50,11 @@ const cast = (cpnSpellbook, action, isAuto, config) => {
 	if (!spell)
 		return false;
 
+	//isAuto means that this method was called from spellbook.update (trying to auto-cast every tick). So when it's
+	// false, it means the player called it and we need to toggle auto-cast instead.
+	if (spell.auto && !isAuto)
+		return castAuto(cpnSpellbook, action, isAuto, config, spell);
+
 	action.target = cpnSpellbook.getTarget(spell, action);
 	action.auto = spell.auto;
 
@@ -25,52 +65,22 @@ const cast = (cpnSpellbook, action, isAuto, config) => {
 	const manaCost = config?.overrides?.manaCost ?? spell.manaCost;
 
 	let success = true;
-	if (!config?.ignoreCooldown && spell.cd > 0) {
-		if (!isAuto) {
-			const type = (spell.auto) ? 'Weapon' : 'Spell';
-			cpnSpellbook.sendAnnouncement(`${type} is on cooldown`);
-		}
+	if (!config?.ignoreCooldown && spell.cd > 0)
 		success = false;
-	} else if (manaCost > obj.stats.values.mana) {
-		if (!isAuto) {
-			const msg = config?.overrides?.messages?.insufficientMana ?? 'Insufficient mana to cast spell';
-
-			cpnSpellbook.sendAnnouncement(msg);
-		}
+	else if (manaCost > obj.stats.values.mana)
 		success = false;
-	} else if (spell.has('range')) {
-		const distance = Math.max(Math.abs(action.target.x - obj.x), Math.abs(action.target.y - obj.y));
-		let range = spell.range;
-		if ((spell.useWeaponRange) && (obj.player)) {
-			const weapon = obj.inventory.findItem(obj.equipment.eq.oneHanded) || obj.inventory.findItem(obj.equipment.eq.twoHanded);
-			if (weapon)
-				range = weapon.range || 1;
-		}
-
-		if (distance > range) {
-			if (!isAuto)
-				cpnSpellbook.sendAnnouncement('Target out of range');
-			success = false;
-		}
-	}
+	else if (targetIsOutOfRange(action, spell, obj))
+		success = false;
 
 	//LoS check
 	//Null means we don't have LoS and as such, we should move
 	if (spell.needLos && success) {
-		if (!physics.hasLos(~~obj.x, ~~obj.y, ~~action.target.x, ~~action.target.y)) {
-			if (!isAuto)
-				cpnSpellbook.sendAnnouncement('Target not in line of sight');
-			action.auto = false;
+		if (!physics.hasLos(~~obj.x, ~~obj.y, ~~action.target.x, ~~action.target.y))
 			success = null;
-		}
 	}
 
-	if (!success) {
-		cpnSpellbook.queueAuto(action, spell);
-		return success;
-	} else if (!cpnSpellbook.queueAuto(action, spell))
+	if (!success)
 		return false;
-
 	const eventBeforeCastSpell = {
 		success: true,
 		action
@@ -92,7 +102,8 @@ const cast = (cpnSpellbook, action, isAuto, config) => {
 			if (!spell.active) {
 				if (1 - obj.stats.values.manaReservePercent < reserve.percentage) {
 					cpnSpellbook.sendAnnouncement('Insufficient mana to cast spell');
-					return;
+
+					return false;
 				} obj.stats.addStat('manaReservePercent', reserveEvent.reservePercent);
 			} else
 				obj.stats.addStat('manaReservePercent', -reserveEvent.reservePercent);
@@ -130,8 +141,9 @@ const cast = (cpnSpellbook, action, isAuto, config) => {
 		action: eventBeforeCastSpell.action
 	});
 
-	//Null means we didn't fail but are initiating casting
-	return (success === null || success === true);
+	//Spells with castTime return null when they start casting. It's not a failure, so we must tell objBase
+	// that we used this tick
+	return success !== false;
 };
 
 module.exports = cast;

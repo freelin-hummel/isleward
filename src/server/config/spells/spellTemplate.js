@@ -1,4 +1,5 @@
-let combat = require('../../combat/combat');
+const spellCastResultTypes = require('../../components/spellbook/spellCastResultTypes');
+const combat = require('../../combat/combat');
 
 module.exports = {
 	cd: 0,
@@ -42,6 +43,26 @@ module.exports = {
 			inRange = (distance <= this.range);
 		}
 		return inRange;
+	},
+
+	getSpellCanCastResult: function (target) {
+		const { obj } = this;
+
+		if (this.has('range')) {
+			const distance = Math.max(Math.abs(target.x - obj.x), Math.abs(target.y - obj.y));
+
+			if (distance > this.range)
+				return spellCastResultTypes.outOfRange;
+		}
+
+		if (this.cd > 0)
+			return spellCastResultTypes.onCooldown;
+		else if (this.manaCost > obj.stats.values.mana)
+			return spellCastResultTypes.insufficientMana;
+		else if (!target)
+			return spellCastResultTypes.noTarget;
+
+		return spellCastResultTypes.success;
 	},
 
 	/*
@@ -178,19 +199,13 @@ module.exports = {
 			cdMax = Math.max(1, Math.ceil(cdMax * (1 - (speedModifier / 100))));
 		}
 
-		const cd = {
-			cd: cdMax
-		};
-		this.obj.fireEvent('beforeSetSpellCooldown', cd, this);
+		const emBeforeSetSpellCooldown = { cd: cdMax };
+		this.obj.fireEvent('beforeSetSpellCooldown', emBeforeSetSpellCooldown, this);
 
-		this.cd = cd.cd;
+		this.cd = emBeforeSetSpellCooldown.cd;
 
-		if (this.obj.player) {
-			this.obj.instance.syncer.queue('onGetSpellCooldowns', {
-				spell: this.id,
-				cd: (this.cd * consts.tickTime)
-			}, [this.obj.serverId]);
-		}
+		const syncSpell = this.simplify();
+		this.obj.syncer.setArray(true, 'spellbook', 'getSpells', syncSpell);
 	},
 
 	setAuto: function (autoConfig) {
@@ -200,7 +215,6 @@ module.exports = {
 			this.obj.instance.syncer.queue('onGetSpellActive', {
 				id: this.obj.id,
 				spell: this.id,
-				cd: (this.cd * consts.tickTime),
 				active: !!autoConfig
 			}, [this.obj.serverId]);
 		}

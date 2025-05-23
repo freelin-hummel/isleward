@@ -32,7 +32,20 @@ module.exports = {
 	},
 
 	pushObjectToList: function (obj) {
-		this.objects.push(obj);
+		if (obj.player) {
+			/*
+				Players should be before everything else because otherwise mobs will always lag behind in combat due to:
+					1. Tick 1 starts
+					2. Mob updates (e.g. attacks)
+					3. Player moves out of range
+					4. Tick 2 starts
+					5. Mob updates (has to move into range)
+					6. Player updates (moves out of range again)
+			*/
+			const indexLastPlayer = this.objects.findLastIndex(f => f.player !== undefined);
+			this.objects.splice(indexLastPlayer + 1, 0, obj);
+		} else
+			this.objects.push(obj);
 	},
 
 	transferObject: function (o) {

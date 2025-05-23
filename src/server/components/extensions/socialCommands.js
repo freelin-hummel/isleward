@@ -37,7 +37,7 @@ let commandRoles = {
 	rezone: 10,
 	startEvent: 10,
 	stopEvent: 10,
-	teleport: 10,
+	teleport: 0,
 	roll: 10,
 	unEq: 10
 };

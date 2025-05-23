@@ -1,85 +1,9 @@
-let abs = Math.abs.bind(Math);
-let rnd = Math.random.bind(Math);
-let max = Math.max.bind(Math);
+const { updatePatrol } = require('./mob/patrol');
+const { canPathHome, teleportHome, queueMovementToLocation, getPathToPosition, replacePath } = require('./mob/helpers');
 
-const canPathHome = require('./mob/canPathHome');
-
-const teleportHome = (physics, obj, mob) => {
-	physics.removeObject(obj, obj.x, obj.y);
-	obj.x = mob.originX;
-	obj.y = mob.originY;
-	const syncer = obj.syncer;
-	syncer.o.x = obj.x;
-	syncer.o.y = obj.y;
-	physics.addObject(obj, obj.x, obj.y);
-	obj.aggro.clearIgnoreList();
-	obj.aggro.move();
-};
-
-const performPatrolAction = ({ obj }, node) => {
-	const { action } = node;
-
-	const { chatter, syncer, instance: { scheduler } } = obj;
-
-	if (action === 'chat') {
-		if (!chatter)
-			obj.addComponent('chatter');
-
-		syncer.set(false, 'chatter', 'msg', node.msg);
-
-		return true;
-	}
-
-	if (action === 'wait') {
-		if (node.cron) {
-			const isActive = scheduler.isActive(node);
-
-			return isActive;
-		} else if (node.ttl === undefined) {
-			node.ttl = node.duration;
-
-			return false;
-		}
-
-		node.ttl--;
-
-		if (!node.ttl) {
-			delete node .ttl;
-			return true;
-		}
-	}
-};
-
-const getNextPatrolTarget = mob => {
-	const { patrol, obj: { x, y } } = mob;
-	let toX, toY;
-
-	do {
-		const toNode = patrol[mob.patrolTargetNode];
-		if (toNode.action) {
-			const nodeDone = performPatrolAction(mob, toNode);
-			if (!nodeDone)
-				return true;
-
-			mob.patrolTargetNode++;
-			if (mob.patrolTargetNode >= patrol.length)
-				mob.patrolTargetNode = 0;
-
-			continue;
-		}
-
-		toX = toNode[0];
-		toY = toNode[1];
-		if ((toX - x === 0) && (toY - y === 0)) {
-			mob.patrolTargetNode++;
-			if (mob.patrolTargetNode >= patrol.length)
-				mob.patrolTargetNode = 0;
-		} else
-			break;
-	} while (toX - x !== 0 || toY - y !== 0);
-
-	return [ toX, toY ];
-};
+const abs = Math.abs.bind(Math);
+const rnd = Math.random.bind(Math);
+const max = Math.max.bind(Math);
 
 module.exports = {
 	type: 'mob',
@@ -113,241 +37,215 @@ module.exports = {
 			this.maxChaseDistance = blueprint.maxChaseDistance;
 	},
 
-	/* eslint-disable-next-line max-lines-per-function */
 	update: function () {
-		let obj = this.obj;
+		const { obj, walkDistance } = this;
 
-		let target = null;
+		const distanceFromHome = Math.max(abs(this.originX - obj.x), abs(this.originY - obj.y));
+
+		let target;
 		if (obj.aggro)
 			target = obj.aggro.getHighest();
 
-		//Have we reached home?
+		//If we're on our way home, check if we're there. If we are, reset the flag
 		if (this.goHome) {
-			let distanceFromHome = Math.max(abs(this.originX - obj.x), abs(this.originY - obj.y));
 			if (!distanceFromHome) {
 				this.goHome = false;
 
 				if (obj.spellbook)
 					obj.spellbook.resetRotation();
+			} else {
+				//If goHome was set by an external source, it wouldn't have queued movement for us
+				if (obj.moveQueue.length === 0)
+					queueMovementToLocation(obj, this, this.originX, this.originY);
+
+				return false;
 			}
 		}
 
-		if (!this.goHome) {
-			//Are we chasing a target too far from home?
-			if (!obj.follower && target) {
-				if (!this.canChase(target)) {
-					obj.clearQueue();
-					obj.aggro.unAggro(target);
-					target = obj.aggro.getHighest();
-				}
+		//If we're too far from home, set the goHome flag
+		if (
+			distanceFromHome > this.maxChaseDistance ||
+			(
+				distanceFromHome > this.walkDistance &&
+				!target &&
+				!this.patrol
+			)
+		) {
+			this.goHome = true;
+			queueMovementToLocation(obj, this, this.originX, this.originY);
+
+			return false;
+		}
+
+		if (obj.aggro) {
+			//If our target is too far away from our home, ignore it and try to find a new one
+			if (target && !obj.follower && !this.canChase(target)) {
+				obj.clearQueue();
+				obj.aggro.unAggro(target);
+				target = obj.aggro.getHighest();
 			}
 
-			//Are we too far from home?
-			let distanceFromHome = Math.max(abs(this.originX - obj.x), abs(this.originY - obj.y));
-			if (distanceFromHome > this.maxChaseDistance || (distanceFromHome > this.walkDistance && !target && !this.patrol))
-				this.goHome = true;
-			else if (target && target !== obj && (!obj.follower || obj.follower.master !== target)) {
-				//If we just started attacking, patrols need to know where home is
+			//If we still have a target, try to attack it
+			if (target) {
+				//If this.target isn't set, it means we're engaging in combat for the first time. In those cases, we
+				// need to initialize the origin location for patrols (the spot where they stopped patrolling).
 				if (!this.target && this.patrol) {
 					this.originX = obj.x;
 					this.originY = obj.y;
 				}
 
-				//Are we in fight mode?
-				this.fight(target);
-				return;
-			} else if (!target && this.target) {
-				//Is fight mode over?
+				//Finally, try to attack the target
+				const didAttack = this.fight(target);
+
+				return didAttack;
+			} else if (this.target) {
+			//We had a target but no longer. The fight is probably over for some reason (player disconnected / was killed)
 				this.target = null;
 				obj.clearQueue();
 				obj.spellbook.resetRotation();
 
-				if (canPathHome(this))
+				if (canPathHome(this)) {
 					this.goHome = true;
-				else
+					queueMovementToLocation(obj, this, this.originX, this.originY);
+				} else
 					teleportHome(this.physics, obj, this);
+
+				return false;
 			}
 		}
 
-		//If we're already going somewhere, don't calculate a new path
-		if (obj.actionQueue.length > 0)
-			return;
+		//We're not fighting or going home, don't try to wander/patrol if we already have movement queued
+		if (obj.moveQueue.length > 0)
+			return false;
 
-		//Unless we're going home, don't always move
-		if (!this.goHome && rnd() < 0.85 && !this.patrol)
-			return;
+		//Patrol mobs, when not going home or fighting can just go about their business
+		if (this.patrol) {
+			updatePatrol(this);
 
-		//Don't move around if we're not allowed to, unless we're going home
-		let walkDistance = this.walkDistance;
-		if ((!this.goHome) && (walkDistance <= 0))
-			return;
-
-		let toX, toY;
-
-		//Patrol mobs should not pick random locations unless they're going home
-		if (this.goHome || !this.patrol) {
-			toX = this.originX + ~~(rnd() * (walkDistance * 2)) - walkDistance;
-			toY = this.originY + ~~(rnd() * (walkDistance * 2)) - walkDistance;
-		} else if (this.patrol) {
-			const patrolResult = getNextPatrolTarget(this);
-
-			//When an action is performed, we will only get a boolean value back
-			if (!patrolResult.push)
-				return;
-
-			[toX, toY] = patrolResult;
+			return false;
 		}
+
+		//If we reach this point, we're not going home or fighting, so we can try to wander around
+		if (walkDistance > 0 && rnd() > 0.2)
+			return false;
+
+		const toX = this.originX + ~~(rnd() * (walkDistance * 2)) - walkDistance;
+		const toY = this.originY + ~~(rnd() * (walkDistance * 2)) - walkDistance;
 
 		//We use goHome to force followers to follow us around but they should never stay in that state
 		// since it messes with combat
 		if (obj.follower)
 			this.goHome = false;
 
-		const dx = abs(obj.x - toX);
-		const dy = abs(obj.y - toY);
-
-		if (dx + dy === 0)
-			return;
-
-		if (dx <= 1 && dy <= 1) {
-			obj.queue({
-				action: 'move',
-				data: {
-					x: toX,
-					y: toY
-				}
-			});
-
-			return;
-		}
-
-		const path = this.physics.getPath({
-			x: obj.x,
-			y: obj.y
-		}, {
-			x: toX,
-			y: toY
-		}, false);
-
-		const pLen = path.length;
-		for (let i = 0; i < pLen; i++) {
-			let p = path[i];
-
-			obj.queue({
-				action: 'move',
-				data: {
-					x: p.x,
-					y: p.y
-				}
-			});
-		}
+		queueMovementToLocation(obj, this, toX, toY);
 	},
 
 	fight: function (target) {
-		let obj = this.obj;
+		const { obj } = this;
+		const { x, y } = obj;
 
+		if (obj.spellbook.isCasting())
+			return true;
+
+		//Swaping to a new target
 		if (this.target !== target) {
 			obj.clearQueue();
 			this.target = target;
 		}
-		//If the target is true, it means we can't reach the target and should wait for a new one
-		if (this.target === true)
-			return;
-		else if (obj.spellbook.isCasting())
-			return;
 
-		let x = obj.x;
-		let y = obj.y;
+		const tx = ~~target.x;
+		const ty = ~~target.y;
 
-		let tx = ~~target.x;
-		let ty = ~~target.y;
+		const distance = max(abs(x - tx), abs(y - ty));
 
-		let distance = max(abs(x - tx), abs(y - ty));
-		let furthestAttackRange = obj.spellbook.getFurthestRange(target, true);
-		let furthestStayRange = obj.spellbook.getFurthestRange(target, false);
+		//The minimum distance from which we can cast right now
+		const furthestAttackRange = obj.spellbook.getFurthestRange(target, true);
 
-		let doesCollide = null;
-		let hasLos = null;
+		//The minimum distance from which we can cast any spell in the future
+		const furthestStayRange = obj.spellbook.closestRange;
 
-		if (distance <= furthestAttackRange) {
-			doesCollide = this.physics.mobsCollide(x, y, obj, target);
-			if (!doesCollide) {
-				hasLos = this.physics.hasLos(x, y, tx, ty);
-				//Maybe we don't care if the mob has LoS
-				if (hasLos || this.needLos === false) {
-					let spell = obj.spellbook.getSpellToCast(target);
-					if (!spell)
-						return;
+		let castSuccess = false;
+		const collidesWithMobOrPlayer = this.physics.mobsCollide(x, y, obj, target);
 
-					let success = obj.spellbook.cast({
-						spell: spell.id,
-						target
-					});
+		const tryToCast = (
+			distance <= furthestAttackRange &&
+			(
+				this.needLos === false ||
+				this.physics.hasLos(x, y, tx, ty)
+			)
+		);
 
-					//null means we don't have LoS
-					if (success !== null)
-						return;
-
-					hasLos = false;
-				}
+		if (tryToCast) {
+			const spell = obj.spellbook.getSpellToCast(target);
+			//If it's an auto-attack, only cast it if the target has changed
+			if (!spell.autoActive || spell.autoActive.target !== target) {
+				castSuccess = obj.spellbook.cast({
+					spell: spell.id,
+					target
+				});
 			}
-		} else if (furthestAttackRange === 0) {
-			if (distance <= obj.spellbook.closestRange && !this.physics.mobsCollide(x, y, obj, target))
-				return;
+
+			if (castSuccess && !collidesWithMobOrPlayer)
+				return true;
 		}
 
-		let targetPos = this.physics.getClosestPos(x, y, tx, ty, target, obj);
-		if (!targetPos) {
-			//Find a new target
-			obj.aggro.ignore(target);
-			//TODO: Don't skip a turn
-			return;
-		}
-		let newDistance = max(abs(targetPos.x - tx), abs(targetPos.y - ty));
+		if (castSuccess)
+			return true;
 
-		if (newDistance >= distance && newDistance > furthestStayRange) {
+		const shouldMove = (
+			collidesWithMobOrPlayer ||
+			distance > furthestStayRange ||
+			!this.physics.hasLos(x, y, tx, ty)
+		);
+
+		if (!shouldMove)
+			return false;
+
+		const moveToPos = this.physics.getClosestPos(x, y, tx, ty, target, obj);
+		let newDistance;
+		if (moveToPos)
+			newDistance = max(abs(moveToPos.x - tx), abs(moveToPos.y - ty));
+
+		//The closest open position needs to be close enough for us to actually attack in the future
+		const canGetCloseEnough = (
+			moveToPos &&
+			(
+				(
+					collidesWithMobOrPlayer &&
+					newDistance <= furthestStayRange
+				) ||
+				(
+					!collidesWithMobOrPlayer &&
+					newDistance <= distance &&
+					newDistance <= furthestStayRange
+				)
+			)
+		);
+
+		let path;
+		if (canGetCloseEnough)
+			path = getPathToPosition(obj, this, moveToPos.x, moveToPos.y);
+
+		//Maybe the closest open position is close enough, but we can't path there
+		if (!canGetCloseEnough || path.length === 0) {
 			obj.clearQueue();
 			obj.aggro.ignore(target);
-			if (!obj.aggro.getHighest()) {
-				//Nobody left to attack so reset our aggro table
-				obj.aggro.die();
-				this.goHome = true;
-			}
 
-			return;
+			target = obj.aggro.getHighest();
+
+			if (target)
+				return this.fight(target);
+
+			//Nobody left to attack so reset our aggro table
+			obj.aggro.die();
+			this.goHome = true;
+
+			return false;
 		}
 
-		if (abs(x - targetPos.x) <= 1 && abs(y - targetPos.y) <= 1) {
-			obj.queue({
-				action: 'move',
-				data: {
-					x: targetPos.x,
-					y: targetPos.y
-				}
-			});
-		} else {
-			let path = this.physics.getPath({
-				x: x,
-				y: y
-			}, {
-				x: targetPos.x,
-				y: targetPos.y
-			});
-			if (path.length === 0) {
-				obj.aggro.ignore(target);
-				//TODO: Don't skip a turn
-				return;
-			}
+		replacePath(obj, path);
 
-			let p = path[0];
-			obj.queue({
-				action: 'move',
-				data: {
-					x: p.x,
-					y: p.y
-				}
-			});
-		}
+		return false;
 	},
 
 	canChase: function (obj) {

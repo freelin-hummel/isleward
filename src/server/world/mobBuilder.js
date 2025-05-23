@@ -141,8 +141,10 @@ const buildCpnSpells = (mob, blueprint, typeDefinition, preferStat) => {
 		dmgMult *= typeDefinition.dmgMult;
 
 	mob.spellbook.spells.forEach((s, i) => {
-		if (i === 0)
+		if (i === 0) {
 			s.cdMax = 2;
+			s.auto = true;
+		}
 
 		if (s.healing === undefined)
 			s.damage *= dmgMult;

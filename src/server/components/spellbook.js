@@ -3,17 +3,48 @@ const spellTemplate = require('../config/spells/spellTemplate');
 const animations = require('../config/animations');
 const playerSpells = require('../config/spells');
 const playerSpellsConfig = require('../config/spellsConfig');
+const spellCastResultTypes = require('./spellbook/spellCastResultTypes');
 
 //Helpers
 const rotationManager = require('./spellbook/rotationManager');
 const cast = require('./spellbook/cast');
+
+//Spells that always exist for players
+const forcedPlayerSpells = [{
+	id: 5,
+	type: 'autoMove',
+	name: 'Auto-Move',
+	description: 'When active, you will automatically move closer to your target if the next queued rune cast is out of range. Moving manually will deactivate auto-move.',
+	icon: [3, 4],
+	forcedSpell: true,
+	//Bit of a hack, to allow us to cast it without a target
+	aura: true,
+	values: {},
+	manaCost: 0,
+	cdMax: 0,
+	cast: (spellbook, spell) => {
+		const { obj } = spellbook;
+
+		spellbook.autoMoveActive = !spellbook.autoMoveActive;
+
+		obj.instance.syncer.queue('onGetSpellActive', {
+			id: obj.id,
+			spell: spell.id,
+			active: spellbook.autoMoveActive
+		}, [obj.serverId]);
+
+		obj.syncer.setArray(true, 'spellbook', 'getSpells', {
+			...spell,
+			autoActive: spellbook.autoMoveActive
+		});
+	}
+}];
 
 //Component
 module.exports = {
 	type: 'spellbook',
 
 	spells: [],
-
 	physics: null,
 	objects: null,
 
@@ -23,6 +54,10 @@ module.exports = {
 	callbacks: [],
 
 	rotation: null,
+
+	//When autoMoveActive is set to true, players will automatically move closer to their targets (without path-finding)
+	// until they are close enough to cast
+	autoMoveActive: false,
 
 	init: function (blueprint) {
 		this.objects = this.obj.instance.objects;
@@ -74,11 +109,11 @@ module.exports = {
 		}, this);
 	},
 
-	simplify: function (self) {
+	simplify: function (self, isSave) {
 		if (!self)
 			return null;
 
-		let s = {
+		const res = {
 			type: this.type,
 			closestRange: this.closestRange,
 			furthestRange: this.furthestRange
@@ -88,12 +123,23 @@ module.exports = {
 		if (spells.length && spells[0].obj)
 			spells = spells.map(f => f.simplify());
 
-		s.spells = spells;
+		if (this.obj.player && !isSave)
+			spells.push(...forcedPlayerSpells);
 
-		return s;
+		res.spells = spells;
+
+		return res;
+	},
+
+	save: function (self) {
+		return this.simplify(true, true);
 	},
 
 	addSpell: function (options, spellId) {
+		//Forced spells can't actually be added since they aren't real spells. We simply add them to send to the client
+		if (options.forcedSpell)
+			return;
+
 		if (!options.type) {
 			options = {
 				type: options
@@ -323,11 +369,33 @@ module.exports = {
 		return target;
 	},
 
+	isForcedSpell: function (spellId) {
+		return !!this.obj.player && forcedPlayerSpells.some(f => f.id === spellId);
+	},
+
+	castForcedSpell: function (spellId) {
+		const spell = forcedPlayerSpells.find(f => f.id === spellId);
+
+		if (spell.type === 'autoMove') {
+			spell.cast(this, spell);
+
+			return true;
+		}
+	},
+
+	hasSpell: function (spellId) {
+		return this.spells.some(f => f.id === spellId);
+	},
+
+	isSpellAuto: function (spellId) {
+		return this.spells.some(f => f.id === spellId && f.auto === true);
+	},
+
 	canCast: function (action) {
 		if (!action.has('spell'))
 			return false;
 
-		let spell = this.spells.find(s => (s.id === action.spell));
+		const spell = this.spells.find(s => (s.id === action.spell));
 
 		if (!spell)
 			return false;
@@ -335,6 +403,17 @@ module.exports = {
 		let target = this.getTarget(spell, action);
 
 		return spell.canCast(target);
+	},
+
+	getSpellCanCastResult: function (action) {
+		const spell = this.spells.find(s => (s.id === action.spell));
+
+		if (!spell)
+			return spellCastResultTypes.noSpellFound;
+
+		const target = this.getTarget(spell, action);
+
+		return spell.getSpellCanCastResult(target);
 	},
 
 	/* config: {
@@ -364,22 +443,61 @@ module.exports = {
 		return cds;
 	},
 
-	update: function () {
+	updateAutoCast: function (skipAutoMove = false) {
+		if (this.isCasting())
+			return false;
+
 		let didCast = false;
+		let didMove = false;
+
+		this.spells.forEach(s => {
+			let auto = s.autoActive;
+			if (!auto)
+				return;
+
+			if (!auto.target || auto.target.destroyed) {
+				s.setAuto(null);
+
+				return;
+			}
+
+			const spellCastResult = s.getSpellCanCastResult(auto.target);
+
+			if (spellCastResult === spellCastResultTypes.outOfRange) {
+				if (!skipAutoMove) {
+					//Players, when autoMoveActive is true can automatically move closer and try to auto-attack again
+					if (this.obj.player) {
+						const didQueue = this.obj.queueAutoMove(s.id, auto.target);
+
+						//If we queue an auto-move, we're allowed to try to move once and then try to auto-attack again
+						if (didQueue)
+							didMove = this.obj.performQueue(true);
+					} else if (this.obj.moveQueue.length === 1) {
+						//Mobs on the other hand, have to employ a different mechanic since they will always have movement queued
+						didMove = this.obj.performQueue(true);
+					}
+
+					if (didMove)
+						this.updateAutoCast(true);
+				}
+			} else {
+				const res = this.cast(auto, true);
+
+				if (res !== false)
+					didCast = true;
+			}
+		});
+
+		return didCast || didMove;
+	},
+
+	update: function () {
 		const isCasting = this.isCasting();
 
 		if (this.rotation)
 			rotationManager.tick(this);
 
 		this.spells.forEach(s => {
-			let auto = s.autoActive;
-			if (auto) {
-				if (!auto.target || auto.target.destroyed)
-					s.setAuto(null);
-				else if (!isCasting && this.cast(auto, true))
-					didCast = true;
-			}
-
 			s.updateBase();
 			if (s.update)
 				s.update();
@@ -410,7 +528,7 @@ module.exports = {
 			}
 		}
 
-		return didCast || isCasting;
+		return isCasting;
 	},
 
 	//Callbacks to be called when this object is destroyed
@@ -540,11 +658,11 @@ module.exports = {
 		},
 
 		clearQueue: function () {
-			this.stopCasting(null, true);
+			this.stopCasting(null, false);
 		},
 
 		beforeDeath: function () {
-			this.stopCasting(null, true);
+			this.stopCasting(null, false);
 
 			this.spells.forEach(function (s) {
 				if (!s.castOnDeath)

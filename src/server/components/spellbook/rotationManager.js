@@ -57,12 +57,6 @@ const getSpellToCast = (source, target) => {
 	if (source.rotation)
 		return getRotationSpell(source, target);
 
-	const { obj: { follower } } = source;
-
-	//Mobs don't cast all the time but player followers do
-	if (!follower?.master?.player && Math.random() >= 0.65)
-		return;
-
 	return getRandomSpell(source, target);
 };
 
@@ -103,7 +97,7 @@ const getFurthestRange = (source, target, checkCanCast) => {
 		return getFurthestRangeRotation(source, target, checkCanCast);
 
 	let sLen = spells.length;
-	let furthest = 0;
+	let furthest = -1;
 	for (let i = 0; i < sLen; i++) {
 		let spell = spells[i];
 		if (spell.procCast || spell.castOnDeath)

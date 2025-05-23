@@ -1,9 +1,8 @@
-let components = require('../components/components');
+const components = require('../components/components');
+const objQueue = require('./objQueue');
 
-module.exports = {
+module.exports = Object.assign({
 	components: [],
-
-	actionQueue: [],
 
 	eventListeners: [],
 
@@ -84,7 +83,7 @@ module.exports = {
 			}
 		}
 
-		if (!usedTurn) 
+		if (!usedTurn && this.aggro)
 			this.performQueue();
 	},
 
@@ -176,55 +175,6 @@ module.exports = {
 		});
 	},
 
-	queue: function (msg) {
-		const { action, auto, data: { priority } } = msg;
-
-		if (action === 'spell') {
-			let spellbook = this.spellbook;
-			const isCasting = spellbook.isCasting();
-
-			if (isCasting && (!priority || !spellbook.canCast(msg))) {
-				if (auto)
-					spellbook.queueAuto(msg);
-
-				return;
-			}
-		
-			if (isCasting)
-				spellbook.stopCasting();
-
-			this.actionQueue.spliceWhere(a => a.priority);
-			this.actionQueue.splice(0, 0, msg);
-		} else {
-			if (priority) {
-				this.spellbook.stopCasting();
-				this.actionQueue.splice(0, 0, msg);
-				return;
-			}
-
-			this.actionQueue.push(msg);
-		}
-	},
-
-	dequeue: function () {
-		if (this.actionQueue.length === 0)
-			return null;
-
-		return this.actionQueue.splice(0, 1)[0];
-	},
-
-	clearQueue: function () {
-		if (this.has('serverId')) {
-			this.instance.syncer.queue('onClearQueue', {
-				id: this.id
-			}, [this.serverId]);
-		}
-
-		this.actionQueue = [];
-
-		this.fireEvent('clearQueue');
-	},
-
 	performAction: function (action) {
 		if (action.instanceModule)
 			return;
@@ -234,40 +184,6 @@ module.exports = {
 			return;
 
 		cpn[action.method](action.data);
-	},
-
-	performQueue: function () {
-		let q = this.dequeue();
-		if (!q) 
-			return;
-
-		if (q.action === 'move') {
-			let maxDistance = 1;
-			if ((this.actionQueue[0]) && (this.actionQueue[0].action === 'move')) {
-				let moveEvent = {
-					sprintChance: this.stats.values.sprintChance || 0
-				};
-				this.fireEvent('onBeforeTryMove', moveEvent);
-
-				let physics = this.instance.physics;
-				let sprintChance = moveEvent.sprintChance;				
-				do {
-					if ((~~(Math.random() * 100) < sprintChance) && (!physics.isTileBlocking(q.data.x, q.data.y))) {
-						q = this.dequeue();
-						maxDistance++;
-					}
-					sprintChance -= 100;
-				} while (sprintChance > 0 && this.actionQueue.length > 0);
-			}
-			q.maxDistance = maxDistance;
-			let success = this.performMove(q);
-			if (!success) 
-				this.clearQueue();
-		} else if (q.action === 'spell') {
-			let success = this.spellbook.cast(q.data);
-			if (!success)
-				this.performQueue();
-		}
 	},
 
 	performMove: function (action) {
@@ -455,4 +371,4 @@ module.exports = {
 
 		return JSON.stringify(res, null, 4).split('"').join('') + '\r\n';
 	}
-};
+}, objQueue);
