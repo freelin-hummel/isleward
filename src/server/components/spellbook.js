@@ -14,7 +14,7 @@ const forcedPlayerSpells = [{
 	id: 5,
 	type: 'autoMove',
 	name: 'Auto-Move',
-	description: 'When active, you will automatically move closer to your target if the next queued rune cast is out of range. Moving manually will deactivate auto-move.',
+	description: 'When active, you will automatically move closer to your target if the next queued rune cast is out of range.',
 	icon: [3, 4],
 	forcedSpell: true,
 	//Bit of a hack, to allow us to cast it without a target
@@ -472,7 +472,7 @@ module.exports = {
 						//If we queue an auto-move, we're allowed to try to move once and then try to auto-attack again
 						if (didQueue)
 							didMove = this.obj.performQueue(true);
-					} else if (this.obj.moveQueue.length === 1) {
+					} else if (this.obj.moveQueue.length > 0) {
 						//Mobs on the other hand, have to employ a different mechanic since they will always have movement queued
 						didMove = this.obj.performQueue(true);
 					}
