@@ -24,6 +24,7 @@ export default {
 	init () {
 		events.on('teleportToPosition', this.resetPath.bind(this));
 		events.on('onDeath', this.resetPath.bind(this));
+		events.on('overridePath', this.overridePath.bind(this));
 		events.on('onClearQueue', this.resetPath.bind(this));
 
 		this.pathPos.x = round(this.obj.x);
@@ -39,6 +40,26 @@ export default {
 		});
 
 		this.path = [];
+	},
+
+	overridePath: function ({ data: { path } }) {
+		this.clearPath();
+
+		this.path = path.map(({ x, y }) => {
+			return {
+				x,
+				y,
+				sprite: renderer.buildRectangle({
+					layerName: 'effects',
+					color: this.pathColor,
+					alpha: this.pathAlpha,
+					x: (x * scale) + scaleMult,
+					y: (y * scale) + scaleMult,
+					w: scale - (scaleMult * 2),
+					h: scale - (scaleMult * 2)
+				})
+			};
+		});
 	},
 
 	resetPath () {

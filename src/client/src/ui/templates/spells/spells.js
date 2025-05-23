@@ -8,11 +8,10 @@ import resources from '../../../js/resources';
 export default {
 	tpl: template,
 
-	spells: null,
+	spells: [],
 
 	postRender () {
 		this.onEvent('onGetSpells', this.onGetSpells.bind(this));
-		this.onEvent('onGetSpellCooldowns', this.onGetSpellCooldowns.bind(this));
 		this.onEvent('onGetSpellActive', this.onGetSpellActive.bind(this));
 		this.onEvent('onGetStats', this.onGetStats.bind(this));
 
@@ -22,7 +21,23 @@ export default {
 	onGetSpells (spells) {
 		this.el.empty();
 
+		const storedTtls = [];
+		this.spells.forEach(({ id, ttl, ttlStart }) => {
+			storedTtls.push({
+				id,
+				ttl,
+				ttlStart
+			});
+		});
+
 		this.spells = spells;
+
+		storedTtls.forEach(({ id, ttl, ttlStart }) => {
+			const spell = this.spells.find(f => f.id === id);
+
+			spell.ttl = ttl;
+			spell.ttlStart = ttlStart;
+		});
 
 		for (let i = 0; i < spells.length; i++) {
 			let spell = spells[i];
@@ -53,14 +68,10 @@ export default {
 			if (spell.autoActive)
 				el.addClass('active');
 
-			//HACK - we don't actually know how long a tick is
-			if (spell.cd) {
-				this.onGetSpellCooldowns({
-					spell: spell.id,
-					cd: spell.cd * 350
-				});
-
-				delete spell.cd;
+			if (spell.cd && !spell.ttlStart) {
+				//HACK: We don't actually know how long a tick is
+				spell.ttlStart = +new Date() - ((spell.cdMax - spell.cd) * 350);
+				spell.ttl = spell.cdMax * 350;
 			}
 		}
 	},
@@ -114,21 +125,13 @@ export default {
 				.replace('$RANGE$', spell.range);
 		} else {
 			tooltip = tooltip
-				.replace('range', 'range hidden');
+				.replace('class="range"', 'class="range hidden"');
 		}
 
 		events.emit('onShowTooltip', tooltip, el[0], pos, 250, false, true, this.el.css('z-index'));
 	},
 	onHideTooltip (el) {
 		events.emit('onHideTooltip', el[0]);
-	},
-
-	onGetSpellCooldowns (options) {
-		let spell = this.spells.find(function (s) {
-			return (s.id === options.spell);
-		});
-		spell.ttl = options.cd;
-		spell.ttlStart = +new Date();
 	},
 
 	onGetSpellActive (options) {
@@ -168,15 +171,18 @@ export default {
 		for (let i = 0; i < spells.length; i++) {
 			let spell = spells[i];
 
-			if (!spell.ttl) {
+			if (!spell.ttlStart) {
 				this.el.children('div').eq(i).find('.cooldown').css({ width: '0%' });
+
 				continue;
 			}
 
-			let elapsed = time - spell.ttlStart;
+			const elapsed = time - spell.ttlStart;
 			let width = 1 - (elapsed / spell.ttl);
 			if (width <= 0) {
 				delete spell.ttl;
+				delete spell.ttlStart;
+
 				width = 0;
 			}
 
