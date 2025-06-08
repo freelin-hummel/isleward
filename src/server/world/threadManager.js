@@ -373,13 +373,16 @@ const update = () => {
 	let tLen = threads.length;
 	for (let i = 0; i < tLen; i++) {
 		const t = threads[i];
-		if (!t.isReady || t.destroyWhenEmptyForMs === -1)
+
+		//Something might have caused the thread to be removed during the update method
+		if (!t) {
+			tLen--;
+			continue;
+		} else if (!t.isReady || t.destroyWhenEmptyForMs === -1)
 			continue;
 
-		if (t.destroyed) {
-			tLen--;
-			i--;
-		}
+		if (t.destroyed)
+			continue;
 
 		if (!t.emptySinceEpoch && t.playersCurrent.length === 0)
 			t.emptySinceEpoch = +new Date();
