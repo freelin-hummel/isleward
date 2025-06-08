@@ -9,9 +9,17 @@ module.exports = {
 	range: 7,
 	cascadeRange: 5,
 	faction: null,
+	subFaction: null,
 
 	physics: null,
 
+	/*
+		list: [{
+			obj: the object we have aggro on,
+			damage: the total amount of damage or heals done that threaten us,
+			threat: the threat number (highest threat will be attacked first)
+		}]
+	*/
 	list: [],
 
 	ignoreSet: null,
@@ -32,10 +40,12 @@ module.exports = {
 		if (blueprint.faction) 
 			this.faction = blueprint.faction;
 
+		if (blueprint.subFaction) 
+			this.subFaction = blueprint.subFaction;
+
 		if (blueprint.range)
 			this.range = blueprint.range;
 
-		//TODO: Why don't we move if faction is null?
 		if (!this.has('faction'))
 			return;
 
@@ -54,9 +64,18 @@ module.exports = {
 	},
 
 	simplify: function (self) {
+		const list = this.list.map(({ obj: { id }, threat }) => {
+			return {
+				id,
+				threat
+			};
+		});
+
 		return {
 			type: 'aggro',
-			faction: this.faction
+			list,
+			faction: this.faction,
+			subFaction: this.subFaction
 		};
 	},
 
@@ -68,7 +87,7 @@ module.exports = {
 		if (obj.dead)
 			return;
 
-		let result = {
+		const result = {
 			success: true
 		};
 		obj.fireEvent('beforeAggro', result);
@@ -135,16 +154,14 @@ module.exports = {
 	},
 
 	canAttack: function (target) {
-		let obj = this.obj;
+		const obj = this.obj;
+
 		if (target === obj)
 			return false;
-		else if (target.player && obj.player)
-			return false;
-		else if ((target.follower) && (target.follower.master.player) && (obj.player))
-			return false;
-		else if (obj.player)
-			return true;
-		else if (target.aggro.faction !== obj.aggro.faction)
+
+		const { aggro: targetAggro } = target;
+
+		if (targetAggro.faction !== this.faction || targetAggro.subFaction !== this.subFaction)
 			return true;
 		else if (!!target.player !== !!obj.player)
 			return true;
@@ -154,10 +171,11 @@ module.exports = {
 		if (this.obj === target)
 			return false;
 
-		let faction = target.aggro.faction;
+		const { aggro: { faction, subFaction } } = target;
+
 		if (!faction || !this.faction)
 			return false;
-		else if (faction === this.faction)
+		else if (faction === this.faction || subFaction === this.subFaction)
 			return false;
 
 		let rep = this.obj.reputation;
@@ -394,6 +412,7 @@ module.exports = {
 		let list = this.list;
 		let lLen = list.length;
 
+		let changed = false;
 		for (let i = 0; i < lLen; i++) {
 			let l = list[i];
 
@@ -401,9 +420,17 @@ module.exports = {
 				this.unAggro(l.obj);
 				i--;
 				lLen--;
-			} else if (l.threat > 0)
+
+				changed = true;
+			} else if (l.threat > 0) {
 				l.threat *= this.threatDecay;
+
+				changed = true;
+			}
 		}
+
+		if (changed)
+			this.obj.syncer.setComponent(false, 'aggro', this.simplify());
 	},
 
 	clearIgnoreList: function () {

@@ -116,6 +116,8 @@ module.exports = {
 					animation: 'melee'
 				}]
 			}, 'regular');
+			mob.aggro.subFaction = obj.aggro.subFaction;
+
 			mob.stats.values.hpMax = obj.stats.values.hpMax * (this.hpPercent / 100);
 			mob.stats.values.hp = mob.stats.values.hpMax;
 			mob.stats.values.regenHp = mob.stats.values.hpMax / 100;

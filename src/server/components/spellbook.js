@@ -345,7 +345,7 @@ module.exports = {
 			}
 
 			if (target.aggro && (spell.spellType === 'buff' || spell.spellType === 'heal')) {
-				if (this.obj.aggro.faction !== target.aggro.faction)
+				if (this.obj.aggro.faction !== target.aggro.faction || this.obj.aggro.subFaction !== target.aggro.subFaction)
 					return;
 			} else if (target.aggro && !this.obj.aggro.canAttack(target)) {
 				if (this.obj.player)

@@ -26,6 +26,7 @@ module.exports = {
 		this.lastMasterPos.y = master.y;
 
 		this.obj.aggro.faction = master.aggro.faction;
+		this.obj.aggro.subFaction = master.aggro.subFaction;
 		this.fGetHighest.inCombat = master.aggro.getHighest.bind(master.aggro);
 		this.fGetHighest.outOfCombat = this.returnNoAggro.bind(this);
 	},

@@ -11,6 +11,7 @@ let loadedCount = 0;
 
 //Internal
 const componentList = [
+	'aggro',
 	'animation',
 	'attackAnimation',
 	'bumpAnimation',

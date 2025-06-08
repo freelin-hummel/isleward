@@ -44,16 +44,40 @@ export default {
 		events.emit('onMobHover', mob);
 	},
 
-	getClosest (x, y, maxDistance, reverse, fromMob) {
-		let objects = this.objects;
+	/*
+		objSeeker: (object)
+			The object trying to find a target
+		maxDistance: (integer)
+			How far away an object can be to still be considered
+		findHostile: (boolean)
+			When true, only consider objects that objSeeker can attack
+			When false, only consider objects that objSeeker can heal
+	*/
+	getClosest (objSeeker, maxDistance, findHostile, fromObj) {
+		const { x, y, aggro: { faction, subFaction } } = objSeeker;
 
-		let list = objects.filter(o => {
-			if ((!o.stats) || (o.nonSelectable) || (o === window.player) || (!o.sprite.visible))
+		let list = this.objects.filter(o => {
+			const { aggro: oAggro } = o;
+
+			if (!oAggro)
 				return false;
 
-			let dx = Math.abs(o.x - x);
+			const sameFaction = (
+				faction === oAggro.faction &&
+				subFaction === oAggro.subFaction
+			);
+
+			if (
+				!o.stats ||
+				o.nonSelectable ||
+				!o.sprite?.visible ||
+				findHostile === sameFaction
+			)
+				return false;
+
+			const dx = Math.abs(o.x - x);
 			if (dx < maxDistance) {
-				let dy = Math.abs(o.y - y);
+				const dy = Math.abs(o.y - y);
 				if (dy < maxDistance)
 					return true;
 			}
@@ -69,17 +93,11 @@ export default {
 			return (aDistance - bDistance);
 		});
 
-		list = list.filter(o => ((o.aggro) && (o.aggro.faction !== window.player.aggro.faction)));
-
-		if (!fromMob)
+		if (!fromObj)
 			return list[0];
 
-		let fromIndex = list.findIndex(l => l.id === fromMob.id);
-
-		if (reverse)
-			fromIndex = (fromIndex === 0 ? list.length : fromIndex) - 1;
-		else
-			fromIndex = (fromIndex + 1) % list.length;
+		let fromIndex = list.findIndex(l => l.id === fromObj.id);
+		fromIndex = (fromIndex + 1) % list.length;
 
 		return list[fromIndex];
 	},
