@@ -129,8 +129,8 @@ module.exports = {
 		if (walkDistance > 0 && rnd() > 0.2)
 			return false;
 
-		const toX = this.originX + ~~(rnd() * (walkDistance * 2)) - walkDistance;
-		const toY = this.originY + ~~(rnd() * (walkDistance * 2)) - walkDistance;
+		const toX = this.originX + ~~(rnd() * ((walkDistance * 2) + 1)) - walkDistance;
+		const toY = this.originY + ~~(rnd() * ((walkDistance * 2) + 1)) - walkDistance;
 
 		//We use goHome to force followers to follow us around but they should never stay in that state
 		// since it messes with combat

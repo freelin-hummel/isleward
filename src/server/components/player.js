@@ -251,5 +251,13 @@ module.exports = {
 			spellbook.stopCasting();
 		else
 			this.obj.clearQueue();
+	},
+
+	unqueueSpellAtIndex: function ({ spellIndex }) {
+		this.obj.unqueueSpellAtIndex(spellIndex);
+	},
+
+	unqueueSpellsForTarget: function ({ spellTargetId }) {
+		this.obj.unqueueSpellsForTarget(spellTargetId);
 	}
 };

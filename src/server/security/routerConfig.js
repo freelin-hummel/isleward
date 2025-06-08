@@ -298,6 +298,24 @@ const routerConfig = {
 				clearQueue: {
 					callback: false,
 					data: []
+				},
+				unqueueSpellAtIndex: {
+					callback: false,
+					data: [
+						{
+							key: 'spellIndex',
+							dataType: 'integer'
+						}
+					]
+				},
+				unqueueSpellsForTarget: {
+					callback: false,
+					data: [
+						{
+							key: 'spellTargetId',
+							dataType: 'integer'
+						}
+					]
 				}
 			},
 			inventory: {

@@ -29,6 +29,35 @@ module.exports = {
 		this.fireEvent('clearQueue');
 	},
 
+	shiftAndSyncSpellQueue: function () {
+		this.spellQueue.shift();
+
+		this.syncSpellQueue();
+	},
+
+	syncSpellQueue: function () {
+		this.instance.syncer.queue('getSpellQueue', {
+			spellQueue: this.spellQueue.map(q => {
+				return {
+					spellId: q.data.spell,
+					targetId: q.data.target
+				};
+			})
+		}, [this.serverId]);
+	},
+
+	unqueueSpellAtIndex: function (spellIndex) {
+		this.spellQueue.splice(spellIndex, 1);
+
+		this.syncSpellQueue();
+	},
+
+	unqueueSpellsForTarget: function (targetId) {
+		this.spellQueue.spliceWhere(f => f.data.target === targetId);
+
+		this.syncSpellQueue();
+	},
+
 	queue: function (msg) {
 		const { action, data } = msg;
 
@@ -49,6 +78,8 @@ module.exports = {
 			}
 
 			this.spellQueue.push(msg);
+
+			this.syncSpellQueue();
 		} else if (action === 'move') {
 			const { priority } = data;
 
@@ -144,13 +175,33 @@ module.exports = {
 		return true;
 	},
 
+	/* eslint-disable-next-line max-lines-per-function */
 	performQueue: function (skipSpells = false) {
-		const { moveQueue, spellQueue, spellbook } = this;
+		const { moveQueue, spellQueue, spellbook, instance: { objects: { objects: objList } } } = this;
 
 		//If we have any spells queued, perform them first
 		let castDone = false;
 
-		if (spellQueue.length > 0 && !skipSpells) {
+		//Unqueue any spells with destroyed targets
+		let spellQueueLen = spellQueue.length;
+		let spellQueueModified = false;
+		for (let i = 0; i < spellQueueLen; i++) {
+			const { data: { target: qTarget } } = spellQueue[i];
+			if (typeof(qTarget) !== 'number')
+				continue;
+
+			const objTarget = objList.find(f => f.id === qTarget);
+
+			if (!objTarget || objTarget.destroyed) {
+				spellQueueLen--;
+				spellQueue.splice(i, 1);
+				i--;
+
+				spellQueueModified = true;
+			}
+		}
+
+		if (spellQueueLen > 0 && !skipSpells) {
 			const { data: queuedSpell } = spellQueue[0];
 			const { spell: spellId } = queuedSpell;
 
@@ -158,7 +209,7 @@ module.exports = {
 			let targetIsObject = typeof(queuedSpell.target) === 'number';
 			let target;
 			if (targetIsObject)
-				target = this.instance.objects.find(f => f.id === queuedSpell.target);
+				target = objList.find(f => f.id === queuedSpell.target);
 
 			//There are some conditions where we just ignore the queued spell completely
 			if (
@@ -173,7 +224,7 @@ module.exports = {
 					)
 				)
 			) {
-				spellQueue.shift();
+				this.shiftAndSyncSpellQueue();
 
 				return this.performQueue();
 			}
@@ -183,19 +234,21 @@ module.exports = {
 				if (moveQueue.length === 0) {
 					const queueSuccess = this.queueAutoMove(spellId, target);
 					if (!queueSuccess)
-						spellQueue.shift();
+						this.shiftAndSyncSpellQueue();
 				}
 			} else if (canCastResponse === spellCastResultTypes.success) {
 				castDone = this.spellbook.cast(queuedSpell);
 
 				//If cast succeeded, we can remove it from the queue. If not, we'll try again next tick
 				if (castDone)
-					spellQueue.shift();
+					this.shiftAndSyncSpellQueue();
 			}
 		}
 
 		if (castDone)
 			return true;
+		else if (spellQueueModified)
+			this.syncSpellQueue();
 
 		if (spellbook) {
 			//We need to inform updateAutoCast if skipSpells is true to stop infinite loops for mobs:
