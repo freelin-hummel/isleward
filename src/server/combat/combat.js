@@ -31,6 +31,8 @@ const getDamage = config => {
 	delete config.tgtValues;
 	delete config.elementName;
 
+	result.amount = 0.001;
+
 	return result;
 };
 

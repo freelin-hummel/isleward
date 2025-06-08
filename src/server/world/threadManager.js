@@ -376,7 +376,9 @@ const update = () => {
 
 		//Something might have caused the thread to be removed during the update method
 		if (!t) {
+			i--;
 			tLen--;
+
 			continue;
 		} else if (!t.isReady || t.destroyWhenEmptyForMs === -1)
 			continue;
