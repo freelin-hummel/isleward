@@ -178,7 +178,7 @@ module.exports = {
 		if (tryToCast) {
 			const spell = obj.spellbook.getSpellToCast(target);
 			//If it's an auto-attack, only cast it if the target has changed
-			if (!spell.autoActive || spell.autoActive.target !== target) {
+			if (spell && (!spell.autoActive || spell.autoActive.target !== target)) {
 				castSuccess = obj.spellbook.cast({
 					spell: spell.id,
 					target
