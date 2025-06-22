@@ -90,6 +90,9 @@ export default {
 
 	updateBarVisibility (visible) {
 		this.bars.forEach(bar => {
+			if (!bar.sprite)
+				return;
+
 			const isVisible = (visible !== undefined) ? visible : bar.isVisible();
 
 			bar.sprite.visible = isVisible;

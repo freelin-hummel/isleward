@@ -195,7 +195,10 @@ module.exports = {
 		const shouldMove = (
 			collidesWithMobOrPlayer ||
 			distance > furthestStayRange ||
-			!this.physics.hasLos(x, y, tx, ty)
+			(
+				!this.physics.hasLos(x, y, tx, ty) &&
+				this.needLos !== false
+			)
 		);
 
 		if (!shouldMove)
