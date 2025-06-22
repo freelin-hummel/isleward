@@ -175,7 +175,7 @@ module.exports = {
 
 		if (!faction || !this.faction)
 			return false;
-		else if (faction === this.faction || subFaction === this.subFaction)
+		else if (faction === this.faction || (!!subFaction && subFaction === this.subFaction))
 			return false;
 
 		let rep = this.obj.reputation;

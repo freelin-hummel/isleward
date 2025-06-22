@@ -83,7 +83,7 @@ module.exports = Object.assign({
 			}
 		}
 
-		if (!usedTurn && this.aggro)
+		if (!usedTurn && (this.aggro || this.moveQueue.length > 0))
 			this.performQueue();
 	},
 
