@@ -31,6 +31,10 @@ const getQueueTick = updateMethod => {
 	return () => requestAnimationFrame(updateMethod);
 };
 
+const loadLongPress = async () => {
+	return import('./js/plugins/long-press-event.min');
+};
+
 const main = {
 	hasFocus: true,
 
@@ -109,8 +113,8 @@ const main = {
 
 	//If we're on an ios device, we need to load longPress since that polyfills contextmenu for us
 	//Todo check and fix ios long press
-	//if (window._.isIos())
-	//	await loadLongPress();
+	if (window._.isIos())
+		await loadLongPress();
 
 	if (window.location.search.includes('hideMonetization'))
 		$('.ui-container').addClass('hideMonetization');
