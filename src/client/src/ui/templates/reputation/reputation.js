@@ -45,7 +45,7 @@ export default {
 	},
 
 	onKeyDown (key) {
-		if (key === 'u')
+		if (key === 'y')
 			this.toggle();
 	},
 
