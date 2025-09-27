@@ -1,4 +1,5 @@
 const spawners = require('../spawners');
+const resourceSpawner = require('../resourceSpawner');
 
 const spawnObjects = (scope, instance, room) => {
 	let template = room.template;
@@ -8,6 +9,9 @@ const spawnObjects = (scope, instance, room) => {
 		if (!o.fog) {
 			o.x = o.x - template.x + room.x;
 			o.y = o.y - template.y + room.y;
+
+			if (o.properties?.resource)
+				resourceSpawner.register(o.properties.resource, o);
 
 			o.amount = scope.mobSpawnCount;
 

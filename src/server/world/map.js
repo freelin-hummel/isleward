@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 let objects = require('../objects/objects');
 let physics = require('./physics');
 let spawners = require('./spawners');
@@ -546,6 +547,14 @@ module.exports = {
 							blueprint.y >= r.y + r.height
 						);
 					});
+
+					//Bit hacky. We can't put fish in the rooms layer because that messes with room templates
+					//So we need to do the following
+					if (blueprint.properties?.resource) {
+						blueprint.y++;
+						blueprint.width = cell.width / mapScale;
+						blueprint.height = cell.height / mapScale;
+					}
 
 					room.objects.push(blueprint);
 				}
