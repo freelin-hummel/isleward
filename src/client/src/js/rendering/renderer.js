@@ -774,7 +774,7 @@ const renderer = {
 			return;
 
 		cell.forEach(c => {
-			c.visible = false;
+			c.alpha = 0;
 			spritePool.store(c);
 		});
 
@@ -803,7 +803,7 @@ const renderer = {
 				const cellSprites = row[y];
 
 				cellSprites.forEach(c => {
-					c.visible = false;
+					c.alpha = 0;
 					spritePool.store(c);
 				});
 
