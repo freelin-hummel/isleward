@@ -32,10 +32,7 @@ module.exports = [{
 	needItems: [{
 		info: 'Pick an item to reroll',
 		withProps: ['slot'],
-		withoutProps: ['noAugment'],
-		checks: [
-			item => item.slot !== 'tool'
-		]
+		withoutProps: ['noAugment']
 	}],
 	craftAction: reroll
 }, {
