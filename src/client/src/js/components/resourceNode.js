@@ -23,7 +23,12 @@ let bptParticles = {
 export default {
 	type: 'resourceNode',
 
+	particles: null,
+	particleColor: null,
+
 	init () {
+		this.particles = $.extend({}, bptParticles);
+
 		let x = this.obj.x;
 		let y = this.obj.y;
 		let w = this.obj.width || 1;
@@ -36,7 +41,7 @@ export default {
 
 		for (let i = x; i < x + w; i++) {
 			for (let j = y; j < y + h; j++) {
-				let bpt = $.extend(true, {}, bptParticles, { new: true });
+				let bpt = $.extend(true, {}, this.particles, { new: true });
 
 				if (isFish) {
 					if (!physics.isTileBlocking(i, j))
@@ -57,6 +62,9 @@ export default {
 						}
 					});
 				}
+
+				if (this.particleColor)
+					bpt.blueprint.color.start = this.particleColor;
 
 				this.obj.addComponent('particles', bpt);
 			}

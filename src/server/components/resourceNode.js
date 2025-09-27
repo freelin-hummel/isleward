@@ -24,7 +24,8 @@ module.exports = {
 	simplify: function () {
 		return {
 			type: 'resourceNode',
-			nodeType: this.nodeType
+			nodeType: this.nodeType,
+			particleColor: this.blueprint?.properties?.particleColor
 		};
 	}
 };
