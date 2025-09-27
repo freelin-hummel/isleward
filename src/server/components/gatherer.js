@@ -108,7 +108,8 @@ module.exports = {
 			nodeType: resourceNode.nodeType,
 			blueprint: resourceNode.blueprint,
 			xp: resourceNode.xp,
-			items: gathering.inventory.items
+			items: gathering.inventory.items,
+			overrideGatherItemLogic: false
 		});
 		this.obj.instance.eventEmitter.emit('beforeGatherResourceComplete', gatherResult);
 		this.obj.fireEvent('beforeGatherResourceComplete', gatherResult);
@@ -123,39 +124,43 @@ module.exports = {
 
 				return;
 			}
+		}
 
-			gatherResult.items.forEach(g => {
-				if (g.slot)
-					return;
+		if (!gatherResult.overrideGatherItemLogic) {
+			if (isFish) {
+				gatherResult.items.forEach(g => {
+					if (g.slot)
+						return;
 				
-				delete g.quantity;
+					delete g.quantity;
 
-				qualityGenerator.generate(g, {
+					qualityGenerator.generate(g, {
 					//100 x 2.86 = 2000 (chance for a common)
-					bonusMagicFind: this.obj.stats.values.fishRarity * 2.82
+						bonusMagicFind: this.obj.stats.values.fishRarity * 2.82
+					});
+
+					g.name = {
+						0: '',
+						1: 'Big ',
+						2: 'Giant ',
+						3: 'Trophy ',
+						4: 'Fabled '
+					}[g.quality] + g.name;
+
+					let statFishWeight = 1 + (this.obj.stats.values.fishWeight / 100);
+					let weight = ~~((gatherResult.blueprint.baseWeight + g.quality + (Math.random() * statFishWeight)) * 100) / 100;
+					g.stats = {
+						weight: weight
+					};
+
+					g.worth = ~~(weight * 10);
 				});
-
-				g.name = {
-					0: '',
-					1: 'Big ',
-					2: 'Giant ',
-					3: 'Trophy ',
-					4: 'Fabled '
-				}[g.quality] + g.name;
-
-				let statFishWeight = 1 + (this.obj.stats.values.fishWeight / 100);
-				let weight = ~~((gatherResult.blueprint.baseWeight + g.quality + (Math.random() * statFishWeight)) * 100) / 100;
-				g.stats = {
-					weight: weight
-				};
-
-				g.worth = ~~(weight * 10);
-			});
-		} else {
-			gatherResult.items.forEach(g => {
-				if (g.worth === undefined)
-					g.worth = 1;
-			});
+			} else {
+				gatherResult.items.forEach(g => {
+					if (g.worth === undefined)
+						g.worth = 1;
+				});
+			}
 		}
 
 		if (isFish) {
