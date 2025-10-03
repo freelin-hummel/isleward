@@ -6,6 +6,9 @@ module.exports = (crafter, recipe, { pickedItemIds = [] }) => {
 
 	const result = pickedItemIds.map((pickedId, i) => {
 		const item = items.find(f => f.id === pickedId);
+		if (!item)
+			return null;
+
 		const isItemValid = needItems[i].allowedItemIds.includes(item.id);
 
 		if (!isItemValid)
