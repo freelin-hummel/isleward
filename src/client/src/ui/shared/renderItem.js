@@ -184,5 +184,12 @@ export default (container, item, useEl, manageTooltip, getItemContextConfig, sho
 
 	itemEl.addClass(`spriteSize${size}`);
 
+	const emBeforeRenderItem = {
+		el: itemEl,
+		item
+	};
+
+	events.emit('beforeRenderItem', emBeforeRenderItem);
+
 	return itemEl;
 };

@@ -241,6 +241,7 @@ module.exports = async (cpnSocial, msg) => {
 		msg: messageString,
 		type: msgData.type,
 		subType: msgData.subType,
+		msgData,
 		ignore: false,
 		error: null
 	};

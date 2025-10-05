@@ -283,6 +283,15 @@ module.exports = {
 		let item = this.findItem(itemId);
 		if ((!item) || (item.material) || (item.quest) || (item.noSalvage) || (item.eq))
 			return;
+
+		const emBeforeSalvageItem = {
+			obj: this.obj,
+			item,
+			success: true
+		};
+		events.emit('beforeSalvageItem', emBeforeSalvageItem);
+		if (!emBeforeSalvageItem.success)
+			return;
 			
 		let messages = [];
 			
@@ -305,6 +314,15 @@ module.exports = {
 	destroyItem: function ({ itemId }, amount, force) {
 		let item = this.findItem(itemId);
 		if (!item || (item.noDestroy && !force))
+			return;
+
+		const emBeforeDestroyItem = {
+			obj: this.obj,
+			item,
+			success: true
+		};
+		events.emit('beforeDestroyItem', emBeforeDestroyItem);
+		if (!emBeforeDestroyItem.success)
 			return;
 
 		amount = amount || item.quantity;
@@ -333,7 +351,16 @@ module.exports = {
 
 	dropItem: function ({ itemId }) {
 		let item = this.findItem(itemId);
-		if ((!item) || (item.noDrop) || (item.quest))
+		if (!item || item.noDrop || item.quest)
+			return;
+
+		const emBeforeDropItem = {
+			obj: this.obj,
+			item,
+			success: true
+		};
+		events.emit('beforeDropItem', emBeforeDropItem);
+		if (!emBeforeDropItem.success)
 			return;
 
 		if (item.has('quickSlot')) {

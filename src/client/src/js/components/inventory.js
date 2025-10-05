@@ -11,10 +11,10 @@ export default {
 		events.emit('onGetInventorySize', this.inventorySize);
 	},
 
-	extend ({ destroyItems, getItems, inventorySize }) {
+	extend ({ destroyItems, getItems, inventorySize, forceRerender }) {
 		const { items } = this;
 
-		let rerenderNeeded = false;
+		let rerenderNeeded = !!forceRerender;
 
 		if (inventorySize) {
 			this.inventorySize = inventorySize;
@@ -44,11 +44,12 @@ export default {
 
 				if (!rerenderNeeded) {
 					rerenderNeeded = (
+						g.forceRerender === true ||
 						findItem.pos !== g.pos ||
-							findItem.eq !== g.eq ||
-							findItem.active !== g.active ||
-							findItem.quickSlot !== g.quickSlot ||
-							findItem.quantity !== g.quantity
+						findItem.eq !== g.eq ||
+						findItem.active !== g.active ||
+						findItem.quickSlot !== g.quickSlot ||
+						findItem.quantity !== g.quantity
 					);
 				}
 

@@ -25,7 +25,7 @@ const lineBuilders = {
 		if (item.quantity > 1)
 			itemName += ' x' + item.quantity;
 
-		return itemName;
+		return `<div class="name q${item.quality}">${itemName}</div>`;
 	},
 
 	type: () => {
@@ -419,6 +419,11 @@ const init = (_item, _compare, _shiftDown, _equipErrors, _customLineBuilders) =>
 			originalBuilders[k];
 
 		lineBuilders[k] = useBuilder;
+	});
+
+	Object.keys(_customLineBuilders).forEach(k => {
+		if (!originalBuilders[k])
+			lineBuilders[k] = _customLineBuilders[k].bind(null, item);
 	});
 };
 

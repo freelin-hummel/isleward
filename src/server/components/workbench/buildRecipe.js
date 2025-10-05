@@ -1,3 +1,5 @@
+const eventEmitter = require('../../misc/events');
+
 const recipes = require('../../config/recipes/recipes');
 
 const buildMaterials = require('./buildMaterials');
@@ -26,6 +28,14 @@ module.exports = (craftType, crafter, msg) => {
 		result.dynamicMaterials = true;
 
 	result.materials = buildMaterials(crafter, recipe, msg);
+
+	const emBeforeSendRecipeToPlayer = {
+		crafter,
+		craftType,
+		recipe: result
+	};
+
+	eventEmitter.emit('beforeSendRecipeToPlayer', emBeforeSendRecipeToPlayer);
 
 	return result;
 };

@@ -103,14 +103,14 @@ export default {
 
 		const newTarget = target ?? this.hoverTarget;
 
-		this.setTarget(newTarget);
+		this.setTarget(newTarget, e);
 	},
 
-	setTarget (obj) {
+	setTarget (obj, e) {
 		this.target = obj;
 		this.targetSprite.visible = !!this.target;
 
-		events.emit('onSetTarget', this.target, null);
+		events.emit('onSetTarget', this.target, e);
 	},
 
 	tabTarget (ignoreIfSet) {
@@ -118,7 +118,7 @@ export default {
 
 		let closest = objects.getClosest(window.player.x, window.player.y, 10, input.isKeyDown('shift'), compareAgainst);
 
-		this.setTarget(closest);
+		this.setTarget(closest, null);
 	},
 
 	onKeyDown (key) {

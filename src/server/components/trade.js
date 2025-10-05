@@ -1,6 +1,8 @@
-let generator = require('../items/generator');
-let statGenerator = require('../items/generators/stats');
-let skins = require('../config/skins');
+const eventEmitter = require('../misc/events');
+
+const generator = require('../items/generator');
+const statGenerator = require('../items/generators/stats');
+const skins = require('../config/skins');
 
 const sendMessage = ({ instance, id, serverId }, color, message) => {
 	instance.syncer.queue('onGetMessages', {
@@ -314,6 +316,12 @@ module.exports = {
 		let itemList = this.obj.inventory.items
 			.filter(i => i.worth > 0 && !i.eq && !i.noDestroy);
 		itemList = extend([], itemList);
+
+		const emBeforeSendSellableItems = {
+			seller: this.obj,
+			items: itemList
+		};
+		eventEmitter.emit('beforeSendSellableItems', emBeforeSendSellableItems);
 
 		this.obj.syncer.set(true, 'trade', 'sellList', {
 			markup: target.trade.markup.buy,

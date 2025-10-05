@@ -218,6 +218,27 @@ const config = {
 		player: [],
 		npc: []
 	},
+	itemTooltipConfig: [
+		{ handler: 'name' },
+		{ handler: 'div', config: { className: 'type', lineBuilder: 'type' } },
+		{ handler: 'div', config: { className: 'power', lineBuilder: 'power' } },
+		{ handler: 'div', config: { className: 'implicitStats', lineBuilder: 'implicitStats' } },
+		{ handler: 'div', config: { className: 'stats', lineBuilder: 'stats' } },
+		{ handler: 'div', config: { className: 'material', lineBuilder: 'material' } },
+		{ handler: 'div', config: { className: 'quest', lineBuilder: 'quest' } },
+		{ handler: 'spellName' },
+		{ handler: 'div', config: { className: 'damage', lineBuilder: 'damage' } },
+		{ handler: 'div', config: { className: 'effects', lineBuilder: 'effects' } },
+		{ handler: 'div', config: { className: 'cd', lineBuilder: 'cd' } },
+		{ handler: 'div', config: { className: 'uses', lineBuilder: 'uses' } },
+		{ handler: 'div', config: { className: 'description', lineBuilder: 'description' } },
+		{ handler: 'div', config: { className: 'worth', lineBuilder: 'worth' } },
+		{ handler: 'requires', config: { className: 'requires' } },
+		{ handler: 'requireLevel' },
+		{ handler: 'requireStats' },
+		{ handler: 'requireFaction' },
+		{ handler: 'div', config: { className: 'info', lineBuilder: 'info' } }
+	],
 	clientComponents: [],
 	sounds: {
 		ui: []
