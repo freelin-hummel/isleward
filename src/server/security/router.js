@@ -1,5 +1,15 @@
+//Imports
 const { routerConfig: { signatures, allowed, allowTargetId, secondaryAllowed, globalAllowed, secondaryAllowTargetId } } = require('./routerConfig');
 
+//Config
+const outerKeysThatNeedToBeStrings = [
+	'cpn',
+	'method',
+	'module',
+	'threadModule'
+];
+
+//Module
 module.exports = {
 	allowedCpn: function (msg) {
 		const { cpn, method, data: { cpn: secondaryCpn, method: secondaryMethod, targetId } } = msg;
@@ -139,8 +149,23 @@ module.exports = {
 		return keysCorrect;
 	},
 
+	outerKeysIncorrect: function (msg) {
+		const incorrect = outerKeysThatNeedToBeStrings.some(f => {
+			const val = msg[f];
+			if (val === undefined)
+				return false;
+
+			return typeof(val) !== 'string';
+		});
+
+		return incorrect;
+	},
+
 	isMsgValid: function (msg, source) {
 		let signature;
+
+		//if (this.outerKeysIncorrect(msg))
+		//	return false;
 
 		if (msg.module) {
 			if (msg.threadModule !== undefined || msg.cpn !== undefined || msg.data.cpn !== undefined) 
