@@ -207,7 +207,7 @@ module.exports = {
 
 			//If the target is a number (object id), get it
 			let targetIsObject = typeof(queuedSpell.target) === 'number';
-			let target;
+			let target = queuedSpell.target;
 			if (targetIsObject)
 				target = objList.find(f => f.id === queuedSpell.target);
 
