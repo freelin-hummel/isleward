@@ -154,7 +154,7 @@ export default {
 			el.show();
 		}
 
-		if (e && e.button === 2 && this.target)
+		if (e?.button === 2 && this.target)
 			this.onContextMenu(e);
 	},
 
