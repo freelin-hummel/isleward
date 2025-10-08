@@ -164,8 +164,8 @@ module.exports = {
 	isMsgValid: function (msg, source) {
 		let signature;
 
-		//if (this.outerKeysIncorrect(msg))
-		//	return false;
+		if (this.outerKeysIncorrect(msg))
+			return false;
 
 		if (msg.module) {
 			if (msg.threadModule !== undefined || msg.cpn !== undefined || msg.data.cpn !== undefined) 
