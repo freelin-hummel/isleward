@@ -11,7 +11,8 @@ module.exports = {
 	// We constrain it so that we don't go overboard with using the CPU
 	msAllowedPerTickForMapGeneration: 100,
 
-	testUiAvailable: true, //process.env.IWD_TEST_UI_AVAILABLE === 'true',
+	//UNDO AND RESET TO: process.env.IWD_TEST_UI_AVAILABLE === 'true',
+	testUiAvailable: true,
 
 	//Options:
 	// sqlite
