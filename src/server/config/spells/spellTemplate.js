@@ -49,6 +49,9 @@ module.exports = {
 		const { obj } = this;
 
 		if (this.has('range')) {
+			if (!target)
+				console.log(`No target found for ${this.type} for obj ${this.obj.name}`);
+
 			const distance = Math.max(Math.abs(target.x - obj.x), Math.abs(target.y - obj.y));
 
 			if (distance > this.range)

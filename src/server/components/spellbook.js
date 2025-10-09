@@ -425,10 +425,13 @@ module.exports = {
 		return cast(this, action, isAuto, config);
 	},
 
-	getClosestRange: function (spellNum) {
-		if (spellNum)
-			return this.spells[spellNum].range;
-		return this.closestRange;
+	getClosestRange: function () {
+		const { closestRange } = this;
+
+		if (closestRange <= 0)
+			return 1;
+
+		return closestRange;
 	},
 
 	getCooldowns: function () {

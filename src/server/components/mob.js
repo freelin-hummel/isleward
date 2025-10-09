@@ -162,7 +162,7 @@ module.exports = {
 		const furthestAttackRange = obj.spellbook.getFurthestRange(target, true);
 
 		//The minimum distance from which we can cast any spell in the future
-		const furthestStayRange = obj.spellbook.closestRange;
+		const furthestStayRange = obj.spellbook.getClosestRange();
 
 		let castSuccess = false;
 		const collidesWithMobOrPlayer = this.physics.mobsCollide(x, y, obj, target);
