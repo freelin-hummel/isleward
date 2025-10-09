@@ -60,6 +60,14 @@ export default {
 				})
 			};
 		});
+
+		const lastEntry = this.path[this.path.length - 1];
+
+		if (!lastEntry)
+			return;
+
+		this.pathPos.x = lastEntry.x;
+		this.pathPos.y = lastEntry.y;
 	},
 
 	resetPath () {
