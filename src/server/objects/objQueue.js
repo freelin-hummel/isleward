@@ -236,7 +236,9 @@ module.exports = {
 					if (!queueSuccess)
 						this.shiftAndSyncSpellQueue();
 				}
-			} else if (canCastResponse === spellCastResultTypes.success) {
+			} else if (canCastResponse === spellCastResultTypes.noTarget)
+				this.shiftAndSyncSpellQueue();
+			else if (canCastResponse === spellCastResultTypes.success) {
 				castDone = this.spellbook.cast(queuedSpell);
 
 				//If cast succeeded, we can remove it from the queue. If not, we'll try again next tick

@@ -50,7 +50,7 @@ module.exports = {
 
 		if (this.has('range')) {
 			if (!target)
-				console.error(`No target found for ${this.type} for obj ${this.obj.name}`);
+				return spellCastResultTypes.noTarget;
 
 			const distance = Math.max(Math.abs(target.x - obj.x), Math.abs(target.y - obj.y));
 
