@@ -37,10 +37,12 @@ module.exports = {
 
 	syncSpellQueue: function () {
 		this.instance.syncer.queue('getSpellQueue', {
-			spellQueue: this.spellQueue.map(q => {
+			spellQueue: this.spellQueue.map(({ data: { spell, target } }) => {
+				const targetId = target?.id ? target.id : target;
+
 				return {
-					spellId: q.data.spell,
-					targetId: q.data.target
+					spellId: spell,
+					targetId
 				};
 			})
 		}, [this.serverId]);
