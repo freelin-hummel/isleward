@@ -66,6 +66,10 @@ module.exports = {
 		if (action === 'spell') {
 			const { spellbook } = this;
 
+			const canCastResponse = spellbook.getSpellCanCastResult(msg.data);
+			if (canCastResponse === spellCastResultTypes.noTarget)
+				return;
+
 			const { spell: spellId } = data;
 
 			if (spellbook.isForcedSpell(spellId)) {
