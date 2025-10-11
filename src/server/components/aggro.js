@@ -393,7 +393,7 @@ module.exports = {
 			}
 		}
 
-		return furthest.obj;
+		return furthest?.obj;
 	},
 
 	getRandom: function () {
