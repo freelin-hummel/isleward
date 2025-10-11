@@ -15,7 +15,7 @@ const forcedPlayerSpells = [{
 	type: 'autoMove',
 	name: 'Auto-Move',
 	description: 'When active, you will automatically move closer to your target if the next queued rune cast is out of range.',
-	icon: [3, 4],
+	icon: [7, 7],
 	forcedSpell: true,
 	//Bit of a hack, to allow us to cast it without a target
 	aura: true,
