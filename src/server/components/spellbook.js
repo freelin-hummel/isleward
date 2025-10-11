@@ -119,7 +119,7 @@ module.exports = {
 			furthestRange: this.furthestRange
 		};
 
-		let spells = this.spells;
+		let spells = [...this.spells];
 		if (spells.length && spells[0].obj)
 			spells = spells.map(f => f.simplify());
 
