@@ -26,6 +26,7 @@ export default {
 		events.on('onDeath', this.resetPath.bind(this));
 		events.on('overridePath', this.overridePath.bind(this));
 		events.on('onClearQueue', this.resetPath.bind(this));
+		events.on('clearUis', this.clearPath.bind(this));
 
 		this.pathPos.x = round(this.obj.x);
 		this.pathPos.y = round(this.obj.y);

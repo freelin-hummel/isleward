@@ -259,5 +259,11 @@ module.exports = {
 
 	unqueueSpellsForTarget: function ({ spellTargetId }) {
 		this.obj.unqueueSpellsForTarget(spellTargetId);
+	},
+
+	events: {
+		beforeRezone: function () {
+			this.obj.clearQueue();
+		}
 	}
 };

@@ -26,6 +26,8 @@ module.exports = {
 		this.moveQueue = [];
 		this.spellQueue = [];
 
+		this.syncSpellQueue();
+
 		this.fireEvent('clearQueue');
 	},
 
