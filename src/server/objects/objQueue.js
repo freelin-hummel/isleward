@@ -69,7 +69,19 @@ module.exports = {
 			const { spellbook } = this;
 
 			const canCastResponse = spellbook.getSpellCanCastResult(msg.data);
-			if (canCastResponse === spellCastResultTypes.noTarget)
+			if (
+				canCastResponse === spellCastResultTypes.noTarget ||
+				this.spellQueue.length >= 10 ||
+				(
+					!spellbook.autoMoveActive &&
+					(
+						canCastResponse === spellCastResultTypes.insufficientMana ||
+						canCastResponse === spellCastResultTypes.noLineOfSight ||
+						canCastResponse === spellCastResultTypes.onCooldown ||
+						canCastResponse === spellCastResultTypes.outOfRange
+					)
+				)
+			)
 				return;
 
 			const { spell: spellId } = data;
