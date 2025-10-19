@@ -9,7 +9,7 @@ module.exports = (obj, [item]) => {
 	delete item.enchantedStats;
 	delete item.implicitStats;
 
-	const originalItemLevel = item.originalLevel ?? item.level;
+	const originalItemLevel = item.originalLevel ?? item.level ?? 1;
 
 	item.stats = {};
 	let bpt = {

@@ -136,9 +136,7 @@ module.exports = [{
 		info: 'Pick an item to scour',
 		withProps: ['slot', 'power'],
 		withoutProps: ['noAugment'],
-		checks: [
-			item => item.slot !== 'tool'
-		]
+		checks: []
 	}],
 	craftAction: scour,
 	checks: [
