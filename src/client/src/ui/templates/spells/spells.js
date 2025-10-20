@@ -1,9 +1,11 @@
+import globals from '../../../js/system/globals';
+import resources from '../../../js/resources';
 import events from '../../../js/system/events';
+
 import template from './template.html?raw';
 import './styles.css';
 import templateSpell from './templateSpell.html?raw';
 import templateTooltip from './templateTooltip.html?raw';
-import resources from '../../../js/resources';
 
 export default {
 	tpl: template,
@@ -14,8 +16,16 @@ export default {
 		this.onEvent('onGetSpells', this.onGetSpells.bind(this));
 		this.onEvent('onGetSpellActive', this.onGetSpellActive.bind(this));
 		this.onEvent('onGetStats', this.onGetStats.bind(this));
+		this.onEvent('onRezone', this.onRezone.bind(this));
 
 		setInterval(this.update.bind(this), 100);
+	},
+
+	onRezone () {
+		this.spells.forEach(s => {
+			delete s.ttl;
+			delete s.ttlStart;
+		});
 	},
 
 	onGetSpells (spells) {
@@ -69,9 +79,10 @@ export default {
 				el.addClass('active');
 
 			if (spell.cd && !spell.ttlStart) {
-				//HACK: We don't actually know how long a tick is
-				spell.ttlStart = +new Date() - ((spell.cdMax - spell.cd) * 350);
-				spell.ttl = spell.cdMax * 350;
+				const tickTime = globals.clientConfig.tickTime;
+
+				spell.ttlStart = +new Date() - ((spell.cdMax - spell.cd) * tickTime);
+				spell.ttl = spell.cdMax * tickTime;
 			}
 		}
 	},

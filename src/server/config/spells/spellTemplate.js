@@ -346,8 +346,8 @@ module.exports = {
 			)
 				continue;
 
-			if (p === 'autoActive') 
-				value = value !== null;
+			if (p === 'autoActive')
+				value = value !== null && value !== false;
 
 			values[p] = value;
 		}
