@@ -9,8 +9,8 @@ let modAudio;
 
 const globalVolume = 0.3;
 
-let soundVolume = config.soundVolume;
-let musicVolume = config.musicVolume;
+let soundVolume;
+let musicVolume;
 
 const globalScopes = ['ui'];
 const minDistance = 10;
@@ -30,6 +30,9 @@ export default {
 	currentMusic: null,
 
 	async init () {
+		soundVolume = config.soundVolume;
+		musicVolume = config.musicVolume;
+
 		modAudio = (await import('@modAudio')).default;
 
 		return new Promise(_promiseResolver => {

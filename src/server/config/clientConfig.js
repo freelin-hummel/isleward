@@ -3,6 +3,8 @@ const { imageSizeFromFile } = require('image-size/fromFile');
 
 //Helpers
 const events = require('../misc/events');
+// eslint-disable-next-line no-shadow
+const consts = require('./consts');
 
 //External Config
 const tos = require('./tos');
@@ -10,6 +12,7 @@ const statTranslations = require('./statTranslations');
 
 //Config
 const config = {
+	tickTime: consts.tickTime,
 	logoPath: null,
 	loginBgGeneratorPath: null,
 	resourceList: [],
@@ -242,6 +245,111 @@ const config = {
 	clientComponents: [],
 	sounds: {
 		ui: []
+	},
+	clientOptions: {
+		options: {
+			showNames: true,
+			showQuests: 'on',
+			showEvents: true,
+			playAudio: true,
+			qualityIndicators: 'off',
+			unusableIndicators: 'off',
+			rememberChatChannel: true,
+			soundVolume: 100,
+			musicVolume: 100,
+			partyView: 'full',
+			damageNumbers: 'element'
+		},
+
+		valueChains: {
+			partyView: ['full', 'compact', 'minimal'],
+			showQuests: ['on', 'minimal', 'off'],
+			qualityIndicators: ['border', 'bottom', 'background', 'off'],
+			unusableIndicators: ['off', 'border', 'top', 'background'],
+			damageNumbers: ['element', 'white', 'off']
+		},
+
+		meta: [
+			{
+				section: 'Game'
+			},
+			{
+				key: 'playAudio',
+				label: 'Audio',
+				type: 'boolean',
+				event: 'onToggleAudio'
+			},
+			{
+				key: 'soundVolume',
+				label: 'Sound Volume',
+				type: 'volume',
+				event: 'onVolumeChange'
+			},
+			{
+				key: 'musicVolume',
+				label: 'Music Volume',
+				type: 'volume',
+				event: 'onVolumeChange'
+			},
+			{
+				section: 'UI'
+			},
+			{
+				key: 'showNames',
+				label: 'Nameplates',
+				type: 'boolean',
+				event: 'onToggleNameplates'
+			},
+			{
+				key: 'showQuests',
+				label: 'Show Quests',
+				type: 'cycle',
+				event: 'onToggleQuestsVisibility'
+			},
+			{
+				key: 'showEvents',
+				label: 'Show Events',
+				type: 'boolean',
+				event: 'onToggleEventsVisibility'
+			},
+			{
+				key: 'partyView',
+				label: 'Party View',
+				type: 'cycle',
+				event: 'onTogglePartyView'
+			},
+			{
+				key: 'damageNumbers',
+				label: 'Damage Numbers',
+				type: 'cycle',
+				event: 'onToggleDamageNumbers'
+			},
+			{
+				section: 'Inventory'
+			},
+			{
+				key: 'qualityIndicators',
+				label: 'Quality Indicators',
+				type: 'cycle',
+				events: ['onToggleQualityIndicators', 'onDependencyCheck']
+			},
+			{
+				key: 'unusableIndicators',
+				label: 'Unusable Indicators',
+				type: 'cycle',
+				events: ['onToggleUnusableIndicators', 'onDependencyCheck']
+			},
+			{
+				section: 'Chat'
+			},
+			{
+				key: 'rememberChatChannel',
+				label: 'Remember Chat Channel',
+				type: 'boolean',
+				event: 'onToggleLastChannel'
+			}
+		]
+
 	},
 	tos,
 	statTranslations

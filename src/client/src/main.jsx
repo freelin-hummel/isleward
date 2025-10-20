@@ -10,6 +10,7 @@ import Loader from './ui/templates/loader/loader';
 
 //System Imports
 import client from './js/system/client';
+import { init as initConfig } from './js/config';
 import components from './js/components';
 import events from './js/system/events';
 import extraClientModules from './js/system/extraClientModules';
@@ -130,6 +131,8 @@ const main = {
 	});
 
 	globals.clientConfig = clientConfig;
+
+	initConfig();
 
 	await uiFactory.preInit();
 

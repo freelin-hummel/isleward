@@ -1,259 +1,118 @@
+// options.js
 import events from '../../../js/system/events';
 import template from './template.html?raw';
 import './styles.css';
-import renderer from '../../../js/rendering/renderer';
+import globals from '../../../js/system/globals';
 import config from '../../../js/config';
 
 export default {
 	tpl: template,
 	centered: true,
-
 	modal: true,
 	hasClose: true,
-
 	isFlex: true,
 
 	postRender () {
 		this.onEvent('onOpenOptions', this.show.bind(this));
 
-		this.find('.item.nameplates .name').on('click', events.emit.bind(events, 'onUiKeyDown', { key: 'v' }));
-		this.find('.item.quests .name').on('click', this.toggleQuests.bind(this));
-		this.find('.item.events .name').on('click', this.toggleEvents.bind(this));
-		this.find('.item.quality .name').on('click', this.toggleQualityIndicators.bind(this));
-		this.find('.item.unusable .name').on('click', this.toggleUnusableIndicators.bind(this));
-		this.find('.item.lastChannel .name').on('click', this.toggleLastChannel.bind(this));
-		this.find('.item.partyView .name').on('click', this.togglePartyView.bind(this));
-		this.find('.item.damageNumbers .name').on('click', this.toggleDamageNumbers.bind(this));
+		const { clientOptions } = globals.clientConfig;
+		const { options, meta } = clientOptions;
 
-		//Can only toggle fullscreen directly in a listener, not deferred the way jQuery does it,
-		// so we register this handler in a different way
-		this.find('.item.screen .name')[0].addEventListener('click', this.toggleScreen.bind(this));
+		const container = this.find('.options-list');
+		container.empty();
 
-		this.find('.item.volume .btn').on('click', this.modifyVolume.bind(this));
+		for (const def of meta) {
+			// Render section heading
+			if (def.section) {
+				const heading = $(`<div class="heading">${def.section}</div>`);
+				container.append(heading);
+				continue;
+			}
 
-		[
-			'onResize',
-			'onUiKeyDown',
-			'onToggleNameplates',
-			'onToggleQualityIndicators',
-			'onToggleUnusableIndicators',
-			'onToggleEventsVisibility',
-			'onToggleQuestsVisibility',
-			'onToggleLastChannel',
-			'onVolumeChange',
-			'onTogglePartyView',
-			'onToggleDamageNumbers'
-		].forEach(e => {
-			this.onEvent(e, this[e].bind(this));
-		});
+			const { key, label, type } = def;
+			const value = options[key];
+			if (value === undefined) continue;
 
-		this.find('.item').on('click', events.emit.bind(events, 'onClickOptionsItem'));
-	},
+			const display = this.formatValue(value);
+			let item;
 
-	modifyVolume (e) {
-		const el = $(e.target);
+			if (type === 'volume') {
+				item = $(`
+			<div class="item ${key} volume">
+				<div class="name">${label}</div>
+				<div class="controls">
+					<div class="btn decrease">-</div>
+					<div class="value">${display}</div>
+					<div class="btn increase">+</div>
+				</div>
+			</div>
+		`);
+				item.find('.btn.increase').on('click', () => this.adjustVolume(key, 10, def));
+				item.find('.btn.decrease').on('click', () => this.adjustVolume(key, -10, def));
+			} else {
+				item = $(`
+			<div class="item ${key}">
+				<div class="name">${label}</div>
+				<div class="value">${display}</div>
+			</div>
+		`);
+				item.on('click', () => this.toggleOption(key, def));
+			}
 
-		const isIncrease = el.hasClass('increase');
-		const delta = isIncrease ? 10 : -10;
-
-		const soundType = el.parent().parent().hasClass('sound') ? 'sound' : 'music';
-
-		events.emit('onManipulateVolume', {
-			soundType,
-			delta
-		});
-	},
-
-	toggleUnusableIndicators () {
-		config.toggle('unusableIndicators');
-
-		if (config.unusableIndicators === 'background' && config.qualityIndicators === 'background') {
-			config.toggle('qualityIndicators');
-			events.emit('onToggleQualityIndicators', config.qualityIndicators);
+			container.append(item);
 		}
-
-		events.emit('onToggleUnusableIndicators', config.unusableIndicators);
 	},
 
-	onToggleUnusableIndicators (state) {
-		const newValue = state[0].toUpperCase() + state.substr(1);
-
-		this.find('.item.unusable .value').html(newValue);
+	formatValue (value) {
+		if (typeof value === 'boolean')
+			return value ? 'On' : 'Off';
+		if (typeof value === 'string')
+			return value[0].toUpperCase() + value.slice(1);
+		return value;
 	},
 
-	toggleQualityIndicators () {
-		config.toggle('qualityIndicators');
+	toggleOption (key, def) {
+		const newValue = config.toggleDynamic(key);
+		this.refreshValue(key);
 
-		if (config.qualityIndicators === 'background' && config.unusableIndicators === 'background') {
-			config.toggle('unusableIndicators');
-			events.emit('onToggleUnusableIndicators', config.unusableIndicators);
-		}
-
-		events.emit('onToggleQualityIndicators', config.qualityIndicators);
+		// Dispatch one or more events
+		if (def.events && Array.isArray(def.events)) {
+			for (const e of def.events)
+				events.emit(e, newValue);
+		} else if (def.event) 
+			events.emit(def.event, newValue);
 	},
 
-	onToggleQualityIndicators (state) {
-		const newValue = state[0].toUpperCase() + state.substr(1);
-
-		this.find('.item.quality .value').html(newValue);
+	refreshValue (key) {
+		const val = this.formatValue(config.get(key));
+		this.find(`.item.${key} .value`).html(val);
 	},
 
-	toggleScreen () {
-		const state = renderer.toggleScreen();
-		const newValue = (state === 'Windowed') ? 'Off' : 'On';
+	adjustVolume (key, delta, def) {
+		const newVolume = Math.max(0, Math.min(100, config.get(key) + delta));
+		config.set(key, newVolume);
+		this.find(`.item.${key} .value`).html(newVolume);
 
-		this.find('.item.screen .value').html(newValue);
-	},
-
-	toggleEvents () {
-		config.toggle('showEvents');
-
-		events.emit('onToggleEventsVisibility', config.showEvents);
-	},
-
-	toggleQuests () {
-		config.toggle('showQuests');
-
-		events.emit('onToggleQuestsVisibility', config.showQuests);
-	},
-
-	onToggleEventsVisibility (state) {
-		const newValue = state ? 'On' : 'Off';
-
-		this.find('.item.events .value').html(newValue);
-	},
-
-	onToggleQuestsVisibility (state) {
-		const newValue = state[0].toUpperCase() + state.substr(1);
-
-		this.find('.item.quests .value').html(newValue);
-	},
-
-	onResize () {
-		let isFullscreen = (window.innerHeight === screen.height);
-		const newValue = isFullscreen ? 'On' : 'Off';
-
-		this.find('.item.screen .value').html(newValue);
-	},
-
-	onToggleNameplates (state) {
-		const newValue = state ? 'On' : 'Off';
-
-		this.find('.item.nameplates .value').html(newValue);
-	},
-
-	toggleAudio () {
-		config.toggle('playAudio');
-
-		events.emit('onToggleAudio', config.playAudio);
-	},
-
-	onToggleAudio (isAudioOn) {
-		const newValue = isAudioOn ? 'On' : 'Off';
-
-		this.find('.item.audio .value').html(newValue);
-	},
-
-	toggleLastChannel () {
-		config.toggle('rememberChatChannel');
-
-		events.emit('onToggleLastChannel', config.rememberChatChannel);
-	},
-
-	onToggleLastChannel (state) {
-		const newValue = state ? 'On' : 'Off';
-
-		this.find('.item.lastChannel .value').html(newValue);
-	},
-
-	togglePartyView () {
-		config.toggle('partyView');
-
-		events.emit('onTogglePartyView', config.partyView);
-	},
-
-	onTogglePartyView (state) {
-		const newValue = state[0].toUpperCase() + state.substr(1);
-
-		this.find('.item.partyView .value').html(newValue);
-	},
-
-	toggleDamageNumbers () {
-		config.toggle('damageNumbers');
-
-		events.emit('onToggleDamageNumbers', config.damageNumbers);
-	},
-
-	onToggleDamageNumbers (state) {
-		const newValue = state[0].toUpperCase() + state.substr(1);
-
-		this.find('.item.damageNumbers .value').html(newValue);
-	},
-
-	onVolumeChange ({ soundType, volume }) {
-		const item = this.find(`.item.volume.${soundType}`);
-
-		item.find('.value').html(volume);
-
-		const tickLeftPosition = `${volume}%`;
-		item.find('.tick').css({ left: tickLeftPosition });
-
-		const btnDecrease = item.find('.btn.decrease').removeClass('disabled');
-		const btnIncrease = item.find('.btn.increase').removeClass('disabled');
-
-		if (volume === 0)
-			btnDecrease.addClass('disabled');
-		else if (volume === 100)
-			btnIncrease.addClass('disabled');
-
-		const configKey = `${soundType}Volume`;
-		config.set(configKey, volume);
-	},
-
-	build () {
-		this.onToggleNameplates(config.showNames);
-		this.onToggleAudio(config.playAudio);
-		this.onToggleEventsVisibility(config.showEvents);
-		this.onToggleQuestsVisibility(config.showQuests);
-		this.onToggleQualityIndicators(config.qualityIndicators);
-		this.onToggleUnusableIndicators(config.unusableIndicators);
-		this.onToggleLastChannel(config.rememberChatChannel);
-		this.onTogglePartyView(config.partyView);
-		this.onToggleDamageNumbers(config.damageNumbers);
-
-		this.onVolumeChange({
-			soundType: 'sound',
-			volume: config.soundVolume
-		});
-
-		this.onVolumeChange({
-			soundType: 'music',
-			volume: config.musicVolume
-		});
+		if (def.events && Array.isArray(def.events)) {
+			for (const e of def.events)
+				events.emit(e, { soundType: key.includes('music') ? 'music' : 'sound', volume: newVolume });
+		} else if (def.event) 
+			events.emit(def.event, { soundType: key.includes('music') ? 'music' : 'sound', volume: newVolume });
 	},
 
 	onAfterShow () {
-		this.onResize();
-
 		this.build();
 	},
 
-	onUiKeyDown (keyEvent) {
-		const { key } = keyEvent;
-
-		if (key === 'v') {
-			config.toggle('showNames');
-
-			events.emit('onToggleNameplates', config.showNames);
-
-			const newValue = config.showNames ? 'On' : 'Off';
-			this.find('.item.nameplates .value').html(newValue);
+	build () {
+		const { options } = globals.clientConfig.clientOptions;
+		for (const key in options) {
+			const val = this.formatValue(options[key]);
+			this.find(`.item.${key} .value`).html(val);
 		}
 	},
 
 	afterHide () {
-		this.onResize();
-
 		events.emit('onCloseOptions');
 	}
 };

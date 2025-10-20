@@ -27,14 +27,14 @@
 		height: 100%;
 		overflow-y: auto;
 
-		.list {
+		.options-list {
 			display: flex;
 			flex-direction: column;
 
 			.heading {
 				color: @grayC;
 				border-bottom: 2px solid @grayD;
-				margin: 0px 10px 5px 10px;
+				margin: 0 10px 5px 10px;
 				padding-bottom: 5px;
 
 				&:not(:first-child) {
@@ -55,7 +55,7 @@
 					height: 100%;
 					display: flex;
 					align-items: center;
-					padding: 0px 10px;
+					padding: 0 10px;
 					margin-right: 10px;
 					cursor: pointer;
 
@@ -74,69 +74,55 @@
 					padding-right: 10px;
 				}
 
+				/* --- Volume Rows --- */
 				&.volume {
 					flex-wrap: wrap;
 					height: 60px;
 
 					.name {
 						pointer-events: none;
-					}
-
-					.name,
-					.value {
-						width: 50%;
-						height: 30px;
-					}
-
-					.slider {
-						padding: 0px 10px;
 						width: 100%;
 						height: 30px;
+						color: @blueB;
 						display: flex;
+						align-items: center;
+						padding-left: 10px;
+					}
+
+					.controls {
+						display: flex;
+						align-items: center;
+						justify-content: space-between;
+						// spread buttons apart
+						width: 100%;
+						height: 30px;
+						padding: 0 10px;
 						position: relative;
 
 						.btn {
 							width: 30px;
-							margin-top: 5px;
-							height: calc(100% - 10px);
+							height: 24px;
 							display: flex;
 							justify-content: center;
 							align-items: center;
 							color: @white;
-							background-color: @blackA;
-							padding-top: unset;
-
-							&:first-child {
-								margin-right: 10px;
-							}
-
-							&:last-child {
-								margin-left: 10px;
-							}
+							background-color: @grayD;
+							cursor: pointer;
 
 							&:hover {
-								background-color: @grayD;
+								background-color: @blackA;
 							}
 
 						}
 
-						.bar {
-							width: 100%;
-							background-color: @blueD;
-							border-top: 10px solid @blackC;
-							border-bottom: 10px solid @blackC;
-							height: 100%;
-							position: relative;
-
-							.tick {
-								position: absolute;
-								width: 5px;
-								height: 20px;
-								top: -5px;
-								left: 100%;
-								background-color: @blueA;
-							}
-
+						.value {
+							flex: 1;
+							color: @white;
+							font-size: 14px;
+							text-align: center;
+							pointer-events: none;
+							justify-content: center;
+							// avoid accidental clicks
 						}
 
 					}

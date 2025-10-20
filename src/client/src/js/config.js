@@ -1,70 +1,84 @@
+// config.js
+import globals from './system/globals';
 import browserStorage from './system/browserStorage';
 
-const config = {
-	showNames: true,
-	showQuests: 'on',
-	showEvents: true,
-	playAudio: true,
-	qualityIndicators: 'off',
-	unusableIndicators: 'off',
-	rememberChatChannel: true,
-	soundVolume: 100,
-	musicVolume: 100,
-	partyView: 'full',
-	damageNumbers: 'element'
-};
+let options;
+let valueChains;
+let meta;
 
-const valueChains = {
-	partyView: ['full', 'compact', 'minimal'],
-	showQuests: ['on', 'minimal', 'off'],
-	qualityIndicators: ['border', 'bottom', 'background', 'off'],
-	unusableIndicators: ['off', 'border', 'top', 'background'],
-	damageNumbers: ['element', 'white', 'off']
-};
+const getKeyName = key => `opt_${key.toLowerCase()}`;
 
 const getNextValue = key => {
-	const currentValue = config[key];
+	const currentValue = options[key];
 	const chain = valueChains[key];
 	const currentIndex = chain.indexOf(currentValue);
-
-	const nextValue = chain[(currentIndex + 1) % chain.length];
-
-	return nextValue;
+	return chain[(currentIndex + 1) % chain.length];
 };
 
-const getKeyName = key => {
-	return `opt_${key.toLowerCase()}`;
+const save = (key, value) => {
+	browserStorage.set(getKeyName(key), value);
+	options[key] = value;
 };
 
-config.set = (key, value) => {
-	config[key] = value;
+const config = {
+	set: (key, value) => save(key, value),
 
-	browserStorage.set(getKeyName(key), config[key]);
-};
+	toggle: key => {
+		if (valueChains[key])
+			save(key, getNextValue(key));
+		else
+			save(key, !options[key]);
+	},
 
-config.toggle = key => {
-	if (valueChains[key])
-		config[key] = getNextValue(key);
-	else
-		config[key] = !config[key];
+	toggleDynamic: key => {
+		// find definition in meta array (ignore section entries)
+		const def = meta.find(m => m.key === key);
+		if (!def) return;
 
-	browserStorage.set(getKeyName(key), config[key]);
+		let newValue = options[key];
+
+		switch (def.type) {
+		case 'boolean':
+			newValue = !options[key];
+			break;
+		case 'cycle':
+			newValue = getNextValue(key);
+			break;
+		case 'volume':
+			// volume handled separately by buttons
+			newValue = options[key];
+			break;
+		}
+
+		save(key, newValue);
+		return newValue;
+	},
+
+	get: key => options[key]
 };
 
 const loadValue = key => {
-	const currentValue = browserStorage.get(getKeyName(key));
-
-	if (currentValue === '{unset}')
+	const stored = browserStorage.get(getKeyName(key));
+	if (stored === '{unset}')
 		return;
 
-	if (['true', 'false'].includes(currentValue))
-		config[key] = currentValue === 'true';
-	else if (~~currentValue === parseInt(currentValue))
-		config[key] = ~~currentValue;
+	if (stored === 'true' || stored === 'false')
+		options[key] = stored === 'true';
+	else if (!isNaN(parseFloat(stored)))
+		options[key] = parseFloat(stored);
 	else
-		config[key] = currentValue;
+		options[key] = stored;
 };
 
-Object.keys(config).forEach(key => loadValue(key));
+export const init = () => {
+	const { clientOptions } = globals.clientConfig;
+
+	options = clientOptions.options;
+	valueChains = clientOptions.valueChains;
+	meta = clientOptions.meta;
+
+	Object.keys(options).forEach(loadValue);
+	Object.assign(config, options);
+};
 
 export default config;
