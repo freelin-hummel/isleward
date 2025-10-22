@@ -271,7 +271,7 @@ export default {
 				y: (obj.y * scale) + scale
 			});
 
-			obj.nameSprite.visible = config.showNames;
+			obj.nameSprite.visible = config.get('showNames');
 		}
 
 		if ((template.x !== 0) || (template.y !== 0)) {

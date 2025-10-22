@@ -24,7 +24,7 @@ export default {
 		this.onEvent('onCompleteQuest', this.onCompleteQuest.bind(this));
 		this.onEvent('onToggleQuestsVisibility', this.onToggleQuestsVisibility.bind(this));
 
-		this.onToggleQuestsVisibility(config.showQuests);
+		this.onToggleQuestsVisibility(config.get('showQuests'));
 	},
 
 	clear () {

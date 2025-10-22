@@ -30,8 +30,8 @@ export default {
 	currentMusic: null,
 
 	async init () {
-		soundVolume = config.soundVolume;
-		musicVolume = config.musicVolume;
+		soundVolume = config.get('soundVolume');
+		musicVolume = config.get('musicVolume');
 
 		modAudio = (await import('@modAudio')).default;
 
@@ -61,7 +61,7 @@ export default {
 				});
 			});
 
-			this.onToggleAudio(config.playAudio);
+			this.onToggleAudio(config.get('playAudio'));
 		});
 	},
 

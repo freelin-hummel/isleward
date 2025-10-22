@@ -24,7 +24,7 @@ export default {
 		this.onEvent('onGetPartyStats', this.onGetPartyStats.bind(this));
 
 		this.onEvent('onTogglePartyView', this.onTogglePartyView.bind(this));
-		this.onTogglePartyView(config.partyView);
+		this.onTogglePartyView(config.get('partyView'));
 	},
 
 	globalObjectListUpdated ({ list }) {

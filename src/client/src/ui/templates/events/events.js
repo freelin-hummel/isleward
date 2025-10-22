@@ -24,7 +24,7 @@ export default {
 		this.onEvent('onCompleteEvent', this.onCompleteEvent.bind(this));
 
 		this.onEvent('onToggleEventsVisibility', this.onToggleEventsVisibility.bind(this));
-		this.onToggleEventsVisibility(config.showEvents);
+		this.onToggleEventsVisibility(config.get('showEvents'));
 	},
 
 	clear () {

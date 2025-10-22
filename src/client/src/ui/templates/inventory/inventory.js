@@ -29,10 +29,10 @@ export default {
 		this.onEvent('onDestroyItems', this.onDestroyItems.bind(this));
 		this.onEvent('onShowInventory', this.toggle.bind(this));
 		this.onEvent('onToggleQualityIndicators', this.onToggleQualityIndicators.bind(this));
-		this.onToggleQualityIndicators(config.qualityIndicators);
+		this.onToggleQualityIndicators(config.get('qualityIndicators'));
 
 		this.onEvent('onToggleUnusableIndicators', this.onToggleUnusableIndicators.bind(this));
-		this.onToggleUnusableIndicators(config.unusableIndicators);
+		this.onToggleUnusableIndicators(config.get('unusableIndicators'));
 
 		this.onEvent('onKeyDown', this.onKeyDown.bind(this));
 		this.onEvent('onKeyUp', this.onKeyUp.bind(this));

@@ -14,6 +14,7 @@ export default {
 
 	postRender () {
 		this.onEvent('onOpenOptions', this.show.bind(this));
+		this.onEvent('onUiKeyDown', this.onUiKeyDown.bind(this));
 
 		const { clientOptions } = globals.clientConfig;
 		const { options, meta } = clientOptions;
@@ -114,5 +115,16 @@ export default {
 
 	afterHide () {
 		events.emit('onCloseOptions');
+	},
+
+	onUiKeyDown (keyEvent) {
+		const { key } = keyEvent;
+
+		if (key === 'v') {
+			config.toggle('showNames');
+
+			events.emit('onToggleNameplates', config.get('showNames'));
+		}
 	}
+
 };

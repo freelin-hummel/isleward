@@ -117,7 +117,7 @@ const getFontSize = ({ fontSize, crit }) => {
 const onGetDamage = msg => {
 	const { ttl = TTL } = msg;
 
-	if (config.damageNumbers === 'off')
+	if (config.get('damageNumbers') === 'off')
 		return;
 
 	const target = objects.objects.find(o => o.id === msg.id);

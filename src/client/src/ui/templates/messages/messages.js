@@ -173,9 +173,9 @@ export default {
 			if (list.length > 5)
 				list.splice(0, list.length - 5);
 
-			if (subType === 'privateOut' && config.rememberChatChannel)
+			if (subType === 'privateOut' && config.get('rememberChatChannel'))
 				this.lastPrivateChannel = target;
-		} else if (subType === 'custom' && config.rememberChatChannel)
+		} else if (subType === 'custom' && config.get('rememberChatChannel'))
 			this.lastCustomChannel = channel;
 	},
 
@@ -296,7 +296,7 @@ export default {
 			this.el.addClass('typing');
 			this.el.find('.main').addClass('hasBorderShadow');
 
-			if (!config.rememberChatChannel) {
+			if (!config.get('rememberChatChannel')) {
 				this.currentChannel = 'global';
 				this.currentSubChannel = null;
 			}

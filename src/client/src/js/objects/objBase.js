@@ -128,7 +128,7 @@ export default {
 			this.sprite.visible = visible;
 
 		if (this.nameSprite)
-			this.nameSprite.visible = (visible && config.showNames);
+			this.nameSprite.visible = (visible && config.get('showNames'));
 
 		if (!visible && this.stats)
 			this.stats.updateBarVisibility(false);
