@@ -20,6 +20,8 @@ module.exports = {
 		outOfCombat: null
 	},
 
+	originalGetHighest: null,
+
 	bindEvents: function () {
 		let master = this.master;
 		this.lastMasterPos.x = master.x;
@@ -27,8 +29,14 @@ module.exports = {
 
 		this.obj.aggro.faction = master.aggro.faction;
 		this.obj.aggro.subFaction = master.aggro.subFaction;
-		this.fGetHighest.inCombat = master.aggro.getHighest.bind(master.aggro);
+
 		this.fGetHighest.outOfCombat = this.returnNoAggro.bind(this);
+		this.fGetHighest.inCombat = this.returnHighestAggro.bind(this);
+
+		//Aggro should not decay
+		this.obj.aggro.update = () => {};
+
+		this.originalGetHighest = this.obj.aggro.getHighest.bind(this.obj.aggro);
 	},
 
 	returnNoAggro: function () {
@@ -40,6 +48,12 @@ module.exports = {
 		mob.originY = master.y;
 
 		return null;
+	},
+
+	returnHighestAggro: function () {
+		this.obj.aggro.list = [...this.master.aggro.list];
+
+		return this.originalGetHighest();
 	},
 
 	despawn: function () {
