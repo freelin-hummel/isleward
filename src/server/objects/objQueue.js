@@ -1,4 +1,17 @@
 const spellCastResultTypes = require('../components/spellbook/spellCastResultTypes');
+const spellCastResultMessages = require('../components/spellbook/spellCastResultMessages');
+
+const sendAnnouncement = (obj, msg) => {
+	process.send({
+		method: 'events',
+		data: {
+			onGetAnnouncement: [{
+				obj: { msg },
+				to: [obj.serverId]
+			}]
+		}
+	});
+};
 
 const getDistance = (xa, ya, xb, yb) => {
 	let dx = xa - xb;
@@ -16,6 +29,8 @@ module.exports = {
 	moveQueue: [],
 	spellQueue: [],
 
+	maxSpellQueueLength: 1,
+
 	clearQueue: function () {
 		if (this.has('serverId')) {
 			this.instance.syncer.queue('onClearQueue', {
@@ -26,40 +41,11 @@ module.exports = {
 		this.moveQueue = [];
 		this.spellQueue = [];
 
-		this.syncSpellQueue();
-
 		this.fireEvent('clearQueue');
 	},
 
-	shiftAndSyncSpellQueue: function () {
+	shiftSpellQueue: function () {
 		this.spellQueue.shift();
-
-		this.syncSpellQueue();
-	},
-
-	syncSpellQueue: function () {
-		this.instance.syncer.queue('getSpellQueue', {
-			spellQueue: this.spellQueue.map(({ data: { spell, target } }) => {
-				const targetId = target?.id ? target.id : target;
-
-				return {
-					spellId: spell,
-					targetId
-				};
-			})
-		}, [this.serverId]);
-	},
-
-	unqueueSpellAtIndex: function (spellIndex) {
-		this.spellQueue.splice(spellIndex, 1);
-
-		this.syncSpellQueue();
-	},
-
-	unqueueSpellsForTarget: function (targetId) {
-		this.spellQueue.spliceWhere(f => f.data.target === targetId);
-
-		this.syncSpellQueue();
 	},
 
 	queue: function (msg) {
@@ -67,22 +53,6 @@ module.exports = {
 
 		if (action === 'spell') {
 			const { spellbook } = this;
-
-			const canCastResponse = spellbook.getSpellCanCastResult(msg.data);
-			if (
-				canCastResponse === spellCastResultTypes.noTarget ||
-				this.spellQueue.length >= 10 ||
-				(
-					!spellbook.autoMoveActive &&
-					(
-						canCastResponse === spellCastResultTypes.insufficientMana ||
-						canCastResponse === spellCastResultTypes.noLineOfSight ||
-						canCastResponse === spellCastResultTypes.onCooldown ||
-						canCastResponse === spellCastResultTypes.outOfRange
-					)
-				)
-			)
-				return;
 
 			const { spell: spellId } = data;
 
@@ -97,9 +67,17 @@ module.exports = {
 				return;
 			}
 
-			this.spellQueue.push(msg);
+			const canCastResponse = spellbook.getSpellCanCastResult(msg.data);
+			if (canCastResponse !== spellCastResultTypes.success) {
+				sendAnnouncement(this, spellCastResultMessages[canCastResponse]);
 
-			this.syncSpellQueue();
+				return;
+			}
+
+			if (this.spellQueue.length === this.maxSpellQueueLength)
+				this.spellQueue.splice(this.spellQueue.length - 1, 1);
+
+			this.spellQueue.push(msg);
 		} else if (action === 'move') {
 			const { priority } = data;
 
@@ -168,17 +146,7 @@ module.exports = {
 		}
 
 		if (addToQueue.length === 0) {
-			process.send({
-				method: 'events',
-				data: {
-					onGetAnnouncement: [{
-						obj: {
-							msg: 'Target not in line of sight, no auto-move queued.'
-						},
-						to: [serverId]
-					}]
-				}
-			});
+			sendAnnouncement(this, 'Target not in line of sight, no auto-move queued');
 
 			return false;
 		}
@@ -204,7 +172,6 @@ module.exports = {
 
 		//Unqueue any spells with destroyed targets
 		let spellQueueLen = spellQueue.length;
-		let spellQueueModified = false;
 		for (let i = 0; i < spellQueueLen; i++) {
 			const { data: { target: qTarget } } = spellQueue[i];
 			if (typeof(qTarget) !== 'number')
@@ -216,8 +183,6 @@ module.exports = {
 				spellQueueLen--;
 				spellQueue.splice(i, 1);
 				i--;
-
-				spellQueueModified = true;
 			}
 		}
 
@@ -244,7 +209,7 @@ module.exports = {
 					)
 				)
 			) {
-				this.shiftAndSyncSpellQueue();
+				this.shiftSpellQueue();
 
 				return this.performQueue();
 			}
@@ -254,23 +219,22 @@ module.exports = {
 				if (moveQueue.length === 0) {
 					const queueSuccess = this.queueAutoMove(spellId, target);
 					if (!queueSuccess)
-						this.shiftAndSyncSpellQueue();
+						this.shiftSpellQueue();
 				}
-			} else if (canCastResponse === spellCastResultTypes.noTarget)
-				this.shiftAndSyncSpellQueue();
-			else if (canCastResponse === spellCastResultTypes.success) {
+			} else if (canCastResponse === spellCastResultTypes.success) {
 				castDone = this.spellbook.cast(queuedSpell);
 
 				//If cast succeeded, we can remove it from the queue. If not, we'll try again next tick
 				if (castDone)
-					this.shiftAndSyncSpellQueue();
+					this.shiftSpellQueue();
+			} else {
+				sendAnnouncement(this, spellCastResultMessages[canCastResponse]);
+				this.shiftSpellQueue();
 			}
 		}
 
 		if (castDone)
 			return true;
-		else if (spellQueueModified)
-			this.syncSpellQueue();
 
 		if (spellbook) {
 			//We need to inform updateAutoCast if skipSpells is true to stop infinite loops for mobs:

@@ -330,7 +330,7 @@ module.exports = {
 		if (item.eq)
 			this.obj.equipment.unequip({ itemId });
 
-		if ((item.quantity) && (amount)) {
+		if (item.quantity && amount) {
 			item.quantity -= amount;
 			if (item.quantity <= 0) {
 				this.items.spliceWhere(i => i.id === itemId);

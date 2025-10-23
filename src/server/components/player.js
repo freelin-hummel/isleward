@@ -253,14 +253,6 @@ module.exports = {
 			this.obj.clearQueue();
 	},
 
-	unqueueSpellAtIndex: function ({ spellIndex }) {
-		this.obj.unqueueSpellAtIndex(spellIndex);
-	},
-
-	unqueueSpellsForTarget: function ({ spellTargetId }) {
-		this.obj.unqueueSpellsForTarget(spellTargetId);
-	},
-
 	events: {
 		beforeRezone: function () {
 			this.obj.clearQueue();
