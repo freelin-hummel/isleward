@@ -44,8 +44,8 @@ module.exports = {
 		let obj = this.obj;
 		let mob = obj.mob;
 
-		mob.originX = master.x;
-		mob.originY = master.y;
+		mob.originX = master.x + ~~(Math.random() * 6) - 3;
+		mob.originY = master.y + ~~(Math.random() * 6) - 3;
 
 		return null;
 	},
@@ -111,13 +111,16 @@ module.exports = {
 		const masterDistanceFromLastPos = Math.max(Math.abs(x - lx), Math.abs(y - ly));
 		if (masterDistanceFromLastPos <= maxDistance)
 			return;
+
+		const newX = x + ~~(Math.random() * 6) - 3;
+		const newY = y + ~~(Math.random() * 6) - 3;
 		
 		obj.mob.goHome = true;
-		obj.mob.originX = x;
-		obj.mob.originY = y;
+		obj.mob.originX = newX;
+		obj.mob.originY = newY;
 
-		this.lastMasterPos.x = x;
-		this.lastMasterPos.y = y;
+		this.lastMasterPos.x = newX;
+		this.lastMasterPos.y = newY;
 	},
 
 	update: function () {
