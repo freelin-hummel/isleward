@@ -161,10 +161,7 @@ module.exports = {
 
 		const { aggro: targetAggro } = target;
 
-		if (targetAggro.faction !== this.faction || targetAggro.subFaction !== this.subFaction)
-			return true;
-		else if (!!target.player !== !!obj.player)
-			return true;
+		return targetAggro.faction !== this.faction || targetAggro.subFaction !== this.subFaction;
 	},
 
 	willAutoAttack: function (target) {
