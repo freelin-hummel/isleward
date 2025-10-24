@@ -4,6 +4,7 @@ const messages = {
 	outOfRange: 'Target out of range',
 	insufficientMana: 'Not enough mana',
 	noTarget: 'No target selected',
+	invalidTarget: 'Invalid target selected',
 	noLineOfSight: 'Target not in line of sight',
 	spellNotFound: 'Unknown spell',
 	onCooldown: 'Spell is on cooldown'

@@ -309,64 +309,83 @@ module.exports = {
 		});
 	},
 
-	getTarget: function (spell, action) {
-		let target = action.target;
+	getSpellFromId: function (spellId) {
+		const spell = this.spells.find(s => s.id === spellId);
 
-		//Cast on self?
-		if (action.self) {
+		return spell;
+	},
+
+	buildTargetFromClientAction: function ({ spell: spellId, target, self }) {
+		const { obj } = this;
+		const { x, y } = obj;
+
+		const spell = this.getSpellFromId(spellId);
+
+		//If we're casting a ground spell but the target is an object, fail
+		if (spell.targetGround && target.id !== undefined)
+			return null;
+
+		//If we already have a target, just return
+		if (target?.id !== undefined) {
+			if (!target.aggro)
+				return null;
+
+			return target;
+		}
+
+		//If it's self-targeted, find our location, or return ourselves
+		if (self) {
 			if (spell.targetGround) {
-				target = {
-					x: this.obj.x,
-					y: this.obj.y
+				return {
+					x,
+					y
 				};
-			} else if (spell.spellType === 'buff')
-				target = this.obj;
+			} return obj;
 		}
 
-		if (!spell.aura && !spell.targetGround) {
-			//Did we pass in the target id?
-			if (target && !target.id) {
-				target = this.objects.objects.find(o => o.id === target);
-				if (!target)
-					return null;
-			}
-
-			if (target === this.obj && spell.noTargetSelf)
-				target = null;
-
-			if (!target || !target.player) {
-				if (spell.autoTargetFollower) {
-					target = this.spells.find(s => s.minions && s.minions.length > 0);
-					if (target)
-						target = target.minions[0];
-					else
-						return null;
-				}
-			}
-
-			if (target.aggro && (spell.spellType === 'buff' || spell.spellType === 'heal')) {
-				if (this.obj.aggro.faction !== target.aggro.faction || this.obj.aggro.subFaction !== target.aggro.subFaction)
-					return;
-			} else if (target.aggro && !this.obj.aggro.canAttack(target)) {
-				if (this.obj.player)
-					this.sendAnnouncement("You don't feel like attacking that target");
-				return;
-			}
-		}
-
-		if (!spell.targetGround && target && !target.aggro && !spell.aura) {
-			if (spell.spellType === 'heal')
-				this.sendAnnouncement("You don't feel like healing that target");
-			else
-				this.sendAnnouncement("You don't feel like attacking that target");
-
-			return;
-		}
-
+		//Auras always target ourselves
 		if (spell.aura)
-			target = this.obj;
+			return obj;
 
-		return target;
+		//If we don't have a target at all, return if needed
+		if (!target) {
+			if (spell.autoTargetFollower) {
+				const spellWithMinions = this.spells.find(s => s.minions && s.minions.length > 0);
+				if (spellWithMinions)
+					return spellWithMinions.minions[0];
+
+				return null;
+			}
+
+			return null;
+		}
+
+		//Ground targeted spells must have integer coordinates
+		if (spell.targetGround) {
+			const isInvalidTarget = (
+				typeof(target.x) !== 'number' ||
+				typeof(target.y) !== 'number'
+			);
+
+			if (isInvalidTarget)
+				return null;
+
+			return {
+				x: +target.x,
+				y: +target.y
+			};
+		}
+
+		//If we reach this point we need to resolve the object from the id
+		const targetObj = this.objects.objects.find(o => o.id === target);
+		if (!targetObj)
+			return null;
+
+		//Don't target ourselves if not allowed
+		if (spell.noTargetSelf && targetObj === obj)
+			return;
+
+		return targetObj;
 	},
 
 	isForcedSpell: function (spellId) {
@@ -391,27 +410,11 @@ module.exports = {
 		return this.spells.some(f => f.id === spellId && f.auto === true);
 	},
 
-	canCast: function (action) {
-		if (!action.has('spell'))
-			return false;
-
-		const spell = this.spells.find(s => (s.id === action.spell));
-
-		if (!spell)
-			return false;
-
-		let target = this.getTarget(spell, action);
-
-		return spell.canCast(target);
-	},
-
-	getSpellCanCastResult: function (action) {
-		const spell = this.spells.find(s => (s.id === action.spell));
+	getSpellCanCastResult: function ({ spell: spellId, target }) {
+		const spell = this.getSpellFromId(spellId);
 
 		if (!spell)
 			return spellCastResultTypes.noSpellFound;
-
-		const target = this.getTarget(spell, action);
 
 		return spell.getSpellCanCastResult(target);
 	},

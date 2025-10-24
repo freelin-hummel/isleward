@@ -19,7 +19,7 @@ const castAuto = (cpnSpellbook, action, isAuto, config, spell) => {
 
 	const currentAutoSpell = cpnSpellbook.spells.find(s => !!s.autoActive);
 
-	if (currentAutoSpell && action.target === spell.autoActive.target.id)
+	if (currentAutoSpell && action.target === spell.autoActive?.target?.id)
 		currentAutoSpell.setAuto(null);
 	else {
 		spell.setAuto({
@@ -55,11 +55,10 @@ const cast = (cpnSpellbook, action, isAuto, config) => {
 	if (spell.auto && !isAuto)
 		return castAuto(cpnSpellbook, action, isAuto, config, spell);
 
-	action.target = cpnSpellbook.getTarget(spell, action);
 	action.auto = spell.auto;
 
 	//If a target has become nonSelectable, we need to stop attacks that are queued/auto
-	if (!action.target || action.target.nonSelectable)
+	if (action.target.nonSelectable)
 		return false;
 
 	const manaCost = config?.overrides?.manaCost ?? spell.manaCost;

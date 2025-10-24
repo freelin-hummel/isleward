@@ -3,7 +3,8 @@ module.exports = {
 	outOfRange: 1,
 	insufficientMana: 2,
 	noTarget: 3,
-	noLineOfSight: 4,
-	spellNotFound: 5,
-	onCooldown: 6
+	invalidTarget: 4,
+	noLineOfSight: 5,
+	spellNotFound: 6,
+	onCooldown: 7
 };

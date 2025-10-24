@@ -28,21 +28,15 @@ module.exports = {
 
 	pendingAttacks: [],
 
-	canCast: function (target) {
-		if (this.cd > 0)
+	canCast: function () {
+		const { cd, manaCost } = this;
+
+		if (cd > 0)
 			return false;
-		else if (this.manaCost > this.obj.stats.values.mana)
+		else if (manaCost > this.obj.stats.values.mana)
 			return false;
-		else if (!target)
-			return true;
-		
-		let inRange = true;
-		if (this.has('range')) {
-			let obj = this.obj;
-			let distance = Math.max(Math.abs(target.x - obj.x), Math.abs(target.y - obj.y));
-			inRange = (distance <= this.range);
-		}
-		return inRange;
+
+		return true;
 	},
 
 	getSpellCanCastResult: function (target) {
@@ -64,6 +58,8 @@ module.exports = {
 			return spellCastResultTypes.insufficientMana;
 		else if (!target)
 			return spellCastResultTypes.noTarget;
+		else if (target.aggro && !obj.aggro.canAttack(target))
+			return spellCastResultTypes.invalidTarget;
 
 		return spellCastResultTypes.success;
 	},
@@ -140,7 +136,10 @@ module.exports = {
 		if (this.castTime > 0) {
 			let action = this.currentAction;
 
-			if (_.getDeepProperty(action, 'target.destroyed') || !this.canCast(action.target)) {
+			if (
+				action?.target?.destroyed ||
+				this.getSpellCanCastResult(action.target) !== spellCastResultTypes.success
+			) {
 				this.currentAction = null;
 				this.castTime = 0;
 				this.obj.syncer.set(false, null, 'casting', 0);

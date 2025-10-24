@@ -1,4 +1,6 @@
-let cpnSmokePatch = {
+const spellCastResultTypes = require('../../components/spellbook/spellCastResultTypes');
+
+const cpnSmokePatch = {
 	type: 'smokePatch',
 
 	contents: [],
@@ -103,6 +105,8 @@ module.exports = {
 	particles: particles,
 
 	update: function () {
+		const { obj: { x, y } } = this;
+
 		let selfCast = this.selfCast;
 
 		if (!selfCast)
@@ -111,10 +115,11 @@ module.exports = {
 		if ((selfCast !== true) && (Math.random() >= selfCast))
 			return;
 
-		if (this.canCast()) {
-			this.cd = this.cdMax;
-			this.cast();
-		}
+		if (this.getSpellCanCastResult({ x, y }) !== spellCastResultTypes.success)
+			return;
+
+		this.cd = this.cdMax;
+		this.cast();
 	},
 
 	cast: function (action) {

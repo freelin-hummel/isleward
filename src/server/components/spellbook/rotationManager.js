@@ -1,3 +1,5 @@
+const spellCastResultTypes = require('./spellCastResultTypes');
+
 const getDefaultRotationSpell = rotationSpells => {
 	const spells = rotationSpells.filter(s => !s.atRotationTicks);
 
@@ -35,7 +37,7 @@ const getRotationSpell = (source, target) => {
 	// later and we want to allow that on bosses
 	useSpell.cd = 0;
 	useSpell.manaCost = 0;
-	if (!useSpell.selfCast && !useSpell.canCast(target))
+	if (!useSpell.selfCast && useSpell.getSpellCanCastResult(target) !== spellCastResultTypes.success)
 		return getDefaultRotationSpell(rotationSpells);
 
 	return useSpell;
@@ -44,7 +46,7 @@ const getRotationSpell = (source, target) => {
 //Mobs without rune rotations (normally the case) simple select any random spell that is valid
 const getRandomSpell = (source, target) => {
 	const valid = source.spells.filter(s => {
-		return (!s.selfCast && !s.procCast && !s.castOnDeath && s.canCast(target));
+		return (!s.selfCast && !s.procCast && !s.castOnDeath && s.getSpellCanCastResult(target) === spellCastResultTypes.success);
 	});
 
 	if (!valid.length)

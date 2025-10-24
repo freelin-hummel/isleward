@@ -60,7 +60,22 @@ module.exports = {
 				spellbook.castForcedSpell(spellId);
 
 				return;
-			} else if (spellbook.isSpellAuto(spellId)) {
+			}
+
+			if (!spellbook.getSpellFromId(spellId)) {
+				sendAnnouncement(this, spellCastResultMessages.spellNotFound);
+
+				return;
+			}
+
+			data.target = spellbook.buildTargetFromClientAction(data);
+			if (!data.target) {
+				sendAnnouncement(this, spellCastResultMessages.invalidTarget);
+
+				return;
+			}
+
+			if (spellbook.isSpellAuto(spellId)) {
 				//If it's an auto spell, just toggle it and carry on
 				this.spellbook.cast(data);
 
