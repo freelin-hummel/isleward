@@ -1,3 +1,4 @@
+/* eslint-disable no-new */
 import physics from '../misc/physics';
 import events from '../system/events';
 import config from '../config';
@@ -9,7 +10,6 @@ let modAudio;
 // Constants
 const MASTER_VOLUME = 0.3;
 const MIN_DISTANCE = 10;
-const FADE_MS = 1800;
 
 // State
 let soundVolume = 100;
@@ -64,14 +64,14 @@ const soundManager = {
 		const { clientConfig: { sounds: loadSounds } } = globals;
 
 		Object.values(loadSounds).forEach(list => {
-			list.forEach(({ name, file }) => {
+			list.forEach(({ name: soundName, file }) => {
 				const mapped = mapModPath(file);
 				if (!mapped)
 					return;
 
 				totalToLoad++;
 				this.addSound({
-					name,
+					name: soundName,
 					scope: 'ui',
 					file: mapped,
 					autoLoad: true,
@@ -114,7 +114,7 @@ const soundManager = {
 	},
 
 	addSound ({
-		name, scope, file, volume = 1, x, y, w, h, area, music,
+		name: soundName, scope, file, volume = 1, x, y, w, h, area, music,
 		defaultMusic, autoLoad, loop, notifyLoadDone
 	}) {
 		if (!area && w) {
@@ -127,7 +127,7 @@ const soundManager = {
 		}
 
 		const entry = {
-			name,
+			name: soundName,
 			scope,
 			file,
 			x, y,

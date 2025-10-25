@@ -4,7 +4,6 @@ import './styles.css';
 import renderer from '../../../js/rendering/renderer';
 import factory from '../../factory';
 import client from '../../../js/system/client';
-import sound from '../../../js/sound/sound';
 
 export default {
 	tpl: template,

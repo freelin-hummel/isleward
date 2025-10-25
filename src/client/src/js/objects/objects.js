@@ -1,7 +1,6 @@
 import objBase from './objBase';
 import events from '../system/events';
 import renderer from '../rendering/renderer';
-import sound from '../sound/sound';
 import config from '../config';
 
 export default {
