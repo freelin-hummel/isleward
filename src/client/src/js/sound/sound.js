@@ -2,271 +2,121 @@ import physics from '../misc/physics';
 import events from '../system/events';
 import config from '../config';
 import globals from '../system/globals';
-
 import { Howler, Howl } from 'howler';
 
 let modAudio;
 
-const globalVolume = 0.3;
+// Constants
+const MASTER_VOLUME = 0.3;
+const MIN_DISTANCE = 10;
+const FADE_MS = 1800;
 
-let soundVolume;
-let musicVolume;
+// State
+let soundVolume = 100;
+let musicVolume = 100;
+let loadCount = 0;
+let totalToLoad = 0;
+let promiseResolver = null;
 
-const globalScopes = ['ui'];
-const minDistance = 10;
-const fadeDuration = 1800;
+// Helpers
+const clamp01 = v => Math.max(0, Math.min(1, v));
+const toLinear = pct => clamp01((Number(pct) || 0) / 100);
+const mapModPath = file => (file && file.startsWith('server/mods') ? modAudio[file] : file);
+const distanceFalloff = d => clamp01(1 - (d * d) / (MIN_DISTANCE * MIN_DISTANCE));
 
-let loadTotal = 0;
-let loadedCount = 0;
-let promiseResolver;
+// Master volume
+Howler.volume(MASTER_VOLUME);
 
-Howler.volume(globalVolume);
-
-export default {
+const soundManager = {
 	sounds: [],
-
 	muted: false,
 
-	currentMusic: null,
-
 	async init () {
-		soundVolume = config.get('soundVolume');
-		musicVolume = config.get('musicVolume');
+		soundVolume = Number(config.get('soundVolume'));
+		if (!Number.isFinite(soundVolume))
+			soundVolume = 100;
+
+		musicVolume = Number(config.get('musicVolume'));
+		if (!Number.isFinite(musicVolume))
+			musicVolume = 100;
+
+		const playAudio = !!config.get('playAudio');
+		this.muted = !playAudio;
+		Howler.mute(this.muted);
 
 		modAudio = (await import('@modAudio')).default;
 
-		return new Promise(_promiseResolver => {
-			promiseResolver = _promiseResolver;
-
-			events.on('onToggleAudio', this.onToggleAudio.bind(this));
-			events.on('onPlaySound', this.playSound.bind(this));
-			events.on('onPlaySoundAtPosition', this.onPlaySoundAtPosition.bind(this));
-			events.on('onManipulateVolume', this.onManipulateVolume.bind(this));
-
-			const { clientConfig: { sounds: loadSounds } } = globals;
-
-			Object.values(loadSounds).forEach(soundList => {
-				soundList.forEach(({ name: soundName, file }) => {
-					loadTotal++;
-
-					file = file.indexOf('server/mods') === 0 ? modAudio[file] : file;
-
-					this.addSound({
-						name: soundName,
-						file,
-						scope: 'ui',
-						autoLoad: true,
-						notifyLoadDone: true
-					});
-				});
-			});
-
-			this.onToggleAudio(config.get('playAudio'));
+		return new Promise(resolve => {
+			promiseResolver = resolve;
+			this._bindEvents();
+			this._preloadConfiguredSounds();
 		});
 	},
 
-	notifyLoadDone () {
-		loadedCount++;
+	_bindEvents () {
+		events.on('onToggleAudio', this.onToggleAudio.bind(this));
+		events.on('onPlaySound', this.playSound.bind(this));
+		events.on('onPlaySoundAtPosition', this.onPlaySoundAtPosition.bind(this));
+		events.on('onManipulateVolume', this.onManipulateVolume.bind(this));
+	},
 
-		events.emit('loaderProgress', {
-			type: 'sounds',
-			progress: loadedCount / loadTotal
+	_preloadConfiguredSounds () {
+		const { clientConfig: { sounds: loadSounds } } = globals;
+
+		Object.values(loadSounds).forEach(list => {
+			list.forEach(({ name, file }) => {
+				const mapped = mapModPath(file);
+				if (!mapped)
+					return;
+
+				totalToLoad++;
+				this.addSound({
+					name,
+					scope: 'ui',
+					file: mapped,
+					autoLoad: true,
+					notifyLoadDone: true
+				});
+			});
 		});
 
-		if (loadedCount === loadTotal)
+		if (totalToLoad === 0)
 			promiseResolver();
 	},
 
-	//Fired when a character rezones
-	// 'newScope' is the new zone name
-	unload (newScope) {
-		const { sounds } = this;
-
-		for (let i = 0; i < sounds.length; i++) {
-			const { scope, sound } = sounds[i];
-
-			if (!globalScopes.includes(scope) && scope !== newScope) {
-				if (sound)
-					sound.unload();
-				sounds.splice(i, 1);
-				i--;
-			}
-		}
-	},
-
-	onPlaySoundAtPosition ({ position: { x, y }, file, volume }) {
-		const { player: { x: playerX, y: playerY } } = window;
-		const dx = Math.abs(x - playerX);
-		const dy = Math.abs(y - playerY);
-		const distance = Math.max(dx, dy);
-
-		const useVolume = volume * (1 - (Math.pow(distance, 2) / Math.pow(minDistance, 2)));
-
-		file = file.indexOf('server/mods') === 0 ? modAudio[file] : file;
-
-		/* eslint-disable-next-line no-new */
-		new Howl({
-			src: [file],
-			volume: useVolume,
-			loop: false,
-			autoplay: true,
-			html5: false
+	notifyLoadDone () {
+		loadCount++;
+		events.emit('loaderProgress', {
+			type: 'sounds',
+			progress: totalToLoad ? loadCount / totalToLoad : 1
 		});
+		if (loadCount === totalToLoad)
+			promiseResolver();
 	},
 
-	playSound (soundName) {
-		const soundEntry = this.sounds.find(s => s.name === soundName);
-		if (!soundEntry)
-			return;
+	loadSound (file, loop = false, autoplay = false, volume = 1, notifyLoadDone = false) {
+		const resolved = mapModPath(file);
+		if (!resolved)
+			return null;
 
-		const { sound } = soundEntry;
-
-		sound.volume(soundVolume / 100);
-		sound.play();
-	},
-
-	playSoundHelper (soundEntry, volume) {
-		const { sound } = soundEntry;
-
-		if (!sound) {
-			let { file, loop } = soundEntry;
-			file = file.indexOf('server/mods') === 0 ? modAudio[file] : file;
-
-			soundEntry.sound = this.loadSound(file, loop, true, volume);
-
-			return;
-		}
-
-		soundEntry.volume = volume;
-
-		volume *= (soundVolume / 100);
-
-		if (sound.playing()) {
-			if (sound.volume() === volume)
-				return;
-
-			sound.volume(volume);
-		} else {
-			sound.volume(volume);
-			sound.play();
-		}
-	},
-
-	playMusicHelper (soundEntry) {
-		const { sound } = soundEntry;
-
-		if (!sound) {
-			let { file, loop } = soundEntry;
-			file = file.indexOf('server/mods') === 0 ? modAudio[file] : file;
-
-			soundEntry.volume = musicVolume;
-			soundEntry.sound = this.loadSound(file, loop, true, musicVolume / 100);
-
-			return;
-		}
-
-		if (!sound.playing()) {
-			soundEntry.volume = 0;
-			sound.volume(0);
-			sound.play();
-		}
-
-		if (this.currentMusic === soundEntry && sound.volume() === musicVolume / 100)
-			return;
-
-		this.currentMusic = soundEntry;
-
-		sound.fade(sound.volume(), (musicVolume / 100), fadeDuration);
-	},
-
-	stopSoundHelper (soundEntry) {
-		const { sound, music } = soundEntry;
-
-		if (!sound || !sound.playing())
-			return;
-
-		if (music)
-			sound.fade(sound.volume(), 0, fadeDuration);
-		else {
-			sound.stop();
-			sound.volume(0);
-		}
-	},
-
-	updateSounds (playerX, playerY) {
-		this.sounds.forEach(s => {
-			const { x, y, area, music, scope } = s;
-
-			if (music || scope === 'ui')
-				return;
-
-			let distance = 0;
-
-			if (!area) {
-				let dx = Math.abs(x - playerX);
-				let dy = Math.abs(y - playerY);
-				distance = Math.max(dx, dy);
-			} else if (!physics.isInPolygon(playerX, playerY, area))
-				distance = physics.distanceToPolygon([playerX, playerY], area);
-
-			if (distance > minDistance) {
-				this.stopSoundHelper(s);
-
-				return;
-			}
-
-			//Exponential fall-off
-			const volume = s.maxVolume * (1 - (Math.pow(distance, 2) / Math.pow(minDistance, 2)));
-			this.playSoundHelper(s, volume);
+		const sound = new Howl({
+			src: [resolved],
+			volume: clamp01(volume),
+			loop,
+			autoplay,
+			html5: loop
 		});
+
+		if (notifyLoadDone)
+			sound.once('load', () => this.notifyLoadDone());
+
+		return sound;
 	},
 
-	updateMusic (playerX, playerY) {
-		const sounds = this.sounds;
-
-		const areaMusic = sounds.filter(s => s.music && s.area);
-
-		//All music that should be playing because we're in the correct polygon
-		const playMusic = areaMusic.filter(s => physics.isInPolygon(playerX, playerY, s.area));
-
-		//All music that should stop playing because we're in the incorrect polygon
-		const stopMusic = areaMusic.filter(s => s.sound && s.sound.playing() && !playMusic.some(m => m === s));
-
-		//Stop or start defaultMusic, depending on whether anything else was found
-		const defaultMusic = sounds.filter(a => a.defaultMusic);
-		if (defaultMusic) {
-			if (!playMusic.length)
-				defaultMusic.forEach(m => this.playMusicHelper(m));
-			else
-				defaultMusic.forEach(m => this.stopSoundHelper(m));
-		}
-
-		//If there's a music entry in both 'play' and 'stop' that shares a fileName, we'll just ignore it. This happens when you
-		// move to a building interior, for example. Unfortunately, we can't have different volume settings for these kinds of entries.
-		// The one that starts playing first will get priority
-		const filesPlaying = [...playMusic.map(p => p.file), ...stopMusic.map(p => p.file)];
-		_.spliceWhere(playMusic, p => filesPlaying.filter(f => f === p.file).length > 1);
-		_.spliceWhere(stopMusic, p => filesPlaying.filter(f => f === p.file).length > 1);
-
-		stopMusic.forEach(m => this.stopSoundHelper(m));
-		playMusic.forEach(m => this.playMusicHelper(m));
-	},
-
-	update (playerX, playerY) {
-		this.updateSounds(playerX, playerY);
-		this.updateMusic(playerX, playerY);
-	},
-
-	addSound (
-		{ name: soundName, scope, file, volume = 1, x, y, w, h, area, music, defaultMusic, autoLoad, loop, notifyLoadDone }
-	) {
-		if (this.sounds.some(s => s.file === file)) {
-			if (window.player?.x !== undefined)
-				this.update(window.player.x, window.player.y);
-
-			return;
-		}
-
+	addSound ({
+		name, scope, file, volume = 1, x, y, w, h, area, music,
+		defaultMusic, autoLoad, loop, notifyLoadDone
+	}) {
 		if (!area && w) {
 			area = [
 				[x, y],
@@ -276,86 +126,161 @@ export default {
 			];
 		}
 
-		let sound = null;
-		if (autoLoad)
-			sound = this.loadSound(file, loop, false, volume, notifyLoadDone);
-
-		if (music)
-			volume = 0;
-
-		const soundEntry = {
-			name: soundName,
-			sound,
+		const entry = {
+			name,
 			scope,
 			file,
-			loop,
-			x,
-			y,
-			volume,
-			maxVolume: volume,
+			x, y,
 			area,
-			music,
-			defaultMusic
+			music: !!music,
+			defaultMusic: !!defaultMusic,
+			loop: !!loop,
+			maxVolume: clamp01(volume),
+			sound: null,
+			targetVolume: 0
 		};
 
-		this.sounds.push(soundEntry);
+		if (autoLoad)
+			entry.sound = this.loadSound(file, loop, false, clamp01(music ? 0 : volume), notifyLoadDone);
+
+		this.sounds.push(entry);
 
 		if (window.player?.x !== undefined)
 			this.update(window.player.x, window.player.y);
 
-		return soundEntry;
+		return entry;
 	},
 
-	loadSound (file, loop = false, autoplay = false, volume = 1, notifyLoadDone = false) {
-		const sound = new Howl({
-			src: [file],
-			volume,
-			loop,
-			autoplay,
-			html5: loop
+	onPlaySoundAtPosition ({ position: { x, y }, file, volume }) {
+		const mapped = mapModPath(file);
+		if (!mapped || !window.player)
+			return;
+
+		const { player: { x: px, y: py } } = window;
+		const dx = Math.abs(x - px);
+		const dy = Math.abs(y - py);
+		const distance = Math.max(dx, dy);
+
+		if (distance >= MIN_DISTANCE)
+			return;
+
+		const gain = clamp01(toLinear(soundVolume) * distanceFalloff(distance) * (volume ?? 1));
+		new Howl({ src: [mapped], volume: gain, autoplay: true });
+	},
+
+	playSound (soundName) {
+		const entry = this.sounds.find(s => s.name === soundName);
+		if (!entry)
+			return;
+
+		if (!entry.sound)
+			entry.sound = this.loadSound(entry.file, entry.loop, false, 1);
+
+		entry.sound.volume(toLinear(soundVolume));
+		entry.sound.play();
+	},
+
+	update (x, y) {
+		this.updateSounds(x, y);
+		this.updateMusic(x, y);
+	},
+
+	updateSounds (x, y) {
+		for (const s of this.sounds) {
+			if (s.music || s.scope === 'ui')
+				continue;
+
+			let distance = 0;
+			if (!s.area) 
+				distance = Math.max(Math.abs(s.x - x), Math.abs(s.y - y));
+			else if (!physics.isInPolygon(x, y, s.area)) 
+				distance = physics.distanceToPolygon([x, y], s.area);
+
+			if (distance > MIN_DISTANCE) {
+				if (s.sound && s.sound.playing()) s.sound.stop();
+
+				continue;
+			}
+
+			const falloff = distanceFalloff(distance);
+			const gain = clamp01(s.maxVolume * falloff * toLinear(soundVolume));
+
+			if (!s.sound)
+				s.sound = this.loadSound(s.file, s.loop);
+
+			s.sound.volume(gain);
+			if (!s.sound.playing())
+				s.sound.play();
+		}
+	},
+
+	updateMusic (x, y) {
+		const areaMusic = this.sounds.filter(s => s.music && s.area);
+		const insideMusic = areaMusic.filter(s => physics.isInPolygon(x, y, s.area));
+		const defaults = this.sounds.filter(s => s.defaultMusic);
+
+		// play default only if no area music active
+		if (defaults.length) {
+			if (insideMusic.length === 0)
+				defaults.forEach(m => this.fadeMusic(m, toLinear(musicVolume)));
+			else
+				defaults.forEach(m => this.fadeMusic(m, 0));
+		}
+
+		// handle area music
+		const stopMusic = areaMusic.filter(s => s.sound && s.sound.playing() && !insideMusic.includes(s));
+		stopMusic.forEach(m => this.fadeMusic(m, 0));
+
+		insideMusic.forEach(m => this.fadeMusic(m, toLinear(musicVolume)));
+	},
+
+	fadeMusic (entry, targetVolume) {
+		if (!entry.sound)
+			entry.sound = this.loadSound(entry.file, entry.loop, false, 0);
+
+		const current = entry.sound.volume();
+		if (Math.abs(current - targetVolume) < 0.001)
+			return;
+
+		if (!entry.sound.playing() && targetVolume > 0)
+			entry.sound.volume(0).play();
+
+		entry.sound.volume(targetVolume);
+	},
+
+	onManipulateVolume ({ soundType, volume }) {
+		if (soundType === 'sound')
+			soundVolume = Math.max(0, Math.min(100, volume));
+		else if (soundType === 'music')
+			musicVolume = Math.max(0, Math.min(100, volume));
+
+		events.emit('onVolumeChange', {
+			soundType,
+			volume: soundType === 'sound' ? soundVolume : musicVolume
 		});
 
-		if (notifyLoadDone)
-			sound.once('load', this.notifyLoadDone(file));
-
-		return sound;
+		if (window.player)
+			this.update(window.player.x, window.player.y);
 	},
 
 	onToggleAudio (isAudioOn) {
 		this.muted = !isAudioOn;
-
-		this.sounds.forEach(s => {
-			if (!s.sound)
-				return;
-
-			s.sound.mute(this.muted);
-		});
-
-		if (!window.player)
-			return;
-
-		const { player: { x, y } } = window;
-		this.update(x, y);
+		Howler.mute(this.muted);
+		if (window.player)
+			this.update(window.player.x, window.player.y);
 	},
 
-	onManipulateVolume ({ soundType, delta }) {
-		if (soundType === 'sound')
-			soundVolume = Math.max(0, Math.min(100, soundVolume + delta));
-		else if (soundType === 'music')
-			musicVolume = Math.max(0, Math.min(100, musicVolume + delta));
+	destroySoundEntry (entry) {
+		if (entry.sound) {
+			if (entry.sound.playing())
+				entry.sound.stop();
 
-		const volume = soundType === 'sound' ? soundVolume : musicVolume;
-
-		events.emit('onVolumeChange', {
-			soundType,
-			volume
-		});
-
-		const { player: { x, y } } = window;
-		this.update(x, y);
-	},
-
-	destroySoundEntry (soundEntry) {
-		_.spliceWhere(this.sounds, s => s === soundEntry);
+			entry.sound.unload();
+		}
+		const idx = this.sounds.indexOf(entry);
+		if (idx !== -1)
+			this.sounds.splice(idx, 1);
 	}
 };
+
+export default soundManager;

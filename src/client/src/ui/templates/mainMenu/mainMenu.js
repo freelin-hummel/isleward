@@ -52,7 +52,6 @@ export default {
 		events.emit('resetPhysics');
 
 		renderer.buildTitleScreen();
-		sound.unload();
 
 		events.emit('onShowCharacterSelect');
 

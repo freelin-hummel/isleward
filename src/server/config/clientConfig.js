@@ -283,13 +283,13 @@ const config = {
 				key: 'soundVolume',
 				label: 'Sound Volume',
 				type: 'volume',
-				event: 'onVolumeChange'
+				event: 'onManipulateVolume'
 			},
 			{
 				key: 'musicVolume',
 				label: 'Music Volume',
 				type: 'volume',
-				event: 'onVolumeChange'
+				event: 'onManipulateVolume'
 			},
 			{
 				section: 'UI'

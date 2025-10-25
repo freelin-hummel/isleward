@@ -181,8 +181,6 @@ export default {
 			window.player = obj;
 			events.emit('onGetPlayer', obj);
 
-			sound.unload(obj.zoneId);
-
 			renderer.setPosition({
 				centerOnObject: obj,
 				instant: true
