@@ -363,9 +363,10 @@ const lineBuilders = {
 
 		let text = null;
 
-		if (isMobile && compare && !shiftDown)
-			text = 'tap again to compare';
-		else if (!shiftDown && compare)
+		if (isMobile) {
+			if (compare && !shiftDown)
+				text = 'tap again to compare';
+		} else if (!shiftDown && compare)
 			text = '[shift] to compare';
 
 		if (!text)

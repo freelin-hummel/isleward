@@ -28,7 +28,10 @@ export default defineConfig(() => {
 				'@modUis': modUis
 			}
 		},
-		server: { fs: { allow: ['..'] } },
+		server: {
+			host: true,
+			fs: { allow: ['..'] }
+		},
 		build: {
 			assetsInlineLimit: 65000,
 			rollupOptions: { external: [] }

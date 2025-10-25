@@ -9,64 +9,67 @@ export default {
 
 	config: null,
 
+	_outside: null,
+
 	postRender () {
 		this.onEvent('onContextMenu', this.onContextMenu.bind(this));
 		this.onEvent('onHideContextMenu', this.onMouseDown.bind(this));
 		this.onEvent('mouseDown', this.onMouseDown.bind(this));
 		this.onEvent('onUiKeyDown', this.onUiKeyDown.bind(this));
 
-		$('.ui-container').on('mouseup', this.onMouseDown.bind(this));
+		// Close only on outside pointer down (capture so it runs first)
+		this._outside = e => {
+			if (!this.el.is(':visible')) return;
+			if (this.el[0].contains(e.target)) return;
+			this.onMouseDown(e);
+		};
+		document.addEventListener('pointerdown', this._outside, true);
+	},
+
+	destroy () {
+		document.removeEventListener('pointerdown', this._outside, true);
 	},
 
 	onContextMenu (config, e) {
 		this.config = config;
 
-		let container = this.el.find('.list')
-			.empty();
+		const container = this.el.find('.list').empty();
 
 		config.forEach((c, i) => {
 			const text = (c.text || c);
-			const hotkey = c.hotkey;
-			const suffix = c.suffix;
+			const { hotkey, suffix } = c;
 
-			const html = templateItem
-				.replace('$TEXT$', text);
+			const row = $(templateItem.replace('$TEXT$', text)).appendTo(container);
 
-			const row = $(html)
-				.appendTo(container);
-
-			if (hotkey)
-				row.find('.hotkey').html(`(${hotkey})`);
-			else if (suffix)
-				row.find('.hotkey').html(`${suffix}`);
+			if (hotkey) row.find('.hotkey').html(`(${hotkey})`);
+			else if (suffix) row.find('.hotkey').html(`${suffix}`);
 
 			if (c.callback) {
-				row.on('click', this.onClick.bind(this, i, c.callback));
-				row.on('click', events.emit.bind(events, 'onClickContextItem'));
+				// prevent outside handler from firing for menu items
+				row.on('pointerdown', ev => ev.stopPropagation());
+				row.on('click', ev => {
+					ev.stopPropagation();
+					this.onClick(i, c.callback);
+					events.emit('onClickContextItem');
+				});
+				row.on('touchstart', ev => {
+					ev.stopPropagation();
+					this.onClick(i, c.callback);
+					events.emit('onClickContextItem');
+				});
 			} else {
 				row.addClass('no-hover');
-
-				if (text.includes('---'))
-					row.addClass('divider');
+				if (text.includes('---')) row.addClass('divider');
 			}
 		});
 
-		const pos = {
-			left: e.clientX,
-			top: e.clientY
-		};
-
-		//Check for a customEvent, like long touch
-		if (_.isIos()) {
-			pos.left = e.detail.clientX;
-			pos.top = e.detail.clientY;
-		}
+		const pos = _.isIos()
+			? { left: e.detail.clientX, top: e.detail.clientY }
+			: { left: e.clientX, top: e.clientY };
 
 		pos['max-height'] = window.innerHeight - pos.top - 10;
 
-		this.el
-			.css(pos)
-			.show();
+		this.el.css(pos).show();
 	},
 
 	onClick (index, callback) {
@@ -75,9 +78,7 @@ export default {
 	},
 
 	onMouseDown (e) {
-		if (!this.el.is(':visible') || (e && (e.cancel || e.button === 2)))
-			return;
-
+		if (!this.el.is(':visible') || (e && e.button === 2)) return;
 		this.config = null;
 		this.el.hide();
 	},

@@ -1,6 +1,8 @@
 import events from './events';
 import { io } from 'socket.io-client';
 
+const serverUrl = import.meta.env.VITE_SERVER_URL;
+
 let client = {
 	doneConnect: false,
 
@@ -12,6 +14,8 @@ let client = {
 
 			if (window.location.hostname === 'localhost')
 				socketArgs.splice(0, 0, 'http://localhost:5000');
+			else if (serverUrl)
+				socketArgs.splice(0, 0, serverUrl);
 
 			this.socket = io(...socketArgs);
 

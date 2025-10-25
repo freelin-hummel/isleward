@@ -351,13 +351,13 @@ export default {
 
 		const eBeforeShowItemContextMenu = {
 			sourceUi: 'inventory',
-			item: this.hoverItem,
+			item: this.hoverItem ?? item,
 			ctxConfig
 		};
 
 		events.emit('beforeShowItemContextMenu', eBeforeShowItemContextMenu);
 
-		if (ctxConfig.length > 0)
+		if (eBeforeShowItemContextMenu.ctxConfig.length > 0)
 			events.emit('onContextMenu', eBeforeShowItemContextMenu.ctxConfig, e);
 
 		e.preventDefault();
