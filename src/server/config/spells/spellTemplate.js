@@ -66,7 +66,8 @@ module.exports = {
 				return spellCastResultTypes.success;
 			else if (!obj.aggro.canAttack(target))
 				return spellCastResultTypes.invalidTarget;
-		}
+		} else if (!this.targetGround && !target.aggro)
+			return spellCastResultTypes.invalidTarget;
 
 		return spellCastResultTypes.success;
 	},

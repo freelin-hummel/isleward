@@ -75,16 +75,16 @@ module.exports = {
 				return;
 			}
 
-			if (spellbook.isSpellAuto(spellId)) {
-				//If it's an auto spell, just toggle it and carry on
-				this.spellbook.cast(data);
+			const canCastResponse = spellbook.getSpellCanCastResult(msg.data);
+			if (canCastResponse !== spellCastResultTypes.success) {
+				sendAnnouncement(this, spellCastResultMessages[canCastResponse]);
 
 				return;
 			}
 
-			const canCastResponse = spellbook.getSpellCanCastResult(msg.data);
-			if (canCastResponse !== spellCastResultTypes.success) {
-				sendAnnouncement(this, spellCastResultMessages[canCastResponse]);
+			if (spellbook.isSpellAuto(spellId)) {
+				//If it's an auto spell, just toggle it and carry on
+				this.spellbook.cast(data);
 
 				return;
 			}
