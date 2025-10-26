@@ -73,14 +73,12 @@ const onCrash = async e => {
 	_.log('Error Logged: ' + e.toString());
 	_.log(e.stack);
 
-	await io.setAsync({
-		key: new Date(),
-		table: 'error',
-		value: e.toString() + ' | ' + e.stack.toString()
-	});
-
-	process.send({
-		event: 'onCrashed'
+	await io.logError({
+		sourceModule: 'threadWorker',
+		sourceMethod: 'general',
+		error: e,
+		info: {},
+		forceCrash: true
 	});
 };
 

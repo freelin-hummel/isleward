@@ -392,10 +392,12 @@ module.exports = {
 		const player = objects.objects.find(o => o.serverId === playerId);
 
 		if (!player?.auth) {
-			await io.setAsync({
-				key: new Date(),
-				table: 'error',
-				value: 'no auth found for forcesave ' + player?.name
+			await io.logError({
+				sourceModule: 'instancer',
+				sourceMethod: 'forceSavePlayer',
+				error: new Error(`No auth component found to save player: ${player?.name}`),
+				info: {},
+				forceCrash: false
 			});
 
 			return;

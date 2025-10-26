@@ -64,19 +64,19 @@ const startup = {
 	},
 
 	onError: async function (e) {
-		if (e.toString().indexOf('ERR_IPC_CHANNEL_CLOSED') > -1)
+		if (e.toString().includes('ERR_IPC_CHANNEL_CLOSED'))
 			return;
 
 		_.log('Error Logged: ' + e.toString());
 		_.log(e.stack);
 
-		await io.setAsync({
-			key: new Date(),
-			table: 'error',
-			value: e.toString() + ' | ' + e.stack.toString()
+		await io.logError({
+			sourceModule: 'mainThread',
+			sourceMethod: 'general',
+			error: e,
+			info: {},
+			forceCrash: true
 		});
-
-		process.exit();
 	}
 };
 

@@ -55,10 +55,11 @@ module.exports = {
 		}
 
 		if (!this.item) {
-			this.setAsync({
-				key: new Date(),
-				table: 'error',
-				value: this.obj.name + ' ' + this.mobType
+			io.logError({
+				sourceModule: 'questLootGen',
+				sourceMethod: 'build',
+				error: new Error(`${this.obj.name} ${this.mobType}`),
+				info: {}
 			});
 		}
 

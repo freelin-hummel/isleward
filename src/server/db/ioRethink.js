@@ -295,18 +295,24 @@ module.exports = {
 		return !!res;
 	},
 
-	logError: async function ({ sourceModule, sourceMethod, error, info }) {
+	logError: async function ({
+		sourceModule = 'unspecified',
+		sourceMethod = 'unspecified',
+		error,
+		info,
+		forceCrash = true
+	}) {
 		try {
-			await this.setAsync({
+			await this.setFlat({
 				table: 'error',
-				value: {
-					date: new Date(),
+				value: [{
+					date: r.now(),
 					sourceModule,
 					sourceMethod,
 					error: error.toString(),
 					stack: error.stack.toString(),
 					info
-				}
+				}]
 			});
 		} catch {
 			console.error('Could not insert error into database');
@@ -319,6 +325,9 @@ module.exports = {
 				info
 			});
 		}
+
+		if (!forceCrash)
+			return;
 
 		if (process.send) {
 			process.send({
