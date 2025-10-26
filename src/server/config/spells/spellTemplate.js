@@ -58,8 +58,15 @@ module.exports = {
 			return spellCastResultTypes.insufficientMana;
 		else if (!target)
 			return spellCastResultTypes.noTarget;
-		else if (target.aggro && !obj.aggro.canAttack(target))
-			return spellCastResultTypes.invalidTarget;
+		else if (target.aggro) {
+			if (this.targetFriendly) {
+				if (obj.aggro.canAttack(target))
+					return spellCastResultTypes.invalidTarget;
+			} else if (this.aura)
+				return spellCastResultTypes.success;
+			else if (!obj.aggro.canAttack(target))
+				return spellCastResultTypes.invalidTarget;
+		}
 
 		return spellCastResultTypes.success;
 	},
