@@ -263,6 +263,15 @@ module.exports = {
 		if (!item || item.quest || item.noStash)
 			return;
 
+		const emBeforeStashItem = {
+			obj: this.obj,
+			item,
+			success: true
+		};
+		events.emit('beforeStashItem', emBeforeStashItem);
+		if (!emBeforeStashItem.success)
+			return;
+
 		delete item.pos;
 
 		const stash = obj.stash;
