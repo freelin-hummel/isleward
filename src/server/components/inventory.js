@@ -162,21 +162,23 @@ module.exports = {
 			}
 		}
 
-		let currentEq = this.items.find(i => (i.runeSlot === slot));
+		const itemPos = item.pos;
+		delete item.pos;
+
+		const currentEq = this.items.find(i => (i.runeSlot === slot));
 		if (currentEq) {
 			spellbook.removeSpellById(slot);
 			delete currentEq.eq;
 			delete currentEq.runeSlot;
 			this.setItemPosition({
 				itemId: currentEq.id,
-				forcePosition: item.pos
+				forcePosition: itemPos
 			});
 			this.obj.syncer.setArray(true, 'inventory', 'getItems', currentEq);
 		}
 
 		item.eq = true;
 		item.runeSlot = slot;
-		delete item.pos;
 
 		spellbook.addSpellFromRune(item.spell, slot);
 		this.obj.syncer.setArray(true, 'inventory', 'getItems', item);
