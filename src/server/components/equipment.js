@@ -67,8 +67,15 @@ module.exports = {
 		if (!slot)
 			slot = item.equipSlot || item.slot;
 		if (slot === 'twoHanded') {
-			if (this.eq.has('offHand'))
-				this.unequip({ itemId: this.eq.offHand }, true);
+			if (this.eq.has('offHand')) {
+				//Only swap the current offHand item to this position if we have no one-handed that should go there instead
+				const forcePosition = this.eq.has('oneHanded') ? undefined : itemPos;
+
+				this.unequip({
+					itemId: this.eq.offHand,
+					forcePosition
+				}, true);
+			}
 
 			slot = 'oneHanded';
 		} else if (slot === 'offHand') {
