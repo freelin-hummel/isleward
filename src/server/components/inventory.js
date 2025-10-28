@@ -167,7 +167,10 @@ module.exports = {
 			spellbook.removeSpellById(slot);
 			delete currentEq.eq;
 			delete currentEq.runeSlot;
-			this.setItemPosition(currentEq.id);
+			this.setItemPosition({
+				itemId: currentEq.id,
+				forcePosition: item.pos
+			});
 			this.obj.syncer.setArray(true, 'inventory', 'getItems', currentEq);
 		}
 
@@ -226,9 +229,20 @@ module.exports = {
 		useItem(this, itemId);
 	},
 
+	/*
+		This method is called either with an integer (itemId),
+		or {
+			itemId: 'integer',
+			forcePosition: '(optional) integer'
+		}
+	*/
 	unlearnAbility: function (itemId) {
-		if (itemId.has('itemId'))
+		let forcePosition;
+
+		if (itemId.has('itemId')) {
 			itemId = itemId.itemId;
+			forcePosition = itemId.forcePosition;
+		}
 
 		let item = this.findItem(itemId);
 		if (!item)
@@ -242,8 +256,13 @@ module.exports = {
 		spellbook.removeSpellById(item.runeSlot);
 		delete item.eq;
 		delete item.runeSlot;
-		if (!item.slot)
-			this.setItemPosition(itemId);
+		if (!item.slot) {
+			this.setItemPosition({
+				itemId,
+				forcePosition
+			});
+		}
+
 		this.obj.syncer.setArray(true, 'inventory', 'getItems', item);
 	},
 
@@ -391,7 +410,7 @@ module.exports = {
 			return;
 
 		if (item.eq)
-			this.obj.equipment.unequip(itemId);
+			this.obj.equipment.unequip({ itemId });
 
 		this.items.spliceWhere(i => i.id === itemId);
 
@@ -502,15 +521,27 @@ module.exports = {
 		}
 	},
 
-	setItemPosition: function (id) {
-		let item = this.findItem(id);
+	setItemPosition: function ({ itemId, forcePosition }) {
+		const item = this.findItem(itemId);
 		if (!item)
 			return;
 
-		let iSize = this.inventorySize;
-		for (let i = 0; i < iSize; i++) {
-			if (!this.items.some(j => (j.pos === i))) {
+		const { items, inventorySize } = this;
+
+		if (forcePosition !== undefined) {
+			const positionAvailable = !items.some(f => f.pos === forcePosition);
+
+			if (positionAvailable) {
+				item.pos = forcePosition;
+
+				return;
+			}
+		}
+
+		for (let i = 0; i < inventorySize; i++) {
+			if (!items.some(j => (j.pos === i))) {
 				item.pos = i;
+
 				break;
 			}
 		}

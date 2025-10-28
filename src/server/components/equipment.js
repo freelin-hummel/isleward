@@ -44,27 +44,12 @@ module.exports = {
 		let item = inventory.findItem(itemId);
 		if (!item || item.eq)
 			return;
-		else if ((!item.slot) || (item.material) || (item.quest) || (item.ability) || (!inventory.canEquipItem(item))) {
+		else if (!item.slot || item.material || item.quest || item.ability || !inventory.canEquipItem(item)) {
 			item.eq = false;
 			return;
 		}
 
-		if (!slot)
-			slot = item.equipSlot || item.slot;
-		if (slot === 'twoHanded') {
-			if (this.eq.has('offHand'))
-				this.unequip({ itemId: this.eq.offHand }, true);
-
-			slot = 'oneHanded';
-		} else if (slot === 'offHand') {
-			if (this.eq.has('oneHanded')) {
-				let oneHandedEq = inventory.findItem(this.eq.oneHanded);
-				if (oneHandedEq.slot === 'twoHanded')
-					this.unequip({ itemId: this.eq.oneHanded }, true);
-			}
-		}
-
-		let equipMsg = {
+		const equipMsg = {
 			success: true,
 			item: item
 		};
@@ -76,7 +61,30 @@ module.exports = {
 			return;
 		}
 
+		const itemPos = item.pos;
 		delete item.pos;
+
+		if (!slot)
+			slot = item.equipSlot || item.slot;
+		if (slot === 'twoHanded') {
+			if (this.eq.has('offHand'))
+				this.unequip({ itemId: this.eq.offHand }, true);
+
+			slot = 'oneHanded';
+		} else if (slot === 'offHand') {
+			if (this.eq.has('oneHanded')) {
+				let oneHandedEq = inventory.findItem(this.eq.oneHanded);
+				if (oneHandedEq.slot === 'twoHanded') {
+					//Only swap the current twoHanded item to this position if we have no off-hand that should go there instead
+					const forcePosition = this.eq.has('offHand') ? undefined : itemPos;
+
+					this.unequip({
+						itemId: this.eq.oneHanded,
+						forcePosition
+					}, true);
+				}
+			}
+		}
 
 		if (slot === 'finger') {
 			let f1 = (this.eq.has('finger-1'));
@@ -94,7 +102,10 @@ module.exports = {
 			if (this.eq[slot] === item.id)
 				return;
 
-			this.unequip({ itemId: this.eq[slot] }, true);
+			this.unequip({
+				itemId: this.eq[slot],
+				forcePosition: itemPos
+			}, true);
 		}
 
 		applyItemStats(obj, item, true);
@@ -116,18 +127,13 @@ module.exports = {
 		obj.fireEvent('afterEquipItem', item);
 	},
 
-	unequip: function (itemId, ignoreSpaceCheck) {
-		let item = itemId;
-		if (typeof (itemId) === 'object')
-			itemId = itemId.itemId;
+	unequip: function ({ itemId, forcePosition }, ignoreSpaceCheck) {
+		const { obj } = this;
+		const { inventory } = obj;
 
-		let obj = this.obj;
-		let inventory = obj.inventory;
+		const item = inventory.findItem(itemId);
 
-		if (typeof(item) !== 'object' || !item.has('id'))
-			item = inventory.findItem(itemId);
-
-		if (!item || !item.eq)
+		if (!item?.eq)
 			return;
 		else if (!ignoreSpaceCheck && !inventory.hasSpace()) {
 			const message = 'You do not have room in your inventory to unequip that item';
@@ -142,11 +148,11 @@ module.exports = {
 
 		applyItemStats(obj, item, false);
 
-		inventory.setItemPosition(itemId);
+		inventory.setItemPosition({ itemId, forcePosition });
 
 		if (item.spell) {
 			item.eq = true;
-			inventory.unlearnAbility({ itemId });
+			inventory.unlearnAbility({ itemId, forcePosition });
 		} else
 			obj.syncer.setArray(true, 'inventory', 'getItems', inventory.simplifyItem(item));
 
