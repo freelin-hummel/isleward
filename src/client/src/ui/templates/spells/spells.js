@@ -151,6 +151,8 @@ export default {
 			.eq(spellIndex)
 			.removeClass('active');
 
+		this.spells[spellIndex].autoActive = options.active;
+
 		if (options.active)
 			el.addClass('active');
 	},

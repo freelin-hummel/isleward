@@ -41,6 +41,11 @@ module.exports = {
 		this.moveQueue = [];
 		this.spellQueue = [];
 
+		this.spellbook.spells.forEach(s => {
+			if (s.autoActive)
+				s.setAuto(null);
+		});
+
 		this.fireEvent('clearQueue');
 	},
 
@@ -75,14 +80,27 @@ module.exports = {
 				return;
 			}
 
+			const isSpellAuto = spellbook.isSpellAuto(spellId);
+
 			const canCastResponse = spellbook.getSpellCanCastResult(msg.data);
-			if (canCastResponse !== spellCastResultTypes.success) {
+
+			const canCast = (
+				canCastResponse === spellCastResultTypes.success ||
+				(
+					isSpellAuto &&
+					canCastResponse === spellCastResultTypes.outOfRange
+				)
+			);
+			if (!canCast) {
 				sendAnnouncement(this, spellCastResultMessages[canCastResponse]);
 
 				return;
 			}
 
-			if (spellbook.isSpellAuto(spellId)) {
+			if (canCastResponse === spellCastResultTypes.outOfRange && !spellbook.autoMoveActive)
+				sendAnnouncement(this, spellCastResultMessages[canCastResponse]);
+
+			if (isSpellAuto) {
 				//If it's an auto spell, just toggle it and carry on
 				this.spellbook.cast(data);
 

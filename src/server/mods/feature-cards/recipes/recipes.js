@@ -17,36 +17,36 @@ module.exports = [{
 		magicFind: 900
 	})
 }, {
-	name: 'Level 15 Rune',
+	name: 'Level 17 Rune',
 	description: '',
 	materials: [{
 		name: 'Runecrafter\'s Toil',
 		quantity: 10
 	}],
 	craftAction: rune.bind(null, {
-		level: 15,
+		level: 17,
 		magicFind: 1400
 	})
 }, {
-	name: 'Level 20 Rune',
+	name: 'Level 23 Rune',
 	description: '',
 	materials: [{
 		name: 'Runecrafter\'s Toil',
 		quantity: 30
 	}],
 	craftAction: rune.bind(null, {
-		level: 20,
+		level: 23,
 		magicFind: 1900
 	})
 }, {
-	name: 'Legendary Level 15 Weapon',
+	name: 'Legendary Level 18 Weapon',
 	description: '',
 	materials: [{
 		name: 'Godly Promise',
 		quantity: 6
 	}],
 	craftAction: weapon.bind(null, {
-		level: 15,
+		level: 18,
 		quality: 4
 	})
 }, {
