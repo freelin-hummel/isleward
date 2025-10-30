@@ -74,7 +74,7 @@ module.exports = {
 				possibleStats.includes(s) ||
 				(
 					s.includes('|') &&
-					possibleStats.includes(s.split[0])
+					possibleStats.includes(s.split('|')[0])
 				)
 			));
 
@@ -106,6 +106,13 @@ module.exports = {
 	},
 
 	buildStat: function (item, blueprint, stat, result) {
+		let value = 0;
+
+		if (stat.includes('|')) {
+			[stat, value] = stat.split('|');
+			value = +value;
+		}
+
 		let statBlueprint = this.stats[stat];
 		if (!statBlueprint) {
 			/* eslint-disable-next-line no-console */
@@ -114,19 +121,19 @@ module.exports = {
 			return;
 		}
 
-		let value = null;
-
-		if (stat.includes('|')) {
-			const split = stat.split('|');
-			stat = split[0];
-			value = ~~split[1];
-		} else if (statBlueprint.generator !== undefined) {
-			const itemLevel = Math.min(balance.maxLevel, item.originalLevel ?? item.level);
-			value = this.generators[statBlueprint.generator](item, itemLevel, blueprint.perfection);
-		} else if (blueprint.perfection === undefined)
-			value = random.norm(statBlueprint.min, statBlueprint.max);
-		else
-			value = statBlueprint.min + ((statBlueprint.max - statBlueprint.min) * blueprint.perfection);
+		if (!value) {
+			if (stat.includes('|')) {
+				const split = stat.split('|');
+				stat = split[0];
+				value = ~~split[1];
+			} else if (statBlueprint.generator !== undefined) {
+				const itemLevel = Math.min(balance.maxLevel, item.originalLevel ?? item.level);
+				value = this.generators[statBlueprint.generator](item, itemLevel, blueprint.perfection);
+			} else if (blueprint.perfection === undefined)
+				value = random.norm(statBlueprint.min, statBlueprint.max);
+			else
+				value = statBlueprint.min + ((statBlueprint.max - statBlueprint.min) * blueprint.perfection);
+		}
 
 		if (result?.addStatMsgs) {
 			value = Math.round(value);
