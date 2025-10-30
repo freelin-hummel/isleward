@@ -42,10 +42,13 @@ module.exports = {
 	getSpellCanCastResult: function (target) {
 		const { obj } = this;
 
-		if (this.has('range')) {
-			if (!target)
-				return spellCastResultTypes.noTarget;
+		if (!target)
+			return spellCastResultTypes.noTarget;
 
+		if (!this.targetGround && !target.aggro)
+			return spellCastResultTypes.invalidTarget;
+
+		if (this.has('range')) {
 			const distance = Math.max(Math.abs(target.x - obj.x), Math.abs(target.y - obj.y));
 
 			if (distance > this.range)
@@ -56,8 +59,6 @@ module.exports = {
 			return spellCastResultTypes.onCooldown;
 		else if (this.manaCost > obj.stats.values.mana)
 			return spellCastResultTypes.insufficientMana;
-		else if (!target)
-			return spellCastResultTypes.noTarget;
 		else if (target.aggro) {
 			if (this.targetFriendly) {
 				if (obj.aggro.canAttack(target))
@@ -66,8 +67,7 @@ module.exports = {
 				return spellCastResultTypes.success;
 			else if (!obj.aggro.canAttack(target))
 				return spellCastResultTypes.invalidTarget;
-		} else if (!this.targetGround && !target.aggro)
-			return spellCastResultTypes.invalidTarget;
+		}
 
 		return spellCastResultTypes.success;
 	},

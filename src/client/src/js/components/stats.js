@@ -47,7 +47,7 @@ export default {
 	addBar (config) {
 		const { obj, bars } = this;
 
-		const bar = buildBar(obj, config);
+		const bar = buildBar({ obj, ...config });
 
 		bars.push(bar);
 
