@@ -23,6 +23,8 @@ export default {
 
 	oldSpellsZIndex: 0,
 
+	hotkeyToOpen: 'i',
+
 	postRender () {
 		this.onEvent('onGetItems', this.onGetItems.bind(this));
 		this.onEvent('onGetInventorySize', this.onGetInventorySize.bind(this));
@@ -55,6 +57,8 @@ export default {
 
 	build () {
 		const { el, inventorySize } = this;
+
+		this.find('.gold .amount').html(window.player?.trade?.gold ?? 0);
 
 		let container = el.find('.grid')
 			.empty();
@@ -558,9 +562,7 @@ export default {
 	},
 
 	onKeyDown (key) {
-		if (key === 'i')
-			this.toggle();
-		else if (key === 'shift' && this.hoverItem)
+		if (key === 'shift' && this.hoverItem)
 			this.onHover();
 	},
 

@@ -9,6 +9,8 @@ export default {
 
 	centered: true,
 
+	isFlex: true,
+
 	modal: true,
 	hasClose: true,
 
@@ -27,6 +29,8 @@ export default {
 		this.itemList = itemList;
 		this.action = action;
 
+		this.find('.gold .amount').html(window.player?.trade?.gold);
+
 		this.find('.heading-text').html(action);
 
 		let uiInventory = $('.uiInventory').data('ui');
@@ -43,7 +47,11 @@ export default {
 
 		const itemsHavePositions = action === 'sell' || buyItems.find(b => b.pos);
 
-		let iLen = Math.max(buyItems.length, 50);
+		const iLen = Math.max(
+			window.player?.inventory?.inventorySize ?? 50,
+			50
+		);
+
 		for (let i = 0; i < iLen; i++) {
 			let item = buyItems[i];
 

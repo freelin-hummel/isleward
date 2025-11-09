@@ -301,7 +301,7 @@ module.exports = {
 
 	inspect: function (msg) {
 		const targetPlayer = this.obj.instance.objects.find(o => o.id === msg.playerId);
-		if (!targetPlayer || !targetPlayer.player)
+		if (!targetPlayer?.player)
 			return;
 
 		const targetEq = targetPlayer.inventory.items.filter(eq => eq.eq === true || eq.quickSlot === 0);
@@ -311,6 +311,7 @@ module.exports = {
 		const mappedStats = extend({}, targetStats);
 		
 		let result = {
+			name: targetPlayer.name,
 			equipment: mappedEq,
 			stats: mappedStats
 		};

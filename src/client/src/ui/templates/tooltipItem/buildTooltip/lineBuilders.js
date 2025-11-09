@@ -21,11 +21,11 @@ const lineBuilders = {
 	},
 
 	name: () => {
-		let itemName = item.name;
+		let quantity = '';
 		if (item.quantity > 1)
-			itemName += ' x' + item.quantity;
+			quantity = `<div class="quantity">(${item.quantity})</div>`;
 
-		return `<div class="name q${item.quality}">${itemName}</div>`;
+		return `<div class="name q${item.quality}">${item.name}${quantity}</div>`;
 	},
 
 	type: () => {
@@ -35,11 +35,27 @@ const lineBuilders = {
 		return item.type;
 	},
 
-	power: () => {
-		if (!item.power)
+	slot: () => {
+		if (!item.slot)
 			return null;
 
-		return (new Array(item.power + 1)).join('+');
+		const { clientConfig: { slotTranslations } } = globals;
+
+		const res = slotTranslations[item.slot] ?? slotTranslations.unknown;
+
+		return res;
+	},
+
+	power: () => {
+		let res = '';
+
+		if (item.infused)
+			res += '<div class="infused">Infused</div>';
+
+		if (item.power)
+			res += `Augmented${item.power > 1 ? ` x${item.power}` : ''}`;
+
+		return res;
 	},
 
 	implicitStats: () => {
@@ -84,26 +100,29 @@ const lineBuilders = {
 
 		const html = tempImplicitStats
 			.map(({ stat, value }) => {
-				let statName = statTranslations[stat];
+				const statName = statTranslations[stat];
 
-				const prettyValue = stringifyStatValue(stat, value);
+				let prettyValue = stringifyStatValue(stat, value);
 
 				let rowClass = '';
 
-				if (compare) {
+				if (compare && shiftDown) {
 					if (prettyValue.indexOf('-') > -1)
 						rowClass = 'loseStat';
 					else if (prettyValue.indexOf('+') > -1)
 						rowClass = 'gainStat';
-				}
+				} else
+					prettyValue = `+${prettyValue}`;
 
 				return `<div class="${rowClass}">${prettyValue} ${statName}</div>`;
 			})
 			.join('');
 
 		const result = (
-			lineBuilders.div('space', ' ') +
-				html
+			lineBuilders.div('smallSpace', ' ') +
+			lineBuilders.div('line', ' ') +
+			lineBuilders.div('smallSpace', ' ') +
+			html
 		);
 
 		return result;
@@ -141,7 +160,7 @@ const lineBuilders = {
 					if (tempStats[s] <= 0)
 						delete tempStats[s];
 
-					tempStats['_' + s] = enchantedStats[s];
+					tempStats['_' + s] = `+${enchantedStats[s]}`;
 				}
 
 				if (infusedStats[s]) {
@@ -149,7 +168,7 @@ const lineBuilders = {
 					if (tempStats['_' + s] <= 0)
 						delete tempStats['_' + s];
 
-					tempStats['~' + s] = infusedStats[s];
+					tempStats['~' + s] = `+${infusedStats[s]}`;
 				}
 			});
 		}
@@ -165,17 +184,18 @@ const lineBuilders = {
 				if (isInfused)
 					statName = statName.substr(1);
 
-				const prettyValue = stringifyStatValue(statName, tempStats[s]);
+				let prettyValue = stringifyStatValue(statName, tempStats[s]);
 				statName = statTranslations[statName];
 
 				let rowClass = '';
 
-				if (compare) {
+				if (compare && shiftDown) {
 					if (prettyValue.indexOf('-') > -1)
 						rowClass = 'loseStat';
 					else if (prettyValue.indexOf('+') > -1)
 						rowClass = 'gainStat';
-				}
+				} else if (prettyValue[0] !== '+')
+					prettyValue = '+' + prettyValue;
 				if (isEnchanted)
 					rowClass += ' enchanted';
 				if (isInfused)
@@ -187,17 +207,16 @@ const lineBuilders = {
 				return (a.replace(' enchanted', '').length - b.replace(' enchanted', '').length);
 			})
 			.sort((a, b) => {
-				if (a.indexOf('infused') > -1 && b.indexOf('infused') === -1)
-					return -1;
-				else if (a.indexOf('infused') === -1 && b.indexOf('infused') > -1)
-					return 1;
+				const getType = row => {
+					if (row.includes('enchanted'))
+						return 3;
+					if (row.includes('infused'))
+						return 2;
 
-				if (a.indexOf('enchanted') > -1 && b.indexOf('enchanted') === -1)
 					return 1;
-				else if (a.indexOf('enchanted') === -1 && b.indexOf('enchanted') > -1)
-					return -1;
+				};
 
-				return 0;
+				return getType(a) - getType(b);
 			})
 			.join('');
 
@@ -205,12 +224,10 @@ const lineBuilders = {
 			return null;
 
 		const result = (
-			lineBuilders.div('space', ' ') +
-				lineBuilders.div('line', ' ') +
-				lineBuilders.div('smallSpace', ' ') +
-				html +
-				lineBuilders.div('smallSpace', ' ') +
-				lineBuilders.div('line', ' ')
+			lineBuilders.div('smallSpace', ' ') +
+			lineBuilders.div('line', ' ') +
+			lineBuilders.div('smallSpace', ' ') +
+			html
 		);
 
 		return result;
@@ -230,10 +247,8 @@ const lineBuilders = {
 
 		const result = (
 			lineBuilders.div('space', ' ') +
-				(item.spell?.values ? lineBuilders.div('line', ' ') + lineBuilders.div('space', ' ') : '') +
-				html +
-				lineBuilders.div('space', ' ') +
-				lineBuilders.div('line', ' ')
+			(item.spell?.values ? lineBuilders.div('line', ' ') + lineBuilders.div('space', ' ') : '') +
+			html
 		);
 
 		return result;
@@ -241,12 +256,12 @@ const lineBuilders = {
 
 	material: () => {
 		if (item.material)
-			return 'crafting material';
+			return 'Crafting Material';
 	},
 
 	quest: () => {
 		if (item.quest)
-			return 'quest item';
+			return 'Quest Item';
 	},
 
 	spellName: () => {
@@ -255,18 +270,40 @@ const lineBuilders = {
 
 		return (
 			lineBuilders.div('space', ' ') +
-				lineBuilders.div(`spellName q${item.spell.quality}`, item.spell.name)
+				lineBuilders.div('line', ' ') +
+			lineBuilders.div('smallSpace', ' ') +
+			lineBuilders.div(`spellName q${item.spell.quality}`, item.spell.name)
 		);
+	},
+
+	typeAndSlot: () => {
+		if (!item.slot && !item.type)
+			return null;
+
+		if (!item.slot)
+			return `<div class="typeAndSlot">${item.type}</div>`;
+		else if (!item.type)
+			return `<div class="typeAndSlot">${item.slot}</div>`;
+
+		const { clientConfig: { slotTranslations } } = globals;
+
+		const slotInfo = slotTranslations[item.slot] ?? slotTranslations.unknown;
+
+		return `<div class="typeAndSlot"><div>${slotInfo}</div><div>${item.type}</div></div>`;
 	},
 
 	damage: () => {
 		if (!item.spell || !item.spell.values)
 			return null;
 
+		const { clientConfig: { statTranslations } } = globals;
+
 		const abilityValues = Object.entries(item.spell.values)
 			.map(([k, v]) => {
+				const translatedStat = statTranslations[k] ?? k;
+
 				if (!compare || !shiftDown)
-					return `${k}: ${v}<br/>`;
+					return `${translatedStat}: ${v}${translatedStat.includes('ercent') ? '%' : ''}<br/>`;
 
 				let delta = v - compare.spell.values[k];
 				// adjust by EPSILON to handle float point imprecision, otherwise 3.15 - 2 = 1.14 or 2 - 3.15 = -1.14
@@ -284,11 +321,22 @@ const lineBuilders = {
 				} else if (delta < 0)
 					rowClass = 'loseDamage';
 
-				return `<div class="${rowClass}">${k}: ${delta}</div>`;
+				return `<div class="${rowClass}">${translatedStat}: ${delta}${translatedStat.includes('ercent') ? '%' : ''}</div>`;
 			})
 			.join('');
 
-		return abilityValues;
+		let res = abilityValues;
+
+		if (!item.slot) {
+			res = (
+				lineBuilders.div('space', ' ') +
+				lineBuilders.div('line', ' ') +
+				lineBuilders.div('space', ' ') +
+				res
+			);
+		}
+
+		return res;
 	},
 
 	requires: className => {
@@ -298,10 +346,14 @@ const lineBuilders = {
 		if (equipErrors.length)
 			className += ' high-level';
 
-		return (
-			lineBuilders.div('space', ' ') +
-				lineBuilders.div(className, 'requires')
+		let res = (
+			lineBuilders.div('smallSpace', ' ') +
+			lineBuilders.div('line', ' ') +
+			lineBuilders.div('smallSpace', ' ') +
+			lineBuilders.div(className, 'Requires')
 		);
+
+		return res;
 	},
 
 	requireLevel: className => {
@@ -313,17 +365,21 @@ const lineBuilders = {
 
 		const level = item.level.push ? `${item.level[0]} - ${item.level[1]}` : item.level;
 
-		return lineBuilders.div(className, `level: ${level}`);
+		return lineBuilders.div(className, `Level: ${level}`);
 	},
 
 	requireStats: className => {
 		if (!item.requires || !item.requires[0])
 			return null;
 
+		const { clientConfig: { statTranslations } } = globals;
+
 		if (equipErrors.includes('stats'))
 			className += ' high-level';
 
-		let html = `${item.requires[0].stat}: ${item.requires[0].value}`;
+		const translatedStat = statTranslations[item.requires[0].stat];
+
+		let html = `${translatedStat}: ${item.requires[0].value}`;
 
 		return lineBuilders.div(className, html);
 	},
@@ -384,7 +440,9 @@ const lineBuilders = {
 
 		return (
 			lineBuilders.div('space', ' ') +
-				item.description
+			lineBuilders.div('line', ' ') +
+			lineBuilders.div('space', ' ') +
+			item.description
 		);
 	},
 

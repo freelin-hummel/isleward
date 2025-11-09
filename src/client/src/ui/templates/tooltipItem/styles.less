@@ -16,15 +16,12 @@
 		pointer-events: none;
 		padding: 10px;
 		color: @white;
-		align-items: center;
 		line-height: 18px;
-		max-width: 300px;
-		text-align: center;
+		max-width: 350px;
 
 		> *:not(:empty) {
 			display: flex;
 			flex-direction: column;
-			align-items: center;
 
 			& + * {
 				margin-top: @marginBetweenItems;
@@ -50,12 +47,41 @@
 			height: 2px;
 		}
 
+		.name {
+			display: flex;
+			flex-direction: row;
+			gap: 5px;
+
+			.quantity {
+				color: @grayC;
+			}
+
+		}
+
 		.type {
 			color: @grayC;
 		}
 
+		.slot {
+			color: @grayC;
+		}
+
+		.typeAndSlot {
+			color: @grayC;
+			width: 100%;
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			gap: 10px;
+		}
+
 		.power {
-			color: @greenA;
+			color: @tealB;
+
+			.infused {
+				color: @tealA;
+			}
+
 		}
 
 		> .implicitStats {
@@ -93,7 +119,7 @@
 			}
 
 			.enchanted {
-				color: @tealC !important;
+				color: @tealB !important;
 			}
 
 			.infused {
@@ -104,6 +130,7 @@
 
 		.effects {
 			color: @blueB;
+			text-align: justify;
 		}
 
 		.faction {
@@ -111,7 +138,7 @@
 		}
 
 		.high-level {
-			color: @redB;
+			color: @redB !important;
 		}
 
 		.material {
@@ -123,7 +150,7 @@
 		}
 
 		.info {
-			color: @grayD;
+			color: @grayC;
 		}
 
 		.damage {
@@ -138,8 +165,8 @@
 		}
 
 		.description {
-			color: @brownB;
-			text-align: center;
+			color: @grayB;
+			text-align: justify;
 		}
 
 		.worth {
@@ -147,6 +174,12 @@
 				color: @redB;
 			}
 
+		}
+
+		.requireStats,
+		.requireLevel,
+		.requireFaction {
+			color: @grayB;
 		}
 
 	}

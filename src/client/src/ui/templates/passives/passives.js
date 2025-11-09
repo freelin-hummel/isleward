@@ -19,6 +19,8 @@ export default {
 	size: {},
 	ctx: null,
 
+	hotkeyToOpen: 'p',
+
 	mouse: {
 		x: 0,
 		y: 0
@@ -82,7 +84,6 @@ export default {
 
 		this.find('.btnReset').on('click', this.events.onReset.bind(this));
 
-		this.onEvent('onKeyDown', this.onKeyDown.bind(this));
 		this.onEvent('uiMouseUp', this.events.onPanEnd.bind(this));
 		this.onEvent('onGetPassives', this.events.onGetPassives.bind(this));
 		this.onEvent('onGetPassivePoints', this.events.onGetPassivePoints.bind(this));
@@ -154,11 +155,6 @@ export default {
 	beforeHide () {
 		events.emit('onHideTooltip', this.el[0]);
 		this.tooltipId = null;
-	},
-
-	onKeyDown (key) {
-		if (key === 'p')
-			this.toggle();
 	},
 
 	renderers: {

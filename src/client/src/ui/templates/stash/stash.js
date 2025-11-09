@@ -182,8 +182,6 @@ export default {
 	onKeyDown (key) {
 		if (key === 'shift' && this.hoverItem)
 			this.onHover();
-		else if (key === 'esc' && this.shown)
-			this.toggle();
 	},
 
 	onKeyUp (key) {

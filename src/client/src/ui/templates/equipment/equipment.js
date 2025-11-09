@@ -1,8 +1,11 @@
+/* eslint-disable max-lines-per-function */
+
 import events from '../../../js/system/events';
 import client from '../../../js/system/client';
 import resources from '../../../js/resources';
 import template from './template.html?raw';
 import renderItem from '../../shared/renderItem';
+import globals from '../../../js/system/globals';
 import './styles.css';
 
 export default {
@@ -22,6 +25,8 @@ export default {
 
 	isInspecting: false,
 
+	hotkeyToOpen: 'j',
+
 	postRender () {
 		this.onEvent('onGetStats', this.onGetStats.bind(this));
 		this.onEvent('onGetItems', this.onGetItems.bind(this));
@@ -34,6 +39,10 @@ export default {
 
 		this.onEvent('onKeyDown', this.onKeyDown.bind(this));
 		this.onEvent('onKeyUp', this.onKeyUp.bind(this));
+
+		this.find('.slot[tooltip]')
+			.on('mousemove', this.onShowTooltipAuto.bind(this))
+			.on('mouseleave', this.onHideTooltip.bind(this));
 	},
 
 	beforeHide () {
@@ -48,6 +57,9 @@ export default {
 	onAfterShow () {
 		this.find('.itemList').hide();
 
+		if (!this.isInspecting)
+			this.find('.heading-text').html(`Character: ${window.player.name}`);
+
 		this.onGetStats();
 		this.onGetItems();
 
@@ -55,9 +67,7 @@ export default {
 	},
 
 	onKeyDown (key) {
-		if (key === 'j')
-			this.toggle();
-		else if (key === 'shift' && this.hoverItem)
+		if (key === 'shift' && this.hoverItem)
 			this.onHoverItem(this.hoverEl, this.hoverItem, this.hoverCompare);
 	},
 	onKeyUp (key) {
@@ -114,33 +124,46 @@ export default {
 				el.find('.info').html('new');
 		});
 
-		items
-			.filter(item => _.has(item, 'quickSlot') || (item.eq && (item.slot || _.has(item, 'runeSlot'))))
-			.forEach(item => {
-				let slot = item.slot;
-				if (_.has(item, 'runeSlot')) {
-					let runeSlot = item.runeSlot;
-					slot = 'rune-' + runeSlot;
-				} else if (_.has(item, 'quickSlot'))
-					slot = 'quick-' + item.quickSlot;
+		const renderItems = items
+			.filter(item => _.has(item, 'quickSlot') || (item.eq && (item.slot || _.has(item, 'runeSlot'))));
 
-				slot = item.equipSlot || slot;
-
-				const elSlot = this.find('[slot="' + slot + '"]')
-					.removeClass('empty show-default-icon');
-
-				const itemEl = renderItem(null, item, elSlot);
-
-				itemEl
-					.data('item', item)
-					.removeClass('empty show-default-icon')
-					.find('.icon')
-					.off()
-					.on('contextmenu', this.showContext.bind(this, item))
-					.on('mousedown', this.buildSlot.bind(this, elSlot))
-					.on('mousemove', this.onHoverItem.bind(this, elSlot, item, null))
-					.on('mouseleave', this.onHoverItem.bind(this, null, null));
+		const twoHandedItem = renderItems.find(f => f.slot === 'twoHanded');
+		if (twoHandedItem) {
+			renderItems.push({
+				...twoHandedItem,
+				equipSlot: 'offHand',
+				faded: true
 			});
+		}
+
+		renderItems.forEach(item => {
+			let slot = item.slot;
+			if (_.has(item, 'runeSlot')) {
+				let runeSlot = item.runeSlot;
+				slot = 'rune-' + runeSlot;
+			} else if (_.has(item, 'quickSlot'))
+				slot = 'quick-' + item.quickSlot;
+
+			slot = item.equipSlot || slot;
+
+			const elSlot = this.find('[slot="' + slot + '"]')
+				.removeClass('empty show-default-icon');
+
+			const itemEl = renderItem(null, item, elSlot);
+
+			itemEl
+				.data('item', item)
+				.removeClass('empty show-default-icon')
+				.find('.icon')
+				.off()
+				.on('contextmenu', this.showContext.bind(this, item))
+				.on('mousedown', this.buildSlot.bind(this, elSlot))
+				.on('mousemove', this.onHoverItem.bind(this, elSlot, item, null))
+				.on('mouseleave', this.onHoverItem.bind(this, null, null));
+
+			if (item.faded)
+				itemEl.addClass('faded');
+		});
 	},
 
 	showContext (item, e) {
@@ -181,6 +204,8 @@ export default {
 	onInspectTarget (result) {
 		this.isInspecting = true;
 
+		this.find('.heading-text').html(`Character: ${result.name}`);
+
 		this.show();
 
 		this.result = result;
@@ -203,9 +228,13 @@ export default {
 		let isRune = (slot.indexOf('rune') === 0);
 		const isConsumable = (slot.indexOf('quick') === 0);
 
-		let container = this.find('.itemList')
-			.empty()
-			.show();
+		let container = this.find('.itemList .contents')
+			.empty();
+
+		this.find('.itemList')
+			.css('display', 'flex');
+
+		this.find('.itemList .heading-text').html(`Choose an item to equip in the '${el.attr('slotName')}' slot`);
 
 		let hoverCompare = this.hoverCompare = el.data('item');
 
@@ -226,31 +255,65 @@ export default {
 		if (isConsumable)
 			items = items.filter((item, i) => items.findIndex(f => f.name === item.name) === i);
 
-		items.splice(0, 0, {
-			name: 'None',
-			slot: hoverCompare ? hoverCompare.slot : null,
-			id: (hoverCompare && !isConsumable) ? hoverCompare.id : null,
-			type: isConsumable ? 'consumable' : null,
+		items.splice(0, 0, ...[{
+			name: 'Back',
+			empty: true,
+			action: 'back'
+		}, {
 			empty: true
-		});
+		}, {
+			empty: true
+		}, {
+			empty: true
+		}, {
+			empty: true
+		}, {
+			empty: true
+		}, {
+			empty: true
+		}]);
+
+		if (hoverCompare) {
+			items.splice(6, 1, {
+				name: hoverCompare ? 'Unequip Item' : 'Back',
+				slot: hoverCompare ? hoverCompare.slot : null,
+				id: (hoverCompare && !isConsumable) ? hoverCompare.id : null,
+				type: isConsumable ? 'consumable' : null,
+				empty: true,
+				action: 'unequip'
+			});
+		}
+
 		if (hoverCompare)
-			items.splice(1, 0, hoverCompare);
+			items.splice(3, 1, hoverCompare);
 
 		items
 			.forEach(function (item, i) {
-				let sprite = item.sprite || [7, 0];
+				let spriteSheet = item.spritesheet ?? '../../../images/items.png';
+				let sprite = item.sprite;
 
-				let spriteSheet = item.empty ? '/images/uiIcons.png' : item.spritesheet || '../../../images/items.png';
-				if (i > 0 && item.type === 'consumable')
+				if (item.action === 'unequip') {
+					spriteSheet = '/images/uiIcons.png';
+					sprite = [7, 0];
+				} else if (item.action === 'back') {
+					spriteSheet = '/images/uiIcons.png';
+					sprite = [6, 0];
+				} else if (item.type === 'consumable')
 					spriteSheet = '../../../images/consumables.png';
 				else if (spriteSheet.indexOf('server/mods') === 0)
 					spriteSheet = resources.sprites[spriteSheet]?.src;
 
-				let imgX = -sprite[0] * 64;
-				let imgY = -sprite[1] * 64;
-
 				let itemEl = $('<div class="slot"><div class="icon"></div></div>')
 					.appendTo(container);
+
+				if (!sprite) {
+					itemEl.css('opacity', 0);
+
+					return;
+				}
+
+				const imgX = -sprite[0] * 64;
+				const imgY = -sprite[1] * 64;
 
 				itemEl
 					.find('.icon')
@@ -286,11 +349,19 @@ export default {
 			return;
 		}
 
+		if (item.action === 'back') {
+			this.find('.itemList').hide();
+
+			e.preventDefault();
+
+			return false;
+		}
+
 		let cpn = 'equipment';
 		let method = 'equip';
 		let data = { itemId: item.id };
 
-		if (item.empty)
+		if (item.action === 'unequip')
 			method = 'unequip';
 
 		if (item.type === 'consumable') {
@@ -372,91 +443,255 @@ export default {
 			this.stats = stats;
 
 		stats = stats || this.stats;
-
 		if (!this.shown)
 			return;
 
-		let container = this.el.find('.stats');
+		const { clientConfig: { statTranslations } } = globals;
 
-		container
-			.children('*:not(.tabs)')
-			.remove();
+		let container = this.el.find('.stats');
+		container.children('*:not(.tabs)').remove();
 
 		let xpRemaining = (stats.xpMax - stats.xp).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
+		const selectedTab = this.find('.tab.selected').html().toLowerCase();
+
 		let newStats = {
 			basic: {
-				level: stats.level,
-				'next level': xpRemaining + 'xp',
+				Level: stats.level,
+				'Next Level': xpRemaining + ' experience',
 				gap1: '',
-				gold: window.player.trade.gold,
-				gap2: '',
-				hp: ~~stats.hp + '/' + ~~stats.hpMax,
-				mana: ~~stats.mana + '/' + ~~stats.manaMax,
-				'hp regen': stats.regenHp,
-				'mana regen': ~~stats.regenMana + '%',
+				Health: ~~stats.hp + '/' + ~~stats.hpMax,
+				regenHp: stats.regenHp,
+				vit: stats.vit,
 				gap3: '',
+				Mana: ~~stats.mana + '/' + ~~stats.manaMax,
+				regenMana: ~~stats.regenMana + '%',
+				gap4: '',
 				str: stats.str,
 				int: stats.int,
-				dex: stats.dex,
-				vit: stats.vit
+				dex: stats.dex
 			},
-			offense: {
-				'global crit chance': (~~(stats.critChance * 10) / 10) + '%',
-				'global crit multiplier': (~~(stats.critMultiplier * 10) / 10) + '%',
-				'attack crit chance': (~~((stats.critChance + stats.attackCritChance) * 10) / 10) + '%',
-				'attack crit multiplier': (~~((stats.critMultiplier + stats.attackCritMultiplier) * 10) / 10) + '%',
-				'spell crit chance': (~~((stats.critChance + stats.spellCritChance) * 10) / 10) + '%',
-				'spell crit multiplier': (~~((stats.critMultiplier + stats.spellCritMultiplier) * 10) / 10) + '%',
+
+			offensive: {
+				critChance: {
+					addCritChance: (~~(stats.critChance * 10) / 10) + '%',
+					addAttackCritChance: (~~((stats.critChance + stats.attackCritChance) * 10) / 10) + '%',
+					addSpellCritChance: (~~((stats.critChance + stats.spellCritChance) * 10) / 10) + '%'
+				},
+
+				gap0: '',
+
+				critMultiplier: {
+					addCritMultiplier: (~~(stats.critMultiplier * 10) / 10) + '%',
+					addAttackCritMultiplier: (~~((stats.critMultiplier + stats.attackCritMultiplier) * 10) / 10) + '%',
+					addSpellCritMultiplier: (~~((stats.critMultiplier + stats.spellCritMultiplier) * 10) / 10) + '%'
+				},
+
 				gap1: '',
-				'arcane increase': stats.elementArcanePercent + '%',
-				'fire increase': stats.elementFirePercent + '%',
-				'frost increase': stats.elementFrostPercent + '%',
-				'holy increase': stats.elementHolyPercent + '%',
-				'poison increase': stats.elementPoisonPercent + '%',
-				'physical increase': stats.physicalPercent + '%',
+
+				attackSpeed: (100 + stats.attackSpeed) + '%',
+				castSpeed: (100 + stats.castSpeed) + '%',
+
 				gap2: '',
-				'spell increase': stats.spellPercent + '%',
-				gap3: '',
-				'attack speed': (100 + stats.attackSpeed) + '%',
-				'cast speed': (100 + stats.castSpeed) + '%'
-			},
-			defense: {
-				armor: stats.armor,
-				'chance to block attacks': stats.blockAttackChance + '%',
-				'chance to block spells': stats.blockSpellChance + '%',
-				gap1: '',
-				'chance to dodge attacks': (~~(stats.dodgeAttackChance * 10) / 10) + '%',
-				'chance to dodge spells': (~~(stats.dodgeSpellChance * 10) / 10) + '%',
-				gap2: '',
-				'arcane resist': stats.elementArcaneResist,
-				'fire resist': stats.elementFireResist,
-				'frost resist': stats.elementFrostResist,
-				'holy resist': stats.elementHolyResist,
-				'poison resist': stats.elementPoisonResist,
-				gap3: '',
-				'all resist': stats.elementAllResist,
+
+				addAttackDamage: stats.addAttackDamage,
+				addSpellDamage: stats.addSpellDamage,
+
 				gap4: '',
-				'life gained on hit': stats.lifeOnHit
+
+				damageGroups: {
+					physicalPercent: stats.physicalPercent,
+					elementArcanePercent: stats.elementArcanePercent,
+					elementFirePercent: stats.elementFirePercent,
+					elementHolyPercent: stats.elementHolyPercent,
+					elementPoisonPercent: stats.elementPoisonPercent,
+					elementFrostPercent: stats.elementFrostPercent,
+					spellPercent: stats.spellPercent
+				}
 			},
-			misc: {
-				'item quality': stats.magicFind + '%',
-				'item quantity': stats.itemQuantity + '%',
+
+			defensive: {
+				armor: stats.armor,
+
 				gap1: '',
-				'sprint chance': ((~~(stats.sprintChance * 100) / 100) || 0) + '%',
+
+				blockAttackChance: stats.blockAttackChance + '%',
+				blockSpellChance: stats.blockSpellChance + '%',
+
 				gap2: '',
-				'xp increase': stats.xpIncrease + '%',
+
+				dodgeAttackChance: (~~(stats.dodgeAttackChance * 10) / 10) + '%',
+				dodgeSpellChance: (~~(stats.dodgeSpellChance * 10) / 10) + '%',
+
+				gap4: '',
+
+				lifeOnHit: stats.lifeOnHit,
+
+				gap5: '',
+
+				resistGroups: {
+					elementArcaneResist: stats.elementArcaneResist,
+					elementFireResist: stats.elementFireResist,
+					elementHolyResist: stats.elementHolyResist,
+					elementPoisonResist: stats.elementPoisonResist,
+					elementFrostResist: stats.elementFrostResist,
+					elementAllResist: stats.elementAllResist
+				}
+			},
+
+			other: {
+				magicFind: stats.magicFind + '%',
+				itemQuantity: stats.itemQuantity + '%',
+
+				gap1: '',
+
+				sprintChance: ((~~(stats.sprintChance * 100) / 100) || 0) + '%',
+
+				gap2: '',
+
+				xpIncrease: stats.xpIncrease + '%',
+
 				gap3: '',
-				'chance to catch a fish': stats.catchChance + '%',
-				'fishing speed': stats.catchSpeed + '%',
-				'increased fish rarity': stats.fishRarity + '%',
-				'increased fish weight': stats.fishWeight + '%',
-				'chance to fish items': stats.fishItems + '%'
+
+				catchChance: stats.catchChance + '%',
+				catchSpeed: stats.catchSpeed + '%',
+				fishRarity: stats.fishRarity + '%',
+				fishWeight: stats.fishWeight + '%',
+				fishItems: stats.fishItems + '%'
 			}
-		}[this.find('.tab.selected').html()];
+		}[selectedTab];
+
+		const damageGroups = [
+			{ key: 'physicalPercent', label: 'Physical', color: 'var(--color-element-default)' },
+			{ key: 'elementArcanePercent', label: 'Arcane', color: 'var(--color-element-arcane)' },
+			{ key: 'elementFirePercent', label: 'Fire', color: 'var(--color-element-fire)' },
+			{ key: 'elementFrostPercent', label: 'Frost', color: 'var(--color-element-frost)' },
+			{ key: 'elementHolyPercent', label: 'Holy', color: 'var(--color-element-holy)' },
+			{ key: 'elementPoisonPercent', label: 'Poison', color: 'var(--color-element-poison)' },
+			{ key: 'spellPercent', label: 'Spell', color: 'elementalRainbow' }
+		];
+
+		const resistGroups = [
+			{ key: 'elementArcaneResist', label: 'Arcane', color: 'var(--color-element-arcane)' },
+			{ key: 'elementFireResist', label: 'Fire', color: 'var(--color-element-fire)' },
+			{ key: 'elementFrostResist', label: 'Frost', color: 'var(--color-element-frost)' },
+			{ key: 'elementHolyResist', label: 'Holy', color: 'var(--color-element-holy)' },
+			{ key: 'elementPoisonResist', label: 'Poison', color: 'var(--color-element-poison)' },
+			{ key: 'elementAllResist', label: 'All Elemental', color: 'elementalRainbow' }
+		];
+
+		const renderElementalGroup = (label, groups) => {
+			let wrap = $('<div class="stat elemental-group"></div>');
+			wrap.append(`<div class="elemental-heading">${label}</div>`);
+
+			let row = $('<div class="elemental-row"></div>').appendTo(wrap);
+
+			groups.forEach(g => {
+				let tooltipText = label.includes('Damage') ?
+					`${g.label} damage is increased by ${g.value}%` :
+					`You have ${g.value}% ${g.label} resistance`;
+
+				const borderColor = g.color === 'elementalRainbow' ? 'transparent' : g.color;
+
+				const tooltipBase = statTranslations.tooltips[g.key];
+
+				const elemClass = g.color === 'elementalRainbow' ? 'elem rainbow' : 'elem';
+				const el = $(`
+					<div class="${elemClass}" style="border-bottom: 4px solid ${borderColor};" tooltip="${tooltipText}">
+						<span>${g.value}%</span>
+					</div>
+				`)
+					.appendTo(row)
+					.on('mousemove', this.onShowTooltipAuto.bind(this))
+					.on('mouseleave', this.onHideTooltip.bind(this));
+
+				if (tooltipBase)
+					el.attr('tooltipBase', tooltipBase);
+			});
+
+			container.append(wrap);
+		};
+
+		const renderCritGroup = (label, parts) => {
+			let wrap = $('<div class="stat elemental-group"></div>');
+			wrap.append(`<div class="elemental-heading">${label}</div>`);
+
+			let row = $('<div class="elemental-row"></div>').appendTo(wrap);
+
+			parts.forEach(p => {
+				const translated = statTranslations[p.key] ?? p.key;
+
+				const tooltipBase = statTranslations.tooltips[p.key];
+
+				const tooltipText = `${translated} is ${p.value}`;
+				const el = $(`
+					<div class="elem" style="border-bottom: 4px solid var(--grayB);" tooltip="${tooltipText}">
+						<span>${p.type}: ${p.value}</span>
+					</div>
+				`)
+					.appendTo(row)
+					.on('mousemove', this.onShowTooltipAuto.bind(this))
+					.on('mouseleave', this.onHideTooltip.bind(this));
+
+				if (tooltipBase)
+					el.attr('tooltipBase', tooltipBase);
+			});
+
+			container.append(wrap);
+		};
 
 		for (let s in newStats) {
-			let label = s + ': ';
+			if (s === 'damageGroups') {
+				let dg = [];
+				for (let k in newStats[s]) {
+					let val = newStats[s][k];
+					dg.push({
+						key: k,
+						label: damageGroups.find(x => x.key === k)?.label || k,
+						color: damageGroups.find(x => x.key === k)?.color || '#fff',
+						value: val
+					});
+				}
+				renderElementalGroup('Damage Increase:', dg);
+
+				continue;
+			} else if (s === 'resistGroups') {
+				let rg = [];
+				for (let k in newStats[s]) {
+					let val = newStats[s][k];
+					rg.push({
+						key: k,
+						label: resistGroups.find(x => x.key === k)?.label || k,
+						color: resistGroups.find(x => x.key === k)?.color || '#fff',
+						value: val
+					});
+				}
+				renderElementalGroup('Resistances:', rg);
+
+				continue;
+			} else if (s === 'critChance') {
+				let c = newStats[s];
+				renderCritGroup('Critical Hit Chance:', [
+					{ key: 'addCritChance', type: 'Global', value: c.addCritChance },
+					{ key: 'addAttackCritChance', type: 'Attack', value: c.addAttackCritChance },
+					{ key: 'addSpellCritChance', type: 'Spell', value: c.addSpellCritChance }
+				]);
+
+				continue;
+			} else if (s === 'critMultiplier') {
+				let c = newStats[s];
+				renderCritGroup('Critical Hit Damage Multiplier:', [
+					{ key: 'addCritMultiplier', type: 'Global', value: c.addCritMultiplier },
+					{ key: 'addAttackCritMultiplier', type: 'Attack', value: c.addAttackCritMultiplier },
+					{ key: 'addSpellCritMultiplier', type: 'Spell', value: c.addSpellCritMultiplier }
+				]);
+
+				continue;
+			}
+
+			const translated = statTranslations[s] ?? s;
+
+			let label = translated + ': ';
 			let value = newStats[s];
 
 			let isGap = false;
@@ -466,16 +701,71 @@ export default {
 				value = '';
 			}
 
-			let row = $('<div class="stat"><font class="q0">' + label + '</font><font color="#999">' + value + '</font></div>')
-				.appendTo(container);
+			let row = $(
+				'<div class="stat"><font class="q0">' +
+				label +
+				'</font><font style="color: var(--grayC)">' +
+				value +
+				'</font></div>'
+			).appendTo(container);
 
-			if (s === 'gold')
+			const tooltip = statTranslations.tooltips[s];
+			if (tooltip) {
+				row
+					.attr('tooltip', tooltip)
+					.on('mousemove', this.onShowTooltipAuto.bind(this))
+					.on('mouseleave', this.onHideTooltip.bind(this));
+			}
+
+			if (s === 'Gold')
 				row.addClass('gold');
-			else if ((s === 'level') || (s === 'next level'))
+			else if (s === 'Level' || s === 'Next Level')
 				row.addClass('blueText');
 
 			if (isGap)
 				row.addClass('empty');
 		}
+	},
+
+	onShowTooltipAuto: function ({ currentTarget, originalEvent }) {
+		const { player: { inventory: { items } } } = window;
+
+		const slot = $(currentTarget).attr('slot');
+
+		if (
+			slot &&
+			(
+				items.some(f => f.equipSlot === slot && f.eq) ||
+				slot === 'offHand' && items.some(f => f.slot === 'twoHanded' && f.eq)
+			)
+		)
+			return;
+
+		const tooltipPos = {
+			x: originalEvent.clientX + 24,
+			y: originalEvent.clientY
+		};
+
+		const tooltipPre = $(currentTarget).attr('tooltip') ?? 'No Tooltip';
+		const tooltipBase = $(currentTarget).attr('tooltipBase') ?? '';
+
+		let tooltip = tooltipPre;
+		if (tooltipBase)
+			tooltip = `${tooltipBase}<br /><br />${tooltipPre}`;
+
+		events.emit('onShowTooltip', tooltip, currentTarget, tooltipPos);
+	},
+
+	onShowTooltip: function (tooltip, { currentTarget, originalEvent }) {
+		const tooltipPos = {
+			x: originalEvent.clientX + 24,
+			y: originalEvent.clientY
+		};
+
+		events.emit('onShowTooltip', tooltip, currentTarget, tooltipPos);
+	},
+
+	onHideTooltip: function (e) {
+		events.emit('onHideTooltip', e.currentTarget);
 	}
 };

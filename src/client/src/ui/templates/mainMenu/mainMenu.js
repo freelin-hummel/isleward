@@ -12,6 +12,10 @@ export default {
 
 	hasClose: true,
 
+	timeHidden: null,
+
+	hotkeyToOpen: 'esc',
+
 	postRender () {
 		this.onEvent('onCloseOptions', this.show.bind(this));
 		this.onEvent('onShowMainMenu', this.show.bind(this));
@@ -73,14 +77,11 @@ export default {
 
 	beforeHide () {
 		this.onResize();
+
+		this.timeHidden = +new Date();
 	},
 
 	logOut () {
 		window.location.reload();
-	},
-
-	onKeyDown (key) {
-		if (key === 'esc')
-			this.toggle();
 	}
 };

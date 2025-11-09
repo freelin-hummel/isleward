@@ -189,6 +189,8 @@ export default {
 	},
 
 	onUiKeyDown (keyEvent) {
+		let closedModal = false;
+
 		if (keyEvent.key === 'esc') {
 			this.uis.forEach(u => {
 				if (!u.modal || !u.shown)
@@ -196,12 +198,21 @@ export default {
 
 				keyEvent.consumed = true;
 				u.toggle();
+
+				closedModal = true;
 			});
 
 			$('.uiOverlay').hide();
 			events.emit('onHideContextMenu');
 		} else if (['o', 'j', 'h', 'i'].indexOf(keyEvent.key) > -1)
 			$('.uiOverlay').hide();
+
+		if (!keyEvent.key === 'esc' || !closedModal) {
+			this.uis.forEach(ui => {
+				if (ui.hotkeyToOpen === keyEvent.key)
+					ui.toggle();
+			});
+		}
 	},
 
 	async preload () {

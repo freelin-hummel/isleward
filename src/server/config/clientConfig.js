@@ -9,6 +9,7 @@ const consts = require('./consts');
 //External Config
 const tos = require('./tos');
 const statTranslations = require('./statTranslations');
+const slotTranslations = require('./slotTranslations');
 
 //Config
 const config = {
@@ -223,23 +224,23 @@ const config = {
 	},
 	itemTooltipConfig: [
 		{ handler: 'name' },
-		{ handler: 'div', config: { className: 'type', lineBuilder: 'type' } },
+		{ handler: 'typeAndSlot' },
 		{ handler: 'div', config: { className: 'power', lineBuilder: 'power' } },
+		{ handler: 'spellName' },
+		{ handler: 'div', config: { className: 'damage', lineBuilder: 'damage' } },
 		{ handler: 'div', config: { className: 'implicitStats', lineBuilder: 'implicitStats' } },
 		{ handler: 'div', config: { className: 'stats', lineBuilder: 'stats' } },
 		{ handler: 'div', config: { className: 'material', lineBuilder: 'material' } },
 		{ handler: 'div', config: { className: 'quest', lineBuilder: 'quest' } },
-		{ handler: 'spellName' },
-		{ handler: 'div', config: { className: 'damage', lineBuilder: 'damage' } },
-		{ handler: 'div', config: { className: 'effects', lineBuilder: 'effects' } },
 		{ handler: 'div', config: { className: 'cd', lineBuilder: 'cd' } },
 		{ handler: 'div', config: { className: 'uses', lineBuilder: 'uses' } },
-		{ handler: 'div', config: { className: 'description', lineBuilder: 'description' } },
-		{ handler: 'div', config: { className: 'worth', lineBuilder: 'worth' } },
+		{ handler: 'div', confiig: { className: 'worth', lineBuilder: 'worth' } },
+		{ handler: 'div', config: { className: 'effects', lineBuilder: 'effects' } },
 		{ handler: 'requires', config: { className: 'requires' } },
-		{ handler: 'requireLevel' },
-		{ handler: 'requireStats' },
-		{ handler: 'requireFaction' },
+		{ handler: 'requireLevel', config: { className: 'requireLevel' } },
+		{ handler: 'requireStats', config: { className: 'requireStats' } },
+		{ handler: 'requireFaction', config: { className: 'requireFaction' } },
+		{ handler: 'div', config: { className: 'description', lineBuilder: 'description' } },
 		{ handler: 'div', config: { className: 'info', lineBuilder: 'info' } }
 	],
 	clientComponents: [],
@@ -252,8 +253,8 @@ const config = {
 			showQuests: 'on',
 			showEvents: true,
 			playAudio: true,
-			qualityIndicators: 'off',
-			unusableIndicators: 'off',
+			qualityIndicators: 'border',
+			unusableIndicators: 'background',
 			rememberChatChannel: true,
 			soundVolume: 100,
 			musicVolume: 100,
@@ -352,7 +353,8 @@ const config = {
 
 	},
 	tos,
-	statTranslations
+	statTranslations,
+	slotTranslations
 };
 
 module.exports = {

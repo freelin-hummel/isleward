@@ -11,8 +11,9 @@ export default {
 
 	list: null,
 
+	hotkeyToOpen: 'y',
+
 	postRender () {
-		this.onEvent('onKeyDown', this.onKeyDown.bind(this));
 		this.onEvent('onGetReputations', this.onGetReputations.bind(this));
 		this.onEvent('onShowReputation', this.toggle.bind(this, true));
 	},
@@ -42,11 +43,6 @@ export default {
 			el.on('click', this.onSelectFaction.bind(this, el, l));
 			el.on('click', events.emit.bind(events, 'onClickButton'));
 		});
-	},
-
-	onKeyDown (key) {
-		if (key === 'y')
-			this.toggle();
 	},
 
 	onSelectFaction (el, faction) {

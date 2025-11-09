@@ -94,12 +94,7 @@ module.exports = {
 
 	values: baseStats,
 
-	statScales: {
-		vitToHp: 10,
-		strToArmor: 1,
-		intToMana: (1 / 6),
-		dexToDodge: (1 / 12)
-	},
+	statScales: balance.statScales,
 
 	syncer: null,
 
