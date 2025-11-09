@@ -736,6 +736,10 @@ export default {
 			slot &&
 			(
 				items.some(f => f.equipSlot === slot && f.eq) ||
+				(
+					slot.includes('rune-') &&
+					items.some(f => f.runeSlot === +slot.replace('rune-', '') && f.eq)
+				) ||
 				slot === 'offHand' && items.some(f => f.slot === 'twoHanded' && f.eq)
 			)
 		)

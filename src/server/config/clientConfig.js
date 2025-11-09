@@ -241,6 +241,7 @@ const config = {
 		{ handler: 'requireStats', config: { className: 'requireStats' } },
 		{ handler: 'requireFaction', config: { className: 'requireFaction' } },
 		{ handler: 'div', config: { className: 'description', lineBuilder: 'description' } },
+		{ handler: 'worth' },
 		{ handler: 'div', config: { className: 'info', lineBuilder: 'info' } }
 	],
 	clientComponents: [],

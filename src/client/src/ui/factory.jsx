@@ -207,12 +207,23 @@ export default {
 		} else if (['o', 'j', 'h', 'i'].indexOf(keyEvent.key) > -1)
 			$('.uiOverlay').hide();
 
-		if (!keyEvent.key === 'esc' || !closedModal) {
-			this.uis.forEach(ui => {
-				if (ui.hotkeyToOpen === keyEvent.key)
-					ui.toggle();
-			});
-		}
+		if (keyEvent.key === 'esc' && closedModal)
+			return;
+
+		//Don't allow esc to open main menu if we have a path or auto-attack is active
+		if (
+			keyEvent.key === 'esc' &&
+			(
+				window.player?.pather?.path?.length > 0 ||
+				window.player?.spellbook?.spells?.some(s => s.autoActive)
+			)
+		)
+			return;
+
+		this.uis.forEach(ui => {
+			if (ui.hotkeyToOpen === keyEvent.key)
+				ui.toggle();
+		});
 	},
 
 	async preload () {

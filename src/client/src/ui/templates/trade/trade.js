@@ -31,7 +31,7 @@ export default {
 
 		this.find('.gold .amount').html(window.player?.trade?.gold);
 
-		this.find('.heading-text').html(action);
+		this.find('.heading-text').html(action[0].toUpperCase() + action.substring(1));
 
 		let uiInventory = $('.uiInventory').data('ui');
 

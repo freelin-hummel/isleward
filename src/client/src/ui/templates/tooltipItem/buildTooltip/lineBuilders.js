@@ -409,7 +409,7 @@ const lineBuilders = {
 
 		return (
 			lineBuilders.div('space', ' ') +
-				`value: ${item.worthText}`
+			`<span class="worth">Price: ${item.worthText}</span>`
 		);
 	},
 
@@ -421,9 +421,9 @@ const lineBuilders = {
 
 		if (isMobile) {
 			if (compare && !shiftDown)
-				text = 'tap again to compare';
+				text = 'Tap again to compare';
 		} else if (!shiftDown && compare)
-			text = '[shift] to compare';
+			text = 'Hold [shift] to compare';
 
 		if (!text)
 			return null;
