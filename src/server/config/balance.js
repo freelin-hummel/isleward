@@ -1,6 +1,20 @@
 //Imports
 const eventEmitter = require('../misc/events');
 
+//Stat Scales
+const statScales = {
+	vitToHp: 10,
+	strToArmor: 1,
+	intNeededPerMana: 6,
+	intToMana: 'calculated below',
+	dexNeededPerDodge: 12,
+	dexToDodge: 'calculated below'
+};
+
+statScales.dexToDodge = 1 / statScales.dexNeededPerDodge;
+statScales.intToMana = 1 / statScales.intNeededPerMana;
+
+//Balance
 const serverBalance = {
 	//The maximum level a player can reach
 	maxLevel: 23,
@@ -16,12 +30,7 @@ const serverBalance = {
 	// y = 0.1 * ⋅x^1.471
 	hpMults: [0.100, 0.277, 0.503, 0.768, 1.067, 1.395, 1.750, 2.130, 2.532, 2.957, 3.402, 3.866, 4.349, 4.850, 5.368, 5.903, 6.453, 7.019, 7.600, 8.195, 8.805, 9.429, 10.066],
 
-	statScales: {
-		vitToHp: 10,
-		strToArmor: 1,
-		intToMana: (1 / 6),
-		dexToDodge: (1 / 12)
-	}
+	statScales
 };
 
 const initMainThread = () => {
