@@ -1,4 +1,4 @@
-FROM rust:1.86-bookworm AS rust
+FROM rust:1.90-bookworm AS rust
 
 WORKDIR /source
 COPY ./rust-server .
