@@ -48,13 +48,6 @@ module.exports = {
 		if (!this.targetGround && !target.aggro)
 			return spellCastResultTypes.invalidTarget;
 
-		if (this.has('range')) {
-			const distance = Math.max(Math.abs(target.x - obj.x), Math.abs(target.y - obj.y));
-
-			if (distance > this.range)
-				return spellCastResultTypes.outOfRange;
-		}
-
 		if (this.cd > 0)
 			return spellCastResultTypes.onCooldown;
 		else if (this.manaCost > obj.stats.values.mana)
@@ -67,6 +60,13 @@ module.exports = {
 				return spellCastResultTypes.success;
 			else if (!obj.aggro.canAttack(target))
 				return spellCastResultTypes.invalidTarget;
+		}
+
+		if (this.has('range')) {
+			const distance = Math.max(Math.abs(target.x - obj.x), Math.abs(target.y - obj.y));
+
+			if (distance > this.range)
+				return spellCastResultTypes.outOfRange;
 		}
 
 		return spellCastResultTypes.success;
