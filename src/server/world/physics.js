@@ -56,23 +56,38 @@ module.exports = {
 
 	addObject: function (obj, x, y, fromX, fromY) {
 		const idsOfCollidingObjects = this.engine.beforeAddObject(x, y, fromX, fromY);
+		if (!idsOfCollidingObjects) {
+			io.logError({
+				sourceModule: 'physics',
+				sourceMethod: 'setAsync',
+				error: new Error('rust.beforeAddObject returned None instead of an array'),
+				info: {
+					zone: instancer.mapName,
+					objName: obj.name,
+					x,
+					y,
+					fromX,
+					fromY
+				}
+			});
+		} else {
+			for (let entry of idsOfCollidingObjects) {
+				const [typeOfEvent, id] = entry.split('|');
 
-		for (let entry of idsOfCollidingObjects) {
-			const [typeOfEvent, id] = entry.split('|');
+				const checkObj = objects.objects.find(f => f.id + '' === id);
 
-			const checkObj = objects.objects.find(f => f.id + '' === id);
+				// TODO: Ensure these can be ignored. Possible the object has already been deleted from the world
+				if (!checkObj)
+					continue;
+				else if (typeOfEvent === 'enter') {
+					if (checkObj.collisionEnter(obj))
+						return;
 
-			// TODO: Ensure these can be ignored. Possible the object has already been deleted from the world
-			if (!checkObj)
-				continue;
-			else if (typeOfEvent === 'enter') {
-				if (checkObj.collisionEnter(obj)) 
-					return;
-			
-				obj.collisionEnter(checkObj);
-			} else if (typeOfEvent === 'stay') {
-				checkObj.collisionStay(obj);
-				obj.collisionStay(checkObj);
+					obj.collisionEnter(checkObj);
+				} else if (typeOfEvent === 'stay') {
+					checkObj.collisionStay(obj);
+					obj.collisionStay(checkObj);
+				}
 			}
 		}
 
