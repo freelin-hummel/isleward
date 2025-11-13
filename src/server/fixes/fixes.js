@@ -432,7 +432,10 @@ module.exports = {
 		items
 			.filter(f => f.spell !== undefined && f.slot !== undefined)
 			.forEach(item => {
-				const { spellConfig } = itemTypes.types[item.slot][item.type];
+				//There are items with invalid slot/type combinations
+				const spellConfig = itemTypes.types[item.slot]?.[item.type]?.spellConfig;
+				if (!spellConfig)
+					return;
 
 				//We are slowly removing statMult from everything (Should just be 1 on everything implicitly)
 				delete item.spell.statMult;
