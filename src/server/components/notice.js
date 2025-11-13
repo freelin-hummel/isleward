@@ -28,7 +28,7 @@ module.exports = {
 		let cpn = null;
 
 		if (typeof(action) === 'function') {
-			action(obj);
+			action.call(this, obj);
 			
 			return;
 		}
@@ -45,7 +45,7 @@ module.exports = {
 		}
 
 		cpn = obj[action.cpn];
-		if ((cpn) && (cpn[action.method]))
+		if (cpn && cpn[action.method])
 			cpn[action.method](...args);
 	},
 
