@@ -99,7 +99,7 @@ const addContextEvents = (el, item, getItemContextConfig) => {
 	el.on('contextmenu', onShowContext.bind(this, item, getItemContextConfig));
 };
 
-export default (container, item, useEl, manageTooltip, getItemContextConfig, showNewIndicators = true) => {
+const renderItem = (container, item, useEl, manageTooltip, getItemContextConfig, showNewIndicators = true) => {
 	const { clientConfig: { spriteSizes } } = globals;
 
 	const itemEl = useEl || $(tplItem).appendTo(container);
@@ -193,3 +193,5 @@ export default (container, item, useEl, manageTooltip, getItemContextConfig, sho
 
 	return itemEl;
 };
+
+export default renderItem;
