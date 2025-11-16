@@ -58,7 +58,7 @@ export default {
 		if (this.el.hasClass('disabled'))
 			return;
 
-		this.el.addClass('disabled');
+		this.find('.details').removeClass('disabled');
 
 		client.request({
 			cpn: 'auth',
@@ -78,8 +78,11 @@ export default {
 
 			$('.uiLoginExtra').remove();
 			this.destroy();
-		} else
+		} else {
+			this.find('.details').removeClass('disabled');
+
 			this.el.find('.message').html(res);
+		}
 	},
 
 	onRegisterClick () {
