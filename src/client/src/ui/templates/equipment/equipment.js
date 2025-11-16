@@ -110,6 +110,10 @@ export default {
 
 		this.find('[slot]').toArray().forEach(el => {
 			el = $(el);
+
+			//Mods might have added more elements. Delete those so we can recreate from scratch
+			el.children().not('.icon, .info').remove();
+
 			let slot = el.attr('slot');
 			let newItems = window.player.inventory.items.some(i => {
 				if (slot.indexOf('finger') === 0)
@@ -228,7 +232,7 @@ export default {
 		let isRune = (slot.indexOf('rune') === 0);
 		const isConsumable = (slot.indexOf('quick') === 0);
 
-		let container = this.find('.itemList .contents')
+		let container = this.find('.itemList .grid')
 			.empty();
 
 		this.find('.itemList')
@@ -258,20 +262,10 @@ export default {
 		items.splice(0, 0, ...[{
 			name: 'Back',
 			empty: true,
-			action: 'back'
-		}, {
-			empty: true
-		}, {
-			empty: true
-		}, {
-			empty: true
-		}, {
-			empty: true
-		}, {
-			empty: true
-		}, {
-			empty: true
-		}]);
+			action: 'back',
+			spritesheet: '/images/uiIcons.png',
+			sprite: [6, 0]
+		}, null, null, null, null, null, null]);
 
 		if (hoverCompare) {
 			items.splice(6, 1, {
@@ -280,53 +274,31 @@ export default {
 				id: (hoverCompare && !isConsumable) ? hoverCompare.id : null,
 				type: isConsumable ? 'consumable' : null,
 				empty: true,
-				action: 'unequip'
+				action: 'unequip',
+				spritesheet: '/images/uiIcons.png',
+				sprite: [7, 0]
 			});
 		}
 
 		if (hoverCompare)
 			items.splice(3, 1, hoverCompare);
 
-		items
-			.forEach(function (item, i) {
-				let spriteSheet = item.spritesheet ?? '../../../images/items.png';
-				let sprite = item.sprite;
+		items.forEach(item => {
+			const itemEl = renderItem(container, item);
 
-				if (item.action === 'unequip') {
-					spriteSheet = '/images/uiIcons.png';
-					sprite = [7, 0];
-				} else if (item.action === 'back') {
-					spriteSheet = '/images/uiIcons.png';
-					sprite = [6, 0];
-				} else if (item.type === 'consumable')
-					spriteSheet = '../../../images/consumables.png';
-				else if (spriteSheet.indexOf('server/mods') === 0)
-					spriteSheet = resources.sprites[spriteSheet]?.src;
+			if (!item)
+				return;
 
-				let itemEl = $('<div class="slot"><div class="icon"></div></div>')
-					.appendTo(container);
+			itemEl
+				.on('mousedown', this.equipItem.bind(this, item, slot))
+				.on('mousemove', this.onHoverItem.bind(this, itemEl, item, null))
+				.on('mouseleave', this.onHoverItem.bind(this, null, null));
 
-				if (!sprite) {
-					itemEl.css('opacity', 0);
-
-					return;
-				}
-
-				const imgX = -sprite[0] * 64;
-				const imgY = -sprite[1] * 64;
-
-				itemEl
-					.find('.icon')
-					.css('background', 'url("' + spriteSheet + '") ' + imgX + 'px ' + imgY + 'px')
-					.on('mousedown', this.equipItem.bind(this, item, slot))
-					.on('mousemove', this.onHoverItem.bind(this, itemEl, item, null))
-					.on('mouseleave', this.onHoverItem.bind(this, null, null));
-
-				if (item === hoverCompare)
-					itemEl.find('.icon').addClass('eq');
-				else if (item.isNew)
-					el.find('.icon').addClass('new');
-			}, this);
+			if (item === hoverCompare)
+				itemEl.find('.icon').addClass('eq');
+			else if (item.isNew)
+				el.find('.icon').addClass('new');
+		});
 
 		if (!items.length)
 			container.hide();
