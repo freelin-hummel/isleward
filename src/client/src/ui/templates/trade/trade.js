@@ -101,7 +101,7 @@ export default {
 			if (item.worth.currency)
 				item.worthText = item.worth.amount + 'x ' + item.worth.currency;
 			else
-				item.worthText = ~~(itemList.markup * item.worth);
+				item.worthText = `${~~(itemList.markup * item.worth)} Gold`;
 		}
 
 		this.center();

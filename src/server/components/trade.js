@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 const eventEmitter = require('../misc/events');
 
 const generator = require('../items/generator');
@@ -18,7 +19,7 @@ const sendMessage = ({ instance, id, serverId }, color, message) => {
 module.exports = {
 	type: 'trade',
 
-	items: [],
+	items: null,
 	buybackList: {},
 
 	maxBuyback: 10,
@@ -27,10 +28,10 @@ module.exports = {
 	gold: 0,
 
 	target: null,
+	action: null,
 
 	regenCd: 0,
 	regenCdMax: 1710,
-	genLeft: 0,
 
 	markup: {
 		buy: 1,
@@ -38,78 +39,150 @@ module.exports = {
 	},
 
 	init: function (blueprint) {
+		const { gold, markup, items, regenCdMax = this.regenCdMax } = blueprint;
+
 		this.blueprint = blueprint;
-		this.gold = blueprint.gold;		
+		this.gold = gold;
 		this.items = [];
+		this.regenCd = 0;
+		this.regenCdMax = regenCdMax;
+
+		if (!items)
+			return;
+
+		this.markup = markup;
+
+		if (blueprint.faction) {
+			this.obj.extendComponent('trade', 'factionVendor', blueprint);
+
+			return;
+		}
+
+		this.update();
+	},
+
+	update: function () {
+		if (!this.blueprint.items?.max)
+			return;
+
+		if (this.regenCd > 0) {
+			this.regenCd--;
+
+			return;
+		}
+
+		const { items, blueprint } = this;
+		const { forceItems, level: itemLevelRange, items: blueprintItems } = blueprint;
+		const { max: amountOfItemsForSale, extra: extraItems, infinite: itemsAreInfinite } = blueprintItems;
+
 		this.regenCd = this.regenCdMax;
 
-		(blueprint.forceItems || []).forEach(function (f, i) {
-			let item = extend({}, f);
+		items.length = 0;
+
+		if (forceItems) {
+			forceItems.forEach((f, i) => {
+				const forcedItem = extend({}, f);
+
+				let forcedItemId = 0;
+				items.forEach(checkItem => {
+					if (checkItem.id >= forcedItemId)
+						forcedItemId = checkItem.id + 1;
+				});
+
+				if (forcedItem.type === 'skin') {
+					const skinBlueprint = skins.getBlueprint(forcedItem.skinId);
+
+					forcedItem.name = skinBlueprint.name;
+					forcedItem.sprite = skinBlueprint.sprite;
+					forcedItem.spritesheet = skinBlueprint.spritesheet;
+				}
+
+				forcedItem.id = forcedItemId;
+
+				items.push(forcedItem);
+			});
+		}
+
+		if (extraItems) {
+			extraItems.forEach(e => {
+				let item = extend({}, e);
+
+				if (item.type === 'skin') {
+					const skinBlueprint = skins.getBlueprint(item.skinId);
+
+					item.skinId = item.skinId;
+					item.name = skinBlueprint.name;
+					item.sprite = skinBlueprint.sprite;
+				} else if (item.generate) {
+					const generated = generator.generate(item);
+
+					if (item.worth)
+						generated.worth = item.worth;
+					if (item.infinite)
+						generated.infinite = true;
+
+					if (item.factions)
+						generated.factions = item.factions;
+
+					item = generated;
+				}
+
+				let id = 0;
+				items.forEach(checkItem => {
+					if (checkItem.id >= id)
+						id = checkItem.id + 1;
+				});
+
+				item.id = id;
+
+				items.push(item);
+			});
+		}
+
+		for (let i = 0; i < amountOfItemsForSale; i++) {
+			let level = 1;
+			if (itemLevelRange)
+				level = itemLevelRange.min + ~~(Math.random() * (itemLevelRange.max - itemLevelRange.min));
+
+			const item = generator.generate({
+				noSpell: true,
+				level
+			});
 
 			let id = 0;
-			this.items.forEach(function (checkItem) {
+			items.forEach(checkItem => {
 				if (checkItem.id >= id)
 					id = checkItem.id + 1;
 			});
 
-			if (item.type === 'skin') {
-				let skinBlueprint = skins.getBlueprint(item.skinId);
-				item.name = skinBlueprint.name;
-				item.sprite = skinBlueprint.sprite;
-				item.spritesheet = skinBlueprint.spritesheet;
-				item.skinId = item.skinId;
-			}
+			if (itemsAreInfinite)
+				item.infinite = true;
 
 			item.id = id;
 
-			this.items.push(item);
-		}, this);
-
-		if (!blueprint.items)
-			return;
-
-		this.markup = blueprint.markup;
-
-		if (blueprint.faction) {
-			this.obj.extendComponent('trade', 'factionVendor', blueprint);
-			return;
+			items.push(item);
 		}
 
-		this.genLeft = blueprint.items.max;
-	},
+		//When we regenerate, we need to find all players currently looking at our
+		// shop and tell them to refresh their Trade UI
+		const { obj: { instance: { syncer, objects } } } = this;
 
-	update: function () {
-		if (this.regenCd > 0) {
-			this.regenCd--;
-			return;
-		}
+		const playersToRefresh = objects.filter(f => (
+			f.player &&
+			f.trade?.target === this.obj &&
+			f.trade.action === 'buy'
+		));
 
-		this.regenCd = this.regenCdMax;
+		playersToRefresh.forEach(p => {
+			syncer.queue('onGetAnnouncement', {
+				msg: 'The shop has been restocked.'
+			}, [p.serverId]);
 
-		if (!this.genLeft)
-			return;
-
-		this.genLeft--;
-
-		let blueprint = this.blueprint;
-		let level = 1;
-		if (blueprint.level)
-			level = blueprint.level.min + ~~(Math.random() * (blueprint.level.max - blueprint.level.min));
-
-		let item = generator.generate({
-			noSpell: true,
-			level: level
+			p.trade.startBuy({
+				target: this.obj,
+				action: 'buy'
+			});
 		});
-
-		let id = 0;
-		this.items.forEach(function (checkItem) {
-			if (checkItem.id >= id)
-				id = checkItem.id + 1;
-		});
-
-		item.id = id;
-
-		this.items.push(item);
 	},
 
 	startBuy: function (msg) {
@@ -124,6 +197,7 @@ module.exports = {
 			target = this.obj.instance.objects.objects.find(o => ((o.name) && (o.name.toLowerCase() === msg.targetName.toLowerCase())));
 
 		this.target = null;
+		this.action = 'buy';
 
 		if ((!target) || (!target.trade))
 			return false;
@@ -307,6 +381,7 @@ module.exports = {
 			target = this.obj.instance.objects.objects.find(o => ((o.name) && (o.name.toLowerCase() === targetName)));
 
 		this.target = null;
+		this.action = 'sell';
 
 		if ((!target) || (!target.trade))
 			return false;
@@ -332,6 +407,7 @@ module.exports = {
 	startBuyback: function (msg) {
 		msg.action = 'buyback';
 		this.startBuy(msg);
+		this.action = 'buyback';
 	},
 
 	removeItem: function (itemId) {
