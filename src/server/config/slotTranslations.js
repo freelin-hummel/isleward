@@ -1,6 +1,7 @@
 const slotTranslations = {
 	head: 'Head',
 	neck: 'Neck',
+	hands: 'Hands',
 	chest: 'Chest',
 	waist: 'Waist',
 	legs: 'Legs',
