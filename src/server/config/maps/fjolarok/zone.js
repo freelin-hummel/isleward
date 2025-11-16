@@ -192,8 +192,39 @@ module.exports = {
 			properties: {
 				cpnTrade: {
 					items: {
-						min: 3,
-						max: 5
+						max: 20,
+						infinite: true,
+						extra: [{
+							generate: true,
+							spell: true,
+							infinite: true,
+							spellName: 'magic missile'
+						}, {
+							generate: true,
+							spell: true,
+							infinite: true,
+							spellName: 'ice spear'
+						}, {
+							generate: true,
+							spell: true,
+							infinite: true,
+							spellName: 'healing touch'
+						}, {
+							generate: true,
+							spell: true,
+							infinite: true,
+							spellName: 'slash'
+						}, {
+							generate: true,
+							spell: true,
+							infinite: true,
+							spellName: 'charge'
+						}, {
+							generate: true,
+							spell: true,
+							infinite: true,
+							spellName: 'smokebomb'
+						}]
 					},
 					forceItems: [{
 						name: 'Flimsy Fishing Rod',
@@ -217,8 +248,8 @@ module.exports = {
 						max: 5
 					},
 					markup: {
-						buy: 0.25,
-						sell: 2.5
+						buy: 0.5,
+						sell: 1
 					}
 				}
 			}
