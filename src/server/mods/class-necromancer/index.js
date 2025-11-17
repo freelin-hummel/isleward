@@ -88,7 +88,7 @@ module.exports = {
 		};
 
 		statTranslations.runeStats['blood barrier'] = {
-			drainPercentage: 'Own Health Dreained(Percent)',
+			drainPercentage: 'Own Health Drained(Percent)',
 			frenzyDuration: 'Effect Duration(Ticks)',
 			shieldMultiplier: 'Shield Strength(Percent)'
 		};
@@ -174,7 +174,7 @@ module.exports = {
 	beforeGetSpellsInfo: function (spells) {
 		spells.push({
 			name: 'Harvest Life',
-			description: 'Absorbs the life-force of a target.',
+			description: 'Absorbs the life-force of your target.',
 			type: 'harvestLife',
 			icon: [0, 0],
 			animation: 'melee',
