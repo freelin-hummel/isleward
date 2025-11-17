@@ -85,7 +85,10 @@ export default {
 		this.onGetStats(stats);
 	},
 
-	onGetItems (items) {
+	onGetItems (items, isInspectedItems = false) {
+		if (this.isInspecting && !isInspectedItems)
+			return;
+
 		items = items || this.items;
 
 		if (!this.isInspecting)
@@ -214,8 +217,8 @@ export default {
 
 		this.result = result;
 
-		this.onGetStats(result.stats);
-		this.onGetItems(result.equipment);
+		this.onGetStats(result.stats, true);
+		this.onGetItems(result.equipment, true);
 	},
 
 	buildSlot (el, e) {
@@ -413,7 +416,10 @@ export default {
 		}
 	},
 
-	onGetStats (stats) {
+	onGetStats (stats, componentBlueprint, isInspectedStats = false) {
+		if (this.isInspecting && !isInspectedStats)
+			return;
+
 		if (stats && !this.isInspecting)
 			this.stats = stats;
 
