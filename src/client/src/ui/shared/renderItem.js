@@ -167,7 +167,7 @@ const renderItem = (container, item, useEl, manageTooltip, getItemContextConfig,
 		itemEl.find('.quantity').html('NEW');
 	}
 
-	if (item.slot) {
+	if (item.slot || item.ability) {
 		const equipErrors = window.player.inventory.equipItemErrors(item);
 		if (equipErrors.length)
 			itemEl.addClass('no-equip');

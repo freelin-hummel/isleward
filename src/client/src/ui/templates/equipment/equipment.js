@@ -294,6 +294,9 @@ export default {
 				.on('mousemove', this.onHoverItem.bind(this, itemEl, item, null))
 				.on('mouseleave', this.onHoverItem.bind(this, null, null));
 
+			if (item.action)
+				itemEl.addClass('empty');
+
 			if (item === hoverCompare)
 				itemEl.find('.icon').addClass('eq');
 			else if (item.isNew)

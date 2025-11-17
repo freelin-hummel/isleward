@@ -71,7 +71,34 @@ const statTranslations = {
 	fishWeight: 'Increased Fish Weight',
 	fishItems: 'Extra Chance to Hook Items',
 
-	damage: 'Damage'
+	addedMeleeRange: 'Increased Melee Range(Tiles)',
+
+	//Rune Stats
+	damage: 'Base Damage',
+	healing: 'Base Heal',
+	freezeDuration: 'Freeze Duration(Ticks)',
+	stunDuration: 'Stun Duration(Ticks)',
+	regenPercentage: 'Regeneration(Percent)',
+	range: 'Range(Tiles)',
+	radius: 'Radius(Tiles)',
+	duration: 'Effect Duration(Ticks)',
+	pushback: 'Pushback Distance(Tiles)',
+	delay: 'Appearance Delay(Ticks)',
+
+	runeStats: {
+		whirlwind: {
+			range: 'Radius(Tiles)'
+		},
+		swiftness: {
+			chance: 'Sprint Chance Increase'
+		},
+		innervation: {
+			regenPercentage: 'Health Regeneration(Percent)'
+		},
+		tranquility: {
+			regenPercentage: 'Mana Regeneration(Percent)'
+		}
+	}
 };
 
 statTranslations.tooltips = {

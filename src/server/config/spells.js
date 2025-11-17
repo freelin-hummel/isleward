@@ -43,7 +43,7 @@ let spells = [{
 	}
 }, {
 	name: 'Magic Missile',
-	description: 'Launches an orb of unfocused energy at your target.',
+	description: 'Launches an orb of unfocused arcane energy at your target.',
 	type: 'projectile',
 	icon: [1, 0],
 	animation: 'hitStaff',
@@ -76,7 +76,7 @@ let spells = [{
 	}
 }, {
 	name: 'Ice Spear',
-	description: 'A jagged projectile of pure ice pierces your target and slows his movement.',
+	description: 'Launches a jagged projectile of ice that pierces your target and slows their movement.',
 	type: 'iceSpear',
 	icon: [1, 1],
 	animation: 'hitStaff',
@@ -109,7 +109,7 @@ let spells = [{
 	}
 }, {
 	name: 'Fireblast',
-	description: 'Unleashes a blast of fire that damages and pushes back nearby foes.',
+	description: 'Unleashes a blast of fire that damages and pushes back nearby targets.',
 	type: 'fireblast',
 	icon: [1, 2],
 	animation: 'raiseStaff',
@@ -156,7 +156,7 @@ let spells = [{
 	}
 }, {
 	name: 'Smite',
-	description: 'Calls down holy energy from the heavens upon your foe.',
+	description: 'Calls down holy energy from the heavens onto your target.',
 	type: 'smite',
 	row: 2,
 	col: 0,
@@ -164,7 +164,7 @@ let spells = [{
 	animation: 'hitStaff'
 }, {
 	name: 'Consecrate',
-	description: 'Creates a circle of pure holy energy that heals allies for a brief period.',
+	description: 'Creates a circle of holy energy that heals nearby allies for a brief period.',
 	type: 'healingCircle',
 	icon: [0, 1],
 	animation: 'raiseStaff',
@@ -214,7 +214,7 @@ let spells = [{
 	}
 }, {
 	name: 'Healing Touch',
-	description: 'Restore health to a friendly target.',
+	description: 'Restores health to a friendly target.',
 	type: 'singleTargetHeal',
 	spellType: 'heal',
 	icon: [0, 3],
@@ -271,7 +271,7 @@ let spells = [{
 	icon: [0, 2]
 }, {
 	name: 'Slash',
-	description: 'Performs a melee attack with your equipped weapon.',
+	description: 'Performs a melee strike with your equipped weapon.',
 	type: 'slash',
 	row: 0,
 	col: 0,
@@ -280,7 +280,7 @@ let spells = [{
 }, {
 	name: 'Charge',
 	type: 'charge',
-	description: 'Charges at a foe, dealing damage and stunning them for a short period.',
+	description: 'Charges at a target, dealing damage and stunning them for a short period.',
 	icon: [3, 1],
 	animation: 'raiseShield'
 }, {
@@ -292,7 +292,7 @@ let spells = [{
 }, {
 	name: 'Flurry',
 	type: 'flurry',
-	description: 'Grants a stack of frenzy, greatly inreasing your attack speed.',
+	description: 'Grants you increased attack speed for a brief period.',
 	animation: 'hitSword',
 	row: 1,
 	col: 0,
@@ -300,7 +300,7 @@ let spells = [{
 }, {
 	name: 'Smokebomb',
 	type: 'smokeBomb',
-	description: 'Envelops the caster in a cloud of poisonous smoke, dealing damage to enemies every tick until it dissipates.',
+	description: 'Envelops the caster in poisonous smoke, dealing damage to nearby targets for a brief period.',
 	animation: 'raiseHands',
 	icon: [2, 1],
 	particles: {
@@ -337,7 +337,7 @@ let spells = [{
 	}
 }, {
 	name: 'Whirlwind',
-	description: 'You furiously spin in a circle, striking all foes around you.',
+	description: 'Furiously spin in a circle, striking all targets around you.',
 	type: 'whirlwind',
 	icon: [5, 0],
 	row: 5,
@@ -346,18 +346,18 @@ let spells = [{
 }, {
 	name: 'Ambush',
 	type: 'ambush',
-	description: 'Step into the shadows and reappear behind your target before delivering a concussing blow.',
+	description: 'Step into the shadows and reappear behind your target before delivering a stunning blow.',
 	icon: [2, 4],
 	animation: 'raiseShield'
 }, {
 	name: 'Stealth',
-	description: 'The thief slips into the shadows and becomes undetectable by foes. Performing an attack removes this effect.',
+	description: 'The thief slips into the shadows and becomes undetectable by targets. Performing an attack removes this effect.',
 	type: 'stealth',
 	icon: [2, 2]
 },
 {
 	name: 'Crystal Spikes',
-	description: 'Jagged crystals break through the ground at your target destination',
+	description: 'Calls forth jagged crystals from the ground at your target location.',
 	type: 'warnBlast',
 	animation: 'raiseHands',
 	icon: [0, 7],
@@ -409,7 +409,7 @@ let spells = [{
 	animation: 'raiseStaff'
 }, {
 	name: 'Innervation',
-	description: 'Grants an aura that regenerates hp for you and your allies.',
+	description: 'Grants an aura that regenerates health for you and your allies.',
 	type: 'aura',
 	spellType: 'aura',
 	icon: [3, 3]
@@ -421,7 +421,7 @@ let spells = [{
 	icon: [3, 4]
 }, {
 	name: 'Swiftness',
-	description: 'Grants an aura that grants increased movement speed to you and your allies.',
+	description: 'Grants an aura that increases movement speed for you and your allies.',
 	type: 'aura',
 	spellType: 'aura',
 	icon: [3, 5]

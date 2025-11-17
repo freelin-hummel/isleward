@@ -3,6 +3,7 @@ let events = require('../misc/events');
 let spells = {
 	melee: {
 		auto: true,
+		isAttack: true,
 		cdMax: 10,
 		castTimeMax: 0,
 		useWeaponRange: true,
@@ -12,6 +13,7 @@ let spells = {
 	},
 	projectile: {
 		auto: true,
+		isAttack: false,
 		cdMax: 10,
 		castTimeMax: 0,
 		manaCost: 0,
@@ -23,6 +25,7 @@ let spells = {
 
 	'magic missile': {
 		statType: 'int',
+		isAttack: false,
 		element: 'arcane',
 		cdMax: 7,
 		castTimeMax: 6,
@@ -34,6 +37,7 @@ let spells = {
 	},
 	'ice spear': {
 		statType: 'int',
+		isAttack: false,
 		element: 'frost',
 		cdMax: 10,
 		castTimeMax: 2,
@@ -46,6 +50,8 @@ let spells = {
 	},
 	fireblast: {
 		statType: 'int',
+		isAttack: false,
+		isAoe: true,
 		element: 'fire',
 		cdMax: 4,
 		castTimeMax: 2,
@@ -58,6 +64,7 @@ let spells = {
 	},
 	smite: {
 		statType: 'int',
+		isAttack: false,
 		element: 'holy',
 		cdMax: 6,
 		castTimeMax: 3,
@@ -70,6 +77,9 @@ let spells = {
 	},
 	consecrate: {
 		statType: 'int',
+		isAttack: false,
+		isAoe: true,
+		isHeal: true,
 		element: 'holy',
 		cdMax: 15,
 		castTimeMax: 4,
@@ -84,6 +94,8 @@ let spells = {
 
 	'healing touch': {
 		statType: 'int',
+		isAttack: false,
+		isHeal: true,
 		element: 'holy',
 		cdMax: 6,
 		castTimeMax: 4,
@@ -96,6 +108,7 @@ let spells = {
 
 	slash: {
 		statType: 'str',
+		isAttack: true,
 		threatMult: 4,
 		cdMax: 9,
 		castTimeMax: 1,
@@ -107,6 +120,8 @@ let spells = {
 	},
 	charge: {
 		statType: 'str',
+		isAttack: true,
+		isMovement: true,
 		threatMult: 3,
 		cdMax: 14,
 		castTimeMax: 1,
@@ -119,6 +134,7 @@ let spells = {
 	},
 	flurry: {
 		statType: 'dex',
+		isBuff: true,
 		cdMax: 20,
 		castTimeMax: 0,
 		manaCost: 10,
@@ -129,6 +145,8 @@ let spells = {
 	},
 	whirlwind: {
 		statType: 'str',
+		isAttack: true,
+		isAoe: true,
 		threatMult: 6,
 		cdMax: 12,
 		castTimeMax: 2,
@@ -140,6 +158,8 @@ let spells = {
 	},
 	smokebomb: {
 		statType: 'dex',
+		isAttack: true,
+		isAoe: true,
 		element: 'poison',
 		cdMax: 7,
 		castTimeMax: 0,
@@ -152,6 +172,8 @@ let spells = {
 	},
 	ambush: {
 		statType: 'dex',
+		isAttack: true,
+		isMovement: true,
 		cdMax: 15,
 		castTimeMax: 3,
 		range: 10,
@@ -163,12 +185,14 @@ let spells = {
 	},
 	'crystal spikes': {
 		statType: ['dex', 'int'],
+		isAttack: true,
+		isAoe: true,
 		manaCost: 14,
 		needLos: true,
 		cdMax: 15,
 		castTimeMax: 0,
 		range: 9,
-		isAttack: true,
+		radius: 1,
 		random: {
 			damage: [3, 66],
 			i_delay: [1, 4]
@@ -179,6 +203,7 @@ let spells = {
 	},
 	innervation: {
 		statType: ['str'],
+		isAura: true,
 		manaReserve: {
 			percentage: 0.25
 		},
@@ -192,7 +217,7 @@ let spells = {
 	},
 	tranquility: {
 		statType: ['int'],
-		element: 'holy',
+		isAura: true,
 		manaReserve: {
 			percentage: 0.25
 		},
@@ -206,7 +231,7 @@ let spells = {
 	},
 	swiftness: {
 		statType: ['dex'],
-		element: 'fire',
+		isAura: true,
 		manaReserve: {
 			percentage: 0.4
 		},
@@ -222,7 +247,8 @@ let spells = {
 };
 
 module.exports = {
-	spells: spells,
+	spells,
+
 	init: function () {
 		events.emit('onBeforeGetSpellsConfig', spells);
 	}

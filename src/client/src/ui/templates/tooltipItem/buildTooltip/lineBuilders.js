@@ -28,13 +28,6 @@ const lineBuilders = {
 		return `<div class="name q${item.quality}">${item.name}${quantity}</div>`;
 	},
 
-	type: () => {
-		if (!item.type || item.type === item.name)
-			return null;
-
-		return item.type;
-	},
-
 	slot: () => {
 		if (!item.slot)
 			return null;
@@ -270,9 +263,161 @@ const lineBuilders = {
 
 		return (
 			lineBuilders.div('space', ' ') +
-				lineBuilders.div('line', ' ') +
+			lineBuilders.div('line', ' ') +
 			lineBuilders.div('smallSpace', ' ') +
 			lineBuilders.div(`spellName q${item.spell.quality}`, item.spell.name)
+		);
+	},
+
+	spellTags: () => {
+		if (!item.spell)
+			return null;
+
+		const { clientConfig: { spells } } = globals;
+
+		const spell = spells.find(f => f.name === item.spell.name);
+
+		if (!spell)
+			return null;
+
+		const tagsArray = [];
+
+		if (spell.isAttack === true)
+			tagsArray.push('Attack');
+		else if (spell.isAttack === false)
+			tagsArray.push('Spell');
+
+		if (spell.isAoe === true)
+			tagsArray.push('AoE');
+
+		if (spell.isAura === true)
+			tagsArray.push('Aura');
+
+		if (spell.isBuff === true)
+			tagsArray.push('Buff');
+
+		if (Object.keys(item.spell.values).some(f => f.toLowerCase().includes('duration')))
+			tagsArray.push('Duration');
+
+		if (spell.isHeal === true)
+			tagsArray.push('Heal');
+
+		if (spell.isMinion === true)
+			tagsArray.push('Minion');
+
+		if (spell.isMovement === true)
+			tagsArray.push('Movement');
+
+		if (spell.isAttack !== undefined) {
+			if (spell.element)
+				tagsArray.push(spell.element[0].toUpperCase() + spell.element.substr(1));
+			else
+				tagsArray.push('Physical');
+		}
+
+		return (
+			lineBuilders.div('spellTags', `(${tagsArray.join(', ')})`)
+		);
+	},
+
+	spellDescription: () => {
+		if (!item.spell)
+			return null;
+
+		const { clientConfig: { spells } } = globals;
+
+		const spell = spells.find(f => f.name === item.spell.name);
+
+		if (!spell)
+			return null;
+
+		return (
+			lineBuilders.div('smallSpace', ' ') +
+			lineBuilders.div('line', ' ') +
+			lineBuilders.div('smallSpace', ' ') +
+			lineBuilders.div('spellDescription', spell.description)
+		);
+	},
+
+	spellCost: () => {
+		if (!item.spell || item.slot)
+			return null;
+
+		const { clientConfig: { spells } } = globals;
+
+		const spell = spells.find(f => f.name === item.spell.name);
+
+		if (!spell)
+			return null;
+
+		return (
+			lineBuilders.div('smallSpace', ' ') +
+			lineBuilders.div('line', ' ') +
+			lineBuilders.div('smallSpace', ' ') +
+			lineBuilders.div('spellCost spellInfo', `Cost:&nbsp;<span class='number'>${spell.manaCost} Mana</span>`)
+		);
+	},
+
+	spellCastTime: () => {
+		if (!item.spell || item.slot)
+			return null;
+
+		const { clientConfig: { spells } } = globals;
+
+		const spell = spells.find(f => f.name === item.spell.name);
+
+		if (!spell)
+			return null;
+
+		const castTime = !spell.castTime ? 'Instant' : `${spell.castTime} Ticks`;
+
+		return (
+			lineBuilders.div('spellCastTime spellInfo', `Cast Time:&nbsp;<span class='number'>${castTime}</span>`)
+		);
+	},
+
+	spellCooldown: () => {
+		if (!item.spell)
+			return null;
+
+		const { clientConfig: { spells } } = globals;
+
+		const spell = spells.find(f => f.name === item.spell.name);
+
+		if (!spell || !spell.cooldown)
+			return null;
+
+		return (
+			lineBuilders.div('spellCooldown spellInfo', `Cooldown:&nbsp;<span class='number'>${spell.cooldown} Ticks</span>`)
+		);
+	},
+
+	spellRange: () => {
+		if (!item.spell)
+			return null;
+
+		const { clientConfig: { spells } } = globals;
+
+		const spell = spells.find(f => f.name === item.spell.name);
+
+		const renderRange = (
+			spell &&
+			(
+				spell.range ||
+				(
+					item.slot === 'oneHanded' ||
+					item.slot === 'twoHanded'
+				)
+			)
+		);
+
+		if (!renderRange)
+			return;
+
+		const range = spell.range ?? item.range ?? 1;
+
+		return (
+			lineBuilders.div('spellRange spellInfo', `Range:&nbsp;<span class='number'>${range} Tile${range > 1 ? 's' : ''}</span>`)
 		);
 	},
 
@@ -280,9 +425,11 @@ const lineBuilders = {
 		if (!item.slot && !item.type)
 			return null;
 
-		if (!item.slot)
-			return `<div class="typeAndSlot">${item.type}</div>`;
-		else if (!item.type)
+		if (!item.slot) {
+			const type = item.type[0].toUpperCase() + item.type.substring(1);
+
+			return `<div class="typeAndSlot">${type}</div>`;
+		} else if (!item.type)
 			return `<div class="typeAndSlot">${item.slot}</div>`;
 
 		const { clientConfig: { slotTranslations } } = globals;
@@ -292,7 +439,7 @@ const lineBuilders = {
 		return `<div class="typeAndSlot"><div>${slotInfo}</div><div>${item.type}</div></div>`;
 	},
 
-	damage: () => {
+	spellRolls: () => {
 		if (!item.spell || !item.spell.values)
 			return null;
 
@@ -300,12 +447,32 @@ const lineBuilders = {
 
 		const abilityValues = Object.entries(item.spell.values)
 			.map(([k, v]) => {
-				const translatedStat = statTranslations[k] ?? k;
+				const translatedStat = statTranslations.runeStats[item.spell.name.toLowerCase()]?.[k] ?? statTranslations[k] ?? k;
 
-				if (!compare || !shiftDown)
-					return `${translatedStat}: ${v}${translatedStat.includes('ercent') ? '%' : ''}<br/>`;
+				const isPercent = translatedStat.toLowerCase().includes('(percent)');
+				const isTicks = translatedStat.toLowerCase().includes('(ticks)');
+				const isTiles = translatedStat.toLowerCase().includes('(tiles)');
 
-				let delta = v - compare.spell.values[k];
+				let delta = v;
+
+				const key = translatedStat
+					.replace('(Ticks)', '')
+					.replace('(Percent)', '')
+					.replace('(Tiles)', '');
+
+				if (!compare || !shiftDown) {
+					let value = delta;
+					if (isPercent)
+						value += '%';
+					if (isTicks)
+						value += ` ${delta > 1 ? 'Ticks' : 'Tick'}`;
+					if (isTiles)
+						value += ` ${delta > 1 ? 'Tiles' : 'Tile'}`;
+
+					return `${key}: ${value}<br/>`;
+				}
+
+				delta = v - compare.spell.values[k];
 				// adjust by EPSILON to handle float point imprecision, otherwise 3.15 - 2 = 1.14 or 2 - 3.15 = -1.14
 				// have to move away from zero by EPSILON, not a simple add
 				if (delta >= 0)
@@ -321,20 +488,24 @@ const lineBuilders = {
 				} else if (delta < 0)
 					rowClass = 'loseDamage';
 
-				return `<div class="${rowClass}">${translatedStat}: ${delta}${translatedStat.includes('ercent') ? '%' : ''}</div>`;
+				let deltaValue = delta;
+				if (isPercent)
+					deltaValue += '%';
+				if (isTicks)
+					deltaValue += ` ${delta > 1 ? 'Ticks' : 'Tick'}`;
+				if (isTiles)
+					deltaValue += ` ${delta > 1 ? 'Tiles' : 'Tile'}`;
+
+				return `<div class="${rowClass}">${key}: ${deltaValue}</div>`;
 			})
 			.join('');
 
-		let res = abilityValues;
-
-		if (!item.slot) {
-			res = (
-				lineBuilders.div('space', ' ') +
-				lineBuilders.div('line', ' ') +
-				lineBuilders.div('space', ' ') +
-				res
-			);
-		}
+		const res = (
+			lineBuilders.div('smallSpace', ' ') +
+			lineBuilders.div('line', ' ') +
+			lineBuilders.div('smallSpace', ' ') +
+			lineBuilders.div('spellRolls', abilityValues)
+		);
 
 		return res;
 	},

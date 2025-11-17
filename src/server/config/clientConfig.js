@@ -8,9 +8,10 @@ const consts = require('./consts');
 
 //External Config
 const tos = require('./tos');
+const { spells } = require('./spells');
+const { spells: spellsConfig } = require('./spellsConfig');
 const statTranslations = require('./statTranslations');
 const slotTranslations = require('./slotTranslations');
-
 //Config
 const config = {
 	tickTime: consts.tickTime,
@@ -227,7 +228,13 @@ const config = {
 		{ handler: 'typeAndSlot' },
 		{ handler: 'div', config: { className: 'power', lineBuilder: 'power' } },
 		{ handler: 'spellName' },
-		{ handler: 'div', config: { className: 'damage', lineBuilder: 'damage' } },
+		{ handler: 'spellTags' },
+		{ handler: 'spellDescription' },
+		{ handler: 'spellRolls' },
+		{ handler: 'spellCost' },
+		{ handler: 'spellCastTime' },
+		{ handler: 'spellCooldown' },
+		{ handler: 'spellRange' },
 		{ handler: 'div', config: { className: 'implicitStats', lineBuilder: 'implicitStats' } },
 		{ handler: 'div', config: { className: 'stats', lineBuilder: 'stats' } },
 		{ handler: 'div', config: { className: 'material', lineBuilder: 'material' } },
@@ -353,6 +360,7 @@ const config = {
 		]
 
 	},
+	spells: 'Set inside the init method below',
 	tos,
 	statTranslations,
 	slotTranslations
@@ -370,6 +378,43 @@ module.exports = {
 		events.emit('onBeforeGetContextMenuActions', config.contextMenuActions);
 		events.emit('onBeforeGetTermsOfService', config.tos);
 		events.emit('onBeforeGetTextureList', config.textureList);
+
+		//Only spells that are in spellsConfig can be obtained by players, but we need to get the descriptions from spells
+		config.spells = spells
+			.filter(f => {
+				const entry = spellsConfig[f.name.toLowerCase()];
+
+				const isValid = (
+					entry !== undefined &&
+					entry.noDrop !== true
+				);
+
+				return isValid;
+			})
+			.map(({ name, description }) => {
+				const res = {
+					name,
+					description
+				};
+
+				const { statType, isAttack, isAoe, isMovement, isBuff, isHeal, isAura, isMinion, element, cdMax, castTimeMax, manaCost = 0, range } = spellsConfig[name.toLowerCase()];
+
+				res.statType = Array.isArray(statType) ? statType : [statType];
+				res.isAttack = isAttack;
+				res.isBuff = isBuff;
+				res.isHeal = isHeal;
+				res.isMovement = isMovement;
+				res.isMinion = isMinion;
+				res.isAura = isAura;
+				res.isAoe = isAoe;
+				res.element = element;
+				res.cooldown = cdMax;
+				res.castTime = castTimeMax;
+				res.manaCost = manaCost;
+				res.range = range;
+
+				return res;
+			});
 
 		await this.calculateAtlasTextureDimensions();
 	},

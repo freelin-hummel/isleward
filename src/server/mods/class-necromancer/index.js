@@ -75,10 +75,23 @@ module.exports = {
 		};
 	},
 
-	onBeforeGetClientConfig: function ({ resourceList, textureList }) {
+	onBeforeGetClientConfig: function ({ resourceList, textureList, statTranslations }) {
 		resourceList.push(`${this.folderName}/images/abilityIcons.png`);
 
 		textureList.push(`${this.folderName}/images/mobs.png`);
+
+		statTranslations.healPercent = 'Damage Gained as Health(Percent)';
+		statTranslations.damagePercent = 'Summoned Minion Damage(Percent)';
+
+		statTranslations.runeStats['summon skeleton'] = {
+			hpPercent: 'Summoned Minion Health(Percent)'
+		};
+
+		statTranslations.runeStats['blood barrier'] = {
+			drainPercentage: 'Own Health Dreained(Percent)',
+			frenzyDuration: 'Effect Duration(Ticks)',
+			shieldMultiplier: 'Shield Strength(Percent)'
+		};
 	},
 
 	beforeGetSpellTemplate: function (spell) {
@@ -118,6 +131,7 @@ module.exports = {
 	beforeGetSpellsConfig: function (spells) {
 		spells['harvest life'] = {
 			statType: ['str', 'int'],
+			isHeal: true,
 			cdMax: 10,
 			castTimeMax: 3,
 			manaCost: 5,
@@ -131,6 +145,7 @@ module.exports = {
 
 		spells['summon skeleton'] = {
 			statType: ['str', 'int'],
+			isMinion: true,
 			cdMax: 6,
 			castTimeMax: 6,
 			manaCost: 5,
@@ -143,6 +158,7 @@ module.exports = {
 
 		spells['blood barrier'] = {
 			statType: ['str', 'int'],
+			isBuff: true,
 			cdMax: 13,
 			castTimeMax: 3,
 			manaCost: 5,
@@ -158,7 +174,7 @@ module.exports = {
 	beforeGetSpellsInfo: function (spells) {
 		spells.push({
 			name: 'Harvest Life',
-			description: 'Absorbs the life-force of your enemies.',
+			description: 'Absorbs the life-force of a target.',
 			type: 'harvestLife',
 			icon: [0, 0],
 			animation: 'melee',
@@ -230,7 +246,7 @@ module.exports = {
 
 		spells.push({
 			name: 'Blood Barrier',
-			description: 'Sacrifice some life force to grant an ally a protective barrier and increased attack speed.',
+			description: 'Sacrifices health to grant an ally a protective barrier and increased attack speed.',
 			type: 'bloodBarrier',
 			icon: [2, 0],
 			animation: 'magic',
