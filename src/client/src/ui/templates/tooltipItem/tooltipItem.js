@@ -14,6 +14,7 @@ export default {
 		this.tooltip = this.el.find('.tooltip');
 
 		this.onEvent('onShowItemTooltip', this.onShowItemTooltip.bind(this));
+		this.onEvent('showItemTooltip', this.showItemTooltip.bind(this));
 		this.onEvent('onHideItemTooltip', this.onHideItemTooltip.bind(this));
 	},
 
@@ -22,6 +23,63 @@ export default {
 
 		if (!canAfford)
 			this.tooltip.find('.worth').addClass('no-afford');
+	},
+
+	//{ item, pos, canCompare, bottomAlign, useTooltipTemplate }
+	showItemTooltip (config) {
+		const { item, pos, width, bottomAlign, rightAlign, zIndex, ...rest } = config;
+
+		this.removeButton();
+
+		const emBeforeBuildItemTooltip = {
+			item,
+			pos,
+			bottomAlign,
+			customLineBuilders: {},
+			...rest
+		};
+		events.emit('beforeBuildItemTooltip', emBeforeBuildItemTooltip);
+
+		const html = buildTooltip(this, emBeforeBuildItemTooltip);
+
+		this.item = item;
+
+		const el = this.tooltip;
+		el.html(html);
+		el.css({ display: 'flex' });
+
+		if (width)
+			el.width(width);
+		else
+			el.css({ width: 'unset' });
+
+		if (pos) {
+			if (bottomAlign)
+				pos.y -= el.height();
+			if (rightAlign)
+				pos.x -= el.width();
+
+			//correct tooltips that are appearing offscreen
+			// arbitrary constant -30 is there to stop resize code
+			// completely squishing the popup
+			if ((pos.x + el.width()) > window.innerWidth)
+				pos.x = window.innerWidth - el.width() - 30;
+
+			if ((pos.y + el.height()) > window.innerHeight)
+				pos.y = window.innerHeight - el.height() - 30;
+
+			el.css({
+				left: pos.x,
+				top: pos.y
+			});
+		}
+
+		if (zIndex && zIndex !== 'auto')
+			el.css('z-index', zIndex);
+		else
+			el.css('z-index', '');
+
+		events.emit('onBuiltItemTooltip', this.tooltip);
 	},
 
 	onShowItemTooltip (item, pos, canCompare, bottomAlign) {

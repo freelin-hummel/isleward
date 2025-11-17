@@ -107,42 +107,23 @@ export default {
 		if (isMobile)
 			return false;
 
-		let pos = el.parent().offset();
-		pos = {
-			x: pos.left - 26,
-			y: pos.top
+		const elParent = el.parent();
+		const ttPos = {
+			x: elParent[0].offsetLeft - 26,
+			y: elParent[0].offsetTop + 4
 		};
 
-		let values = Object.keys(spell.values).filter(function (v) {
-			return ((v !== 'damage') && (v !== 'healing'));
-		}).map(function (v) {
-			return v + ': ' + spell.values[v];
-		}).join('<br />');
-
-		let manaCost = spell.manaCost;
-		if (spell.manaReserve)
-			manaCost = ~~(spell.manaReserve.percentage * 100) + '% reserved';
-
-		let tooltip = templateTooltip
-			.replace('$NAME$', spell.name)
-			.replace('$DESCRIPTION$', spell.description)
-			.replace('$MANA$', manaCost)
-			.replace('$CD$', spell.cdMax + ' Ticks')
-			.replace('$VALUES$', values)
-			.replace('$ELEMENT$', spell.element ? 'element: ' + spell.element : '');
-
-		if (spell.range) {
-			tooltip = tooltip
-				.replace('$RANGE$', spell.range);
-		} else {
-			tooltip = tooltip
-				.replace('class="range"', 'class="range hidden"');
-		}
-
-		events.emit('onShowTooltip', tooltip, el[0], pos, 250, false, true, this.el.css('z-index'));
+		events.emit('showItemTooltip', {
+			item: { spell },
+			pos: ttPos,
+			rightAlign: true,
+			zIndex: this.el.css('z-index'),
+			useTooltipConfig: 'equipedRuneTooltipConfig'
+		});
 	},
+
 	onHideTooltip (el) {
-		events.emit('onHideTooltip', el[0]);
+		events.emit('onHideItemTooltip', el[0]);
 	},
 
 	onGetSpellActive (options) {

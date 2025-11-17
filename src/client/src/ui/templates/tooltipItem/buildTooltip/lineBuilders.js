@@ -257,16 +257,22 @@ const lineBuilders = {
 			return 'Quest Item';
 	},
 
-	spellName: () => {
+	spellName: config => {
 		if (!item.spell || item.ability)
 			return null;
 
-		return (
-			lineBuilders.div('space', ' ') +
-			lineBuilders.div('line', ' ') +
-			lineBuilders.div('smallSpace', ' ') +
-			lineBuilders.div(`spellName q${item.spell.quality}`, item.spell.name)
-		);
+		let res = lineBuilders.div(`spellName q${item.spell.quality}`, item.spell.name);
+
+		if (config?.lineAbove !== false) {
+			res = (
+				lineBuilders.div('space', ' ') +
+				lineBuilders.div('line', ' ') +
+				lineBuilders.div('smallSpace', ' ') +
+				res
+			);
+		}
+
+		return res;
 	},
 
 	spellTags: () => {
@@ -387,8 +393,11 @@ const lineBuilders = {
 		if (!spell || !spell.cooldown)
 			return null;
 
+		//We can pass in either an item or an equiped rune
+		const cooldown = item.spell.cdMax ?? spell.cooldown;
+
 		return (
-			lineBuilders.div('spellCooldown spellInfo', `Cooldown:&nbsp;<span class='number'>${spell.cooldown} Ticks</span>`)
+			lineBuilders.div('spellCooldown spellInfo', `Cooldown:&nbsp;<span class='number'>${cooldown} Ticks</span>`)
 		);
 	},
 
@@ -400,10 +409,16 @@ const lineBuilders = {
 
 		const spell = spells.find(f => f.name === item.spell.name);
 
+		if (!spell)
+			return;
+
+		//We can pass in either an item or an equiped rune
+		const range = item.range ?? item.spell.range ?? spell.range;
+
 		const renderRange = (
 			spell &&
 			(
-				spell.range ||
+				range ||
 				(
 					item.slot === 'oneHanded' ||
 					item.slot === 'twoHanded'
@@ -414,10 +429,10 @@ const lineBuilders = {
 		if (!renderRange)
 			return;
 
-		const range = spell.range ?? item.range ?? 1;
+		const useRange = range ?? 1;
 
 		return (
-			lineBuilders.div('spellRange spellInfo', `Range:&nbsp;<span class='number'>${range} Tile${range > 1 ? 's' : ''}</span>`)
+			lineBuilders.div('spellRange spellInfo', `Range:&nbsp;<span class='number'>${useRange} Tile${range > 1 ? 's' : ''}</span>`)
 		);
 	},
 
@@ -443,14 +458,20 @@ const lineBuilders = {
 		if (!item.spell || !item.spell.values)
 			return null;
 
+		const entries = Object.entries(item.spell.values);
+
+		if (entries.length === 0)
+			return;
+
 		const { clientConfig: { statTranslations } } = globals;
 
-		const abilityValues = Object.entries(item.spell.values)
+		const abilityValues = entries
 			.map(([k, v]) => {
 				const translatedStat = statTranslations.runeStats[item.spell.name.toLowerCase()]?.[k] ?? statTranslations[k] ?? k;
 
 				const isPercent = translatedStat.toLowerCase().includes('(percent)');
 				const isTicks = translatedStat.toLowerCase().includes('(ticks)');
+				const isPerTick = translatedStat.toLowerCase().includes('(per tick)');
 				const isTiles = translatedStat.toLowerCase().includes('(tiles)');
 
 				let delta = v;
@@ -458,7 +479,8 @@ const lineBuilders = {
 				const key = translatedStat
 					.replace('(Ticks)', '')
 					.replace('(Percent)', '')
-					.replace('(Tiles)', '');
+					.replace('(Tiles)', '')
+					.replace('(Per Tick)', '');
 
 				if (!compare || !shiftDown) {
 					let value = delta;
@@ -468,6 +490,8 @@ const lineBuilders = {
 						value += ` ${delta > 1 ? 'Ticks' : 'Tick'}`;
 					if (isTiles)
 						value += ` ${delta > 1 ? 'Tiles' : 'Tile'}`;
+					if (isPerTick)
+						value += ' per Tick';
 
 					return `${key}: ${value}<br/>`;
 				}
@@ -495,6 +519,8 @@ const lineBuilders = {
 					deltaValue += ` ${delta > 1 ? 'Ticks' : 'Tick'}`;
 				if (isTiles)
 					deltaValue += ` ${delta > 1 ? 'Tiles' : 'Tile'}`;
+				if (isPerTick)
+					deltaValue += ' per Tick';
 
 				return `<div class="${rowClass}">${key}: ${deltaValue}</div>`;
 			})

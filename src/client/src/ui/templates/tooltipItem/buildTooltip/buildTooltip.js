@@ -5,8 +5,8 @@ import globals from '../../../../js/system/globals';
 
 const { init: initLineBuilders, lineBuilders: g } = lineBuilders;
 
-const buildTooltipHtml = ({ quality }) => {
-	const html = globals.clientConfig.itemTooltipConfig
+const buildTooltipHtml = useTooltipConfig => {
+	const html = globals.clientConfig[useTooltipConfig]
 		.map(({ handler, config }) => {
 			const args = [];
 
@@ -20,7 +20,7 @@ const buildTooltipHtml = ({ quality }) => {
 					args.splice(0, 0, className);
 			}
 
-			return g[handler].call(null, ...args);
+			return g[handler].call(null, ...args, config);
 		})
 		.filter(t => t !== null)
 		.join('');
@@ -28,7 +28,7 @@ const buildTooltipHtml = ({ quality }) => {
 	return html;
 };
 
-const buildTooltip = (ui, { item, canCompare, customLineBuilders }) => {
+const buildTooltip = (ui, { item, canCompare, customLineBuilders, useTooltipConfig = 'itemTooltipConfig' }) => {
 	let shiftDown = input.isKeyDown('shift', true);
 	const equipErrors = window.player.inventory.equipItemErrors(item);
 
@@ -46,7 +46,7 @@ const buildTooltip = (ui, { item, canCompare, customLineBuilders }) => {
 
 	initLineBuilders(item, compare, shiftDown, equipErrors, customLineBuilders);
 
-	const contents = buildTooltipHtml(item);
+	const contents = buildTooltipHtml(useTooltipConfig);
 
 	return contents;
 };

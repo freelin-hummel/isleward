@@ -84,6 +84,8 @@ const statTranslations = {
 	duration: 'Effect Duration(Ticks)',
 	pushback: 'Pushback Distance(Tiles)',
 	delay: 'Appearance Delay(Ticks)',
+	dmg: 'Damage(Per Tick)',
+	heal: 'Healing(Per Tick)',
 
 	runeStats: {
 		whirlwind: {

@@ -284,9 +284,9 @@ module.exports = {
 			dmg /= div;
 
 			if (this.damage) 
-				this.values.dmg = ~~(dmg * 100) / 100 + '/tick';
+				this.values.dmg = ~~(dmg * 100) / 100;
 			else
-				this.values.heal = ~~(dmg * 100) / 100 + '/tick';
+				this.values.heal = ~~(dmg * 100) / 100;
 
 			if (!noSync)
 				this.obj.syncer.setArray(true, 'spellbook', 'getSpells', this.simplify());

@@ -251,6 +251,16 @@ const config = {
 		{ handler: 'worth' },
 		{ handler: 'div', config: { className: 'info', lineBuilder: 'info' } }
 	],
+	equipedRuneTooltipConfig: [
+		{ handler: 'spellName', config: { lineAbove: false } },
+		{ handler: 'spellTags' },
+		{ handler: 'spellDescription' },
+		{ handler: 'spellRolls' },
+		{ handler: 'spellCost' },
+		{ handler: 'spellCastTime' },
+		{ handler: 'spellCooldown' },
+		{ handler: 'spellRange' }
+	],
 	clientComponents: [],
 	sounds: {
 		ui: []
