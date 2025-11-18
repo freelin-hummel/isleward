@@ -143,6 +143,9 @@ module.exports = {
 					id = checkItem.id + 1;
 			});
 
+			if (!item.quality)
+				item.quality = 0;
+
 			item.id = id;
 
 			list.items.push(item);

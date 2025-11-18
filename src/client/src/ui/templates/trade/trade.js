@@ -3,6 +3,7 @@ import client from '../../../js/system/client';
 import template from './template.html?raw';
 import './styles.css';
 import renderItem from '../../shared/renderItem';
+import uiFactory from '../../factory';
 
 export default {
 	tpl: template,
@@ -33,7 +34,7 @@ export default {
 
 		this.find('.heading-text').html(action[0].toUpperCase() + action.substring(1));
 
-		let uiInventory = $('.uiInventory').data('ui');
+		const uiInventory = uiFactory.getUi('inventory');
 
 		let container = this.el.find('.grid')
 			.empty();
@@ -128,12 +129,12 @@ export default {
 
 		events.emit('onBuySellItem', this.el);
 
-		let uiInventory = $('.uiInventory').data('ui');
+		const uiInventory = uiFactory.getUi('inventory');
 		uiInventory.hideTooltip(el, item, e);
 	},
 
 	onHover (el, item, action, e) {
-		let uiInventory = $('.uiInventory').data('ui');
+		const uiInventory = uiFactory.getUi('inventory');
 		uiInventory.onHover(el, item, e);
 
 		let canAfford = true;
@@ -154,7 +155,7 @@ export default {
 
 	beforeHide () {
 		events.emit('onHideOverlay', this.el);
-		$('.uiInventory').data('ui').hideTooltip();
+		uiFactory.getUi('inventory').hideTooltip();
 	},
 
 	onServerRespond (el) {

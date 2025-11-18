@@ -1,4 +1,5 @@
 /* eslint-disable max-lines-per-function */
+ 
 const eventEmitter = require('../misc/events');
 
 const generator = require('../items/generator');
@@ -62,9 +63,6 @@ module.exports = {
 	},
 
 	update: function () {
-		if (!this.blueprint.items?.max)
-			return;
-
 		if (this.regenCd > 0) {
 			this.regenCd--;
 
@@ -73,7 +71,8 @@ module.exports = {
 
 		const { items, blueprint } = this;
 		const { forceItems, level: itemLevelRange, items: blueprintItems } = blueprint;
-		const { max: amountOfItemsForSale, extra: extraItems, infinite: itemsAreInfinite } = blueprintItems;
+
+		const { max: amountOfItemsForSale, extra: extraItems, infinite: itemsAreInfinite } = blueprintItems ?? {};
 
 		this.regenCd = this.regenCdMax;
 
@@ -132,6 +131,9 @@ module.exports = {
 					if (checkItem.id >= id)
 						id = checkItem.id + 1;
 				});
+
+				if (!item.quality)
+					item.quality = 0;
 
 				item.id = id;
 
