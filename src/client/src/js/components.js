@@ -95,7 +95,8 @@ export default {
 		const fullList = [ ...componentList ];
 
 		globals.clientConfig.clientComponents.forEach(c => {
-			_.spliceWhere(fullList, f => f.type === c.type);
+			if (c.type)
+				_.spliceWhere(fullList, f => f.type === c.type);
 
 			fullList.push(c);
 		});
