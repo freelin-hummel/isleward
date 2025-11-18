@@ -72,6 +72,8 @@ const statTranslations = {
 	fishItems: 'Extra Chance to Hook Items',
 
 	addedMeleeRange: 'Increased Melee Range(Tiles)',
+	cooldown: 'Cooldown(Ticks)',
+	uses: 'Uses',
 
 	//Rune Stats
 	damage: 'Base Damage',
@@ -99,6 +101,9 @@ const statTranslations = {
 		},
 		tranquility: {
 			regenPercentage: 'Mana Regeneration(Percent)'
+		},
+		flurry: {
+			chance: 'Effect Chance(Percent)'
 		}
 	}
 };

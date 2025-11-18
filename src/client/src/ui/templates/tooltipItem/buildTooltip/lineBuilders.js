@@ -647,14 +647,76 @@ const lineBuilders = {
 		if (!item.cd)
 			return null;
 
-		return `cooldown: ${item.cd}`;
+		const { clientConfig: { statTranslations } } = globals;
+
+		const translatedStat = statTranslations.cooldown ?? 'Cooldown';
+
+		const isPercent = translatedStat.toLowerCase().includes('(percent)');
+		const isTicks = translatedStat.toLowerCase().includes('(ticks)');
+		const isPerTick = translatedStat.toLowerCase().includes('(per tick)');
+		const isTiles = translatedStat.toLowerCase().includes('(tiles)');
+
+		const key = translatedStat
+			.replace('(Ticks)', '')
+			.replace('(Percent)', '')
+			.replace('(Tiles)', '')
+			.replace('(Per Tick)', '');
+
+		let value = item.cd;
+
+		if (isPercent)
+			value += '%';
+		if (isTicks)
+			value += ` ${value > 1 ? 'Ticks' : 'Tick'}`;
+		if (isTiles)
+			value += ` ${value > 1 ? 'Tiles' : 'Tile'}`;
+		if (isPerTick)
+			value += ' per Tick';
+
+		return (
+			lineBuilders.div('space', ' ') +
+			lineBuilders.div('line', ' ') +
+			lineBuilders.div('space', ' ') +
+			lineBuilders.div('itemCooldown', `${key}: ${value}`)
+		);
 	},
 
 	uses: () => {
 		if (!item.uses)
 			return null;
 
-		return `uses: ${item.uses}`;
+		const { clientConfig: { statTranslations } } = globals;
+
+		const translatedStat = statTranslations.uses ?? 'Uses';
+
+		const isPercent = translatedStat.toLowerCase().includes('(percent)');
+		const isTicks = translatedStat.toLowerCase().includes('(ticks)');
+		const isPerTick = translatedStat.toLowerCase().includes('(per tick)');
+		const isTiles = translatedStat.toLowerCase().includes('(tiles)');
+
+		const key = translatedStat
+			.replace('(Ticks)', '')
+			.replace('(Percent)', '')
+			.replace('(Tiles)', '')
+			.replace('(Per Tick)', '');
+
+		let value = item.uses;
+
+		if (isPercent)
+			value += '%';
+		if (isTicks)
+			value += ` ${value > 1 ? 'Ticks' : 'Tick'}`;
+		if (isTiles)
+			value += ` ${value > 1 ? 'Tiles' : 'Tile'}`;
+		if (isPerTick)
+			value += ' per Tick';
+
+		return (
+			lineBuilders.div('space', ' ') +
+			lineBuilders.div('line', ' ') +
+			lineBuilders.div('space', ' ') +
+			lineBuilders.div('itemUses', `${key}: ${value}`)
+		);
 	}
 };
 

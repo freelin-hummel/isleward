@@ -292,7 +292,7 @@ let spells = [{
 }, {
 	name: 'Flurry',
 	type: 'flurry',
-	description: 'Grants you increased attack speed for a brief period.',
+	description: 'Grants your attacks a chance to reduce their cooldown to 1 tick, allowing for rapid consecutive strikes.',
 	animation: 'hitSword',
 	row: 1,
 	col: 0,
