@@ -109,6 +109,32 @@ module.exports = {
 		for (let i = 0; i < bLen; i++) 
 			list.items.push(baseItems[i]);
 
+		const forceItems = this.blueprint.forceItems;
+
+		if (forceItems) {
+			forceItems.forEach((f, i) => {
+				const forcedItem = extend({}, f);
+
+				let forcedItemId = 0;
+				list.items.forEach(checkItem => {
+					if (checkItem.id >= forcedItemId)
+						forcedItemId = checkItem.id + 1;
+				});
+
+				if (forcedItem.type === 'skin') {
+					const skinBlueprint = skins.getBlueprint(forcedItem.skinId);
+
+					forcedItem.name = skinBlueprint.name;
+					forcedItem.sprite = skinBlueprint.sprite;
+					forcedItem.spritesheet = skinBlueprint.spritesheet;
+				}
+
+				forcedItem.id = forcedItemId;
+
+				list.items.push(forcedItem);
+			});
+		}
+
 		let extra = blueprint.items.extra;
 		if (!extra)
 			return;
