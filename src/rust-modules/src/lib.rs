@@ -326,12 +326,14 @@ pub mod physics {
             from_x: Option<i32>,
             from_y: Option<i32>,
         ) -> Option<Vec<String>> {
-            let xi: usize = x.try_into().unwrap();
+            let xi = usize::try_from(x).ok()?;
             if xi >= self.cells.len() {
                 return None;
             }
+
             let row: &[Vec<PhysicsObject>] = &self.cells[xi];
-            let yi: usize = y.try_into().unwrap();
+
+            let yi = usize::try_from(y).ok()?;
             if yi >= row.len() {
                 return None;
             }
@@ -376,12 +378,22 @@ pub mod physics {
 
         #[napi]
         pub fn add_object(&mut self, obj: JsObject, x: i32, y: i32) {
-            let x: usize = x.try_into().unwrap();
+            let x: usize = match usize::try_from(x) {
+                Ok(v) => v,
+                Err(_) => return,
+            };
+
             if x >= self.cells.len() {
                 return;
             }
+
             let row: &mut Vec<Vec<PhysicsObject>> = &mut self.cells[x];
-            let y: usize = y.try_into().unwrap();
+
+            let y: usize = match usize::try_from(y) {
+                Ok(v) => v,
+                Err(_) => return,
+            };
+
             if y >= row.len() {
                 return;
             }
