@@ -40,12 +40,16 @@ module.exports = {
 	},
 
 	returnNoAggro: function () {
-		let master = this.master;
-		let obj = this.obj;
-		let mob = obj.mob;
+		const { obj, master } = this;
+		const { mob, instance: { physics } } = obj;
 
-		mob.originX = master.x + ~~(Math.random() * 6) - 3;
-		mob.originY = master.y + ~~(Math.random() * 6) - 3;
+		const { x, y } = master;
+
+		const newX = Math.max(0, Math.min(physics.width - 1, x + ~~(Math.random() * 6) - 3));
+		const newY = Math.max(0, Math.min(physics.height - 1, y + ~~(Math.random() * 6) - 3));
+
+		mob.originX = newX;
+		mob.originY = newY;
 
 		return null;
 	},
@@ -104,6 +108,7 @@ module.exports = {
 
 	followMaster: function (distance) {
 		const { obj, maxDistance, master: { x, y }, lastMasterPos: { x: lx, y: ly } } = this;
+		const { instance: { physics } } = obj;
 
 		if (distance < maxDistance)
 			return;
@@ -112,9 +117,9 @@ module.exports = {
 		if (masterDistanceFromLastPos <= maxDistance)
 			return;
 
-		const newX = x + ~~(Math.random() * 6) - 3;
-		const newY = y + ~~(Math.random() * 6) - 3;
-		
+		const newX = Math.max(0, Math.min(physics.width - 1, x + ~~(Math.random() * 6) - 3));
+		const newY = Math.max(0, Math.min(physics.height - 1, y + ~~(Math.random() * 6) - 3));
+
 		obj.mob.goHome = true;
 		obj.mob.originX = newX;
 		obj.mob.originY = newY;
