@@ -78,16 +78,21 @@
 	height: auto;
 	background-color: transparent;
 	display: flex;
+	height: calc(100% - 10px);
+	justify-content: space-between;
 	flex-direction: column-reverse;
 
 	.spell {
 		position: relative;
-		margin: 5px 0px 0px 0px;
 		background-color: fade(#3a3b4a, 90%);
 		border: none;
 
 		.hotkey {
 			display: none;
+		}
+
+		+ .spell {
+			margin-left: 0px;
 		}
 
 		&.active:before {
