@@ -62,13 +62,24 @@ const buildScale = oldConfig => {
 		};
 };
 
-const buildRotationStatic = () => ({
-	type: 'rotationStatic',
-	config: {
-		min: 0,
-		max: 360
+const buildRotationStatic = oldConfig => {
+	const rotation = oldConfig.rotation;
+
+	const res = {
+		type: 'rotationStatic',
+		config: {
+			min: 0,
+			max: 360
+		}
+	};
+
+	if (rotation) {
+		res.config.min = rotation.min ?? rotation;
+		res.config.max = rotation.max ?? rotation;
 	}
-});
+
+	return res;
+};
 
 const buildNoRotation = () => ({
 	type: 'noRotation',
@@ -224,7 +235,7 @@ const migrateParticleConfig = oldConfig => {
 		buildBlendMode(oldConfig.blendMode),
 		buildAlpha(oldConfig),
 		buildScale(oldConfig),
-		buildRotationStatic(),
+		buildRotationStatic(oldConfig),
 		buildNoRotation(),
 		buildBurst(oldConfig)
 	);
