@@ -111,6 +111,9 @@ module.exports = {
 
 		this.selected.forEach(function (s) {
 			let node = passiveTree.nodes.find(n => (n.id === s));
+			if (!node)
+				return;
+
 			if (node.spiritStart)
 				return;
 
