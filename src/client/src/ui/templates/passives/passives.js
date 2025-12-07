@@ -1,13 +1,54 @@
+/* eslint-disable max-lines-per-function */
+ 
 let zoom = 1;
 
 import globals from '../../../js/system/globals';
 import events from '../../../js/system/events';
 import client from '../../../js/system/client';
+import resources from '../../../js/resources';
 import tpl from './template.html?raw';
 import './styles.css';
 import constants from './constants';
 import temp from './temp';
 import input from './input';
+
+const nodeTypes = [
+	{ type: 'addAttackCritChance', index: 8 },
+	{ type: 'addAttackCritMultiplier', index: 9 },
+	{ type: 'addSpellCritChance', index: 10 },
+	{ type: 'addSpellCritMultiplier', index: 11 },
+	{ type: 'armor', index: 12 },
+	{ type: 'attackSpeed', index: 13 },
+	{ type: 'blockAttackChance', index: 14 },
+	{ type: 'blockSpellChance', index: 15 },
+	{ type: 'castSpeed', index: 16 },
+	{ type: 'dex', index: 17 },
+	{ type: 'dodgeAttackChance', index: 18 },
+	{ type: 'elementAllResist', index: 19 },
+	{ type: 'elementArcanePercent', index: 20 },
+	{ type: 'elementFirePercent', index: 21 },
+	{ type: 'elementFrostPercent', index: 22 },
+	{ type: 'elementHolyPercent', index: 23 },
+	{ type: 'elementPoisonPercent', index: 24 },
+	{ type: 'int', index: 25 },
+	{ type: 'dex+int', index: 26 },
+	{ type: 'manaMax', index: 27 },
+	{ type: 'physicalPercent', index: 28 },
+	{ type: 'regenHp', index: 29 },
+	{ type: 'regenMana', index: 30 },
+	{ type: 'sprintChance', index: 31 },
+	{ type: 'spellPercent', index: 32 },
+	{ type: 'str', index: 33 },
+	{ type: 'dex+str', index: 34 },
+	{ type: 'int+str', index: 35 },
+	{ type: 'vit', index: 36 }
+];
+
+const spiritStarts = [
+	{ spirit: 'lynx', index: 0 },
+	{ spirit: 'bear', index: 1 },
+	{ spirit: 'owl', index: 2 }
+];
 
 export default {
 	tpl,
@@ -39,6 +80,8 @@ export default {
 		nodes: null,
 		links: null
 	},
+
+	pointsAvailable: 0,
 
 	hoverNode: null,
 
@@ -165,73 +208,125 @@ export default {
 		},
 
 		node (node) {
-			let color = (node.color >= 0) ? (node.color + 1) : -1;
-			if ((!node.stats || Object.keys(node.stats).length === 0) && !node.spiritStart)
-				color = 0;
+			const sheetObj = resources.sprites.passiveNodes;
+			const sheet = sheetObj.element || sheetObj;
+
+			if (!sheet || !sheet.complete)
+				return;
+
+			const size = 64;
+
+			const x = (node.pos.x * constants.gridSize) - ((size - constants.blockSize) / 2) - this.pos.x;
+			const y = (node.pos.y * constants.gridSize) - ((size - constants.blockSize) / 2) - this.pos.y;
+
+			let spriteIndex = 0;
 
 			if (node.spiritStart) {
-				color = 8;
-				node.size = 1;
+				const spiritDef = spiritStarts.find(s => s.spirit === node.spiritStart);
+				spriteIndex = spiritDef ? spiritDef.index : 0;
+			} else if (node.nodeType) {
+				const typeDef = nodeTypes.find(t => t.type === node.nodeType);
+				spriteIndex = typeDef ? typeDef.index : 0;
 			}
 
-			this.ctx.fillStyle = ([
-				'#69696e',
-				'#c0c3cf',
-				'#3fa7dd',
-				'#4ac441',
-				'#d43346',
-				'#a24eff',
-				'#faac45',
-				'#44cb95',
-				'#fafcfc'
-			])[color];
-			let size = ([
-				constants.blockSize,
-				constants.blockSize * 2,
-				constants.blockSize * 3
-			])[node.size];
-			let x = (node.pos.x * constants.gridSize) - ((size - constants.blockSize) / 2) - this.pos.x;
-			let y = (node.pos.y * constants.gridSize) - ((size - constants.blockSize) / 2) - this.pos.y;
+			const cols = 8;
+			const sx = (spriteIndex % cols) * 64;
+			const sy = Math.floor(spriteIndex / cols) * 64;
 
-			let linked = this.data.links.some(l => {
+			const linked = this.data.links.some(l => {
 				if (l.from.id !== node.id && l.to.id !== node.id)
 					return false;
 
 				return this.data.nodes.some(n => {
 					return (
 						(n.id === l.from.id && n.selected) ||
-							(n.id === l.to.id && n.selected)
+					(n.id === l.to.id && n.selected)
 					);
 				});
 			});
 
-			if (!linked)
-				this.ctx.globalAlpha = 0.25;
+			// Draw background rect
+			if (node.selected && !node.spiritStart) {
+				const padding = 4;
+				const lineLength = 64;
+				const lineWidth = 4;
 
-			this.ctx.fillRect(x, y, size, size);
+				// Dark framed box
+				this.ctx.fillStyle = '#373041';
+				this.ctx.fillRect(
+					x - padding,
+					y - padding,
+					size + padding * 2,
+					size + padding * 2
+				);
 
-			if (linked) {
-				this.ctx.strokeStyle = ([
-					'#69696e',
-					'#69696e',
-					'#42548d',
-					'#386646',
-					'#763b3b',
-					'#533399',
-					'#d07840',
-					'#3f8d6d',
-					'#fafcfc'
-				])[color];
-				this.ctx.strokeRect(x, y, size, size);
+				this.ctx.fillStyle = '#fcfcfc';
 
-				if (node.selected) {
-					this.ctx.strokeStyle = '#fafcfc';
-					this.ctx.strokeRect(x, y, size, size);
-				}
+				const drawCorner = (xHor, yHor, xVer, yVer) => {
+					this.ctx.fillRect(
+						xHor,
+						yHor,
+						lineLength,
+						lineWidth
+					);
+
+					this.ctx.fillRect(
+						xVer,
+						yVer,
+						lineWidth,
+						lineWidth
+					);
+				};
+
+				//Top Left
+				/*drawCorner(
+					x - padding,
+					y - padding,
+					x - padding,
+					y - padding + lineWidth
+				);*/
+
+				//Top Right
+				/*drawCorner(
+					x + size + padding - lineLength,
+					y - padding,
+					x + size + padding - lineWidth,
+					y - padding + lineWidth
+				);*/
+
+				//Bottom Left
+				drawCorner(
+					x - padding,
+					y + size + padding - lineWidth,
+					x - padding,
+					y + size + padding - (lineWidth * 2) 
+				);
+
+				//Bottom Right
+				drawCorner(
+					x + size + padding - lineLength,
+					y + size + padding - lineWidth,
+					x + size + padding - lineWidth,
+					y + size + padding - (lineWidth * 2) 
+				);
+			} else {
+				this.ctx.fillStyle = '#373041';
+				this.ctx.fillRect(x, y, size, size);
 			}
 
-			if (!linked)
-				this.ctx.globalAlpha = 1;
+			let alpha = 0.25;
+			if (node.selected || linked) 
+				alpha = 1;
+			
+			this.ctx.globalAlpha = alpha;
+
+			this.ctx.drawImage(
+				sheet,
+				sx + 0.5, sy + 0.5, 64 - 0.5, 64 - 0.5,
+				x, y, size, size
+			);
+
+			this.ctx.globalAlpha = 1;
 		},
 
 		line (fromNode, toNode, linked) {
@@ -248,18 +343,18 @@ export default {
 			let toX = (toNode.pos.x * constants.gridSize) + halfSize - this.pos.x;
 			let toY = (toNode.pos.y * constants.gridSize) + halfSize - this.pos.y;
 
-			if ((!linked) && (!fromNode.selected) && (!toNode.selected))
-				this.ctx.globalAlpha = 0.25;
+			let lineColor = '#3c3f4c';
+			if (fromNode.selected && toNode.selected)
+				lineColor = '#fcfcfc';
+			else if (fromNode.selected || toNode.selected)
+				lineColor = '#69696e';
 
-			ctx.strokeStyle = linked ? '#fafcfc' : '#69696e';
+			ctx.strokeStyle = lineColor;
 			ctx.beginPath();
 			ctx.moveTo(fromX, fromY);
 			ctx.lineTo(toX, toY);
 			ctx.closePath();
 			ctx.stroke();
-
-			if (!linked && !fromNode.selected && !toNode.selected)
-				this.ctx.globalAlpha = 1;
 		}
 	},
 
@@ -275,68 +370,80 @@ export default {
 				y: pos.y
 			};
 
-			let cell = {
-				x: ~~((this.pos.x + this.mouse.x) / constants.gridSize),
-				y: ~~((this.pos.y + this.mouse.y) / constants.gridSize)
-			};
-
-			let node = this.hoverNode = this.data.nodes.find(function (n) {
-				return (
-					(n.pos.x === cell.x) &&
-						(n.pos.y === cell.y)
-				);
+			let hoverNode = null;
+			const size = 64;
+			this.data.nodes.forEach(n => {
+				const x = (n.pos.x * constants.gridSize) - ((size - constants.blockSize) / 2) - this.pos.x;
+				const y = (n.pos.y * constants.gridSize) - ((size - constants.blockSize) / 2) - this.pos.y;
+				if (this.mouse.x >= x && this.mouse.x < x + size && this.mouse.y >= y && this.mouse.y < y + size) 
+					hoverNode = n;
 			});
+			this.hoverNode = hoverNode;
 
-			if (node) {
-				let percentageStats = [
-					'addAttackCritChance',
-					'addAttackCritMultiplier',
-					'addCritChance',
-					'addCritMultiplier',
-					'addSpellCritChance',
-					'addSpellCritMultiplier',
-					'addSpellDamage',
-					'attackSpeed',
-					'blockAttackChance',
-					'blockSpellChance',
-					'castSpeed',
-					'catchChance',
-					'catchSpeed',
-					'dodgeAttackChance',
-					'dodgeSpellChance',
-					'elementArcanePercent',
-					'elementFirePercent',
-					'elementFrostPercent',
-					'elementHolyPercent',
-					'elementPoisonPercent',
-					'fishItems',
-					'fishRarity',
-					'fishWeight',
-					'itemQuantity',
-					'magicFind',
-					'physicalPercent',
-					'sprintChance',
-					'xpIncrease'
-				];
+			if (hoverNode) {
+				let text;
+				if (hoverNode.spiritStart) 
+					text = hoverNode.spiritStart === window.player.class ? 'Your starting node' : 'Starting node for ' + hoverNode.spiritStart + ' spirits';
+				else {
+					let percentageStats = [
+						'addAttackCritChance',
+						'addAttackCritMultiplier',
+						'addCritChance',
+						'addCritMultiplier',
+						'addSpellCritChance',
+						'addSpellCritMultiplier',
+						'addSpellDamage',
+						'attackSpeed',
+						'blockAttackChance',
+						'blockSpellChance',
+						'castSpeed',
+						'catchChance',
+						'catchSpeed',
+						'dodgeAttackChance',
+						'dodgeSpellChance',
+						'elementArcanePercent',
+						'elementFirePercent',
+						'elementFrostPercent',
+						'elementHolyPercent',
+						'elementPoisonPercent',
+						'fishItems',
+						'fishRarity',
+						'fishWeight',
+						'itemQuantity',
+						'magicFind',
+						'physicalPercent',
+						'sprintChance',
+						'xpIncrease'
+					];
 
-				let text = Object.keys(node.stats)
-					.map(function (s) {
-						let statName = statTranslations[s];
-						let statValue = node.stats[s];
-						if (s.indexOf('CritChance') > -1)
-							statValue /= 20;
-						let negative = ((statValue + '')[0] === '-');
-						if (percentageStats.includes(s))
-							statValue += '%';
+					const statArray = Object.keys(hoverNode.stats);
+					text = statArray
+						.map((s, i) => {
+							const statName = statTranslations[s];
+							const statInfo = statTranslations.tooltips[s];
 
-						return ((negative ? '' : '+') + statValue + ' ' + statName);
-					})
-					.join('<br />');
+							let statValue = hoverNode.stats[s];
+							const negative = ((statValue + '')[0] === '-');
 
-				if (node.spiritStart === window.player.class)
-					text = 'Your starting node';
-				else if (node.spiritStart)
-					text = 'Starting node for ' + node.spiritStart + ' spirits';
+							if (s.indexOf('CritChance') > -1)
+								statValue /= 20;
+							if (percentageStats.includes(s))
+								statValue += '%';
+
+							let res = `
+								${negative ? '' : '+'}${statValue} ${statName}
+								<br />
+								<span style="color: var(--grayC)">
+									${statInfo}
+								</span>
+							`;
+
+							if (i < statArray.length)
+								res += '<br />';
+
+							return res;
+						}).join('<br />');
+				}
 
 				let tooltipPos = {
 					x: (input.mouse.raw.clientX + 15) / zoom,
@@ -344,7 +451,7 @@ export default {
 				};
 
 				events.emit('onShowTooltip', text, this.el[0], tooltipPos);
-				this.tooltipId = node.id;
+				this.tooltipId = hoverNode.id;
 			} else {
 				events.emit('onHideTooltip', this.el[0]);
 				this.tooltipId = null;
@@ -353,25 +460,22 @@ export default {
 
 		onPanStart (e) {
 			if (isMobile) {
-				let cell = {
-					x: ~~((this.pos.x + e.x) / constants.gridSize),
-					y: ~~((this.pos.y + e.y) / constants.gridSize)
-				};
-
-				let node = this.data.nodes.find(function (n) {
-					return (
-						(n.pos.x === cell.x) &&
-							(n.pos.y === cell.y)
-					);
+				let hoverNode = null;
+				const size = 64;
+				this.data.nodes.forEach(n => {
+					const x = (n.pos.x * constants.gridSize) - ((size - constants.blockSize) / 2) - this.pos.x;
+					const y = (n.pos.y * constants.gridSize) - ((size - constants.blockSize) / 2) - this.pos.y;
+					if (e.x >= x && e.x < x + size && e.y >= y && e.y < y + size) 
+						hoverNode = n;
 				});
 
-				if (this.hoverNode && node && node.id !== this.hoverNode.id) {
+				if (this.hoverNode && hoverNode && hoverNode.id !== this.hoverNode.id) {
 					this.events.onMouseMove.call(this, e);
 
 					return;
 				}
 
-				if (!node)
+				if (!hoverNode)
 					this.hoverNode = null;
 			}
 
@@ -470,8 +574,10 @@ export default {
 		},
 
 		onGetPassivePoints (points) {
-			this.find('.points')
-				.html('Points Available: ' + points);
+			this.pointsAvailable = points;
+
+			this.find('.points-available')
+				.html(`(Points available: ${points})`);
 		},
 
 		onReset () {

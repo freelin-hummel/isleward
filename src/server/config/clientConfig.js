@@ -36,7 +36,8 @@ const config = {
 		'animMob',
 		'animBoss',
 		'white',
-		'ray'
+		'ray',
+		'passiveNodes'
 	],
 	//Textures that are 24x24. The renderer needs to know this
 	bigTextures: [
