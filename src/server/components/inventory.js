@@ -712,6 +712,10 @@ module.exports = {
 			return true;
 
 		let slots = this.inventorySize - this.obj.inventory.items.filter(f => !f.eq).length;
+		//We're not checking if there's any space for any specific item, just checking if there is at least one slot open
+		if (items.length === 0)
+			return slots > 0;
+
 		for (const item of items) {
 			if (isItemStackable(item) && (!noStack)) {
 				let exists = this.items.find(owned => (owned.name === item.name) && (isItemStackable(owned)));
@@ -721,7 +725,7 @@ module.exports = {
 			slots--;
 		}
 
-		return (slots >= 0);
+		return slots >= 0;
 	},
 
 	getItem: function (item, hideMessage, noStack, hideAlert, createBagIfFull) {
