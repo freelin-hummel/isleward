@@ -2,6 +2,7 @@ import resources from '../../../js/resources';
 
 import events from '../../../js/system/events';
 import client from '../../../js/system/client';
+import globals from '../../../js/system/globals';
 import template from './template.html?raw';
 
 import './styles.css';
@@ -25,28 +26,46 @@ export default {
 		this.on('.btnApply', 'click', this.apply.bind(this));
 	},
 
-	onGetWardrobeSkins (msg) {
-		let list = msg.skins;
-		this.wardrobeId = msg.id;
+	onGetWardrobeSkins ({ skins: list, id: wardrobeId }) {
+		this.wardrobeId = wardrobeId;
 
-		let container = this.find('.list').empty();
+		list.forEach(l => {
+			l.name = l.name.replace('Skin: ', '');
+		});
 
-		list.forEach(function (l) {
-			let html = '<div class="skinName">' + l.name + '</div>';
+		list.sort((a, b) =>
+			a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+		);
 
-			let el = $(html)
-				.appendTo(container);
+		const container = this.find('.list').empty();
+		let selectedEl = null;
+		let selectedData = null;
+
+		list.forEach(l => {
+			const html = '<div class="skinName">' + l.name + '</div>';
+			const el = $(html).appendTo(container);
 
 			el.on('click', this.setPreview.bind(this, l, el));
 			el.on('click', events.emit.bind(events, 'onClickListItem'));
 
 			if (l.id === window.player.skinId) {
 				el.addClass('current');
-				this.setPreview(l, el);
+				selectedEl = el;
+				selectedData = l;
 			}
-		}, this);
+		});
 
 		this.show();
+
+		if (selectedEl) {
+			this.setPreview(selectedData, selectedEl);
+
+			requestAnimationFrame(() => {
+				selectedEl.get(0).scrollIntoView({
+					block: 'center'
+				});
+			});
+		}
 	},
 
 	setPreview (skin, el) {
@@ -57,15 +76,24 @@ export default {
 		this.skin = skin;
 
 		let costume = skin.sprite.split(',');
-		let spriteX = -costume[0] * 8;
-		let spriteY = -costume[1] * 8;
 
 		let spritesheet = skin.spritesheet || '../../../images/characters.png';
+		const isBig = globals.clientConfig.bigTextures?.includes(spritesheet);
+
 		if (spritesheet.indexOf('server/mods') === 0)
 			spritesheet = resources.sprites[spritesheet]?.src;
 
-		this.find('.sprite')
-			.css('background', 'url("' + spritesheet + '") ' + spriteX + 'px ' + spriteY + 'px');
+		const tileSize = isBig ? 24 : 8;
+
+		let spriteX = -costume[0] * tileSize;
+		let spriteY = -costume[1] * tileSize;
+
+		const sprite = this.find('.sprite')
+			.css('background', 'url("' + spritesheet + '") ' + spriteX + 'px ' + spriteY + 'px')
+			.removeClass('bigSprite');
+
+		if (isBig)
+			sprite.addClass('bigSprite');
 	},
 
 	apply () {
