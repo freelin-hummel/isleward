@@ -72,6 +72,7 @@ export default {
 		modUis = (await import('@modUis')).default;
 
 		events.on('onBuildIngameUis', this.onBuildIngameUis.bind(this));
+		events.on('onReactUiReady', this.onReactUiReady.bind(this));
 		events.on('onUiKeyDown', this.onUiKeyDown.bind(this));
 		events.on('onResize', this.onResize.bind(this));
 
@@ -157,10 +158,6 @@ export default {
 
 				this.setComponents([...this.reactUis]);
 
-				this.uis.push({
-					type
-				});
-
 				return;
 			}
 
@@ -170,6 +167,10 @@ export default {
 		} catch (e) {
 			console.error(`Failed to load UI: ${fullPath}`, e);
 		}
+	},
+
+	onReactUiReady: function ({ type }) {
+		this.uis.push({ type });
 	},
 
 	renderUi (ui) {
