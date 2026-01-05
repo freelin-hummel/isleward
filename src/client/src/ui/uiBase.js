@@ -1,3 +1,4 @@
+import uiFactory from './factory';
 import events from '../js/system/events';
 
 export default {
@@ -100,14 +101,8 @@ export default {
 		if (this.shown)
 			return;
 
-		if (this.modal) {
-			//Close any other open modal
-			$('.modal').toArray().forEach(el => {
-				const ui = $(el).data('ui');
-				if (ui.shown)
-					ui.hide();
-			});
-		}
+		if (this.modal)
+			uiFactory.closeOpenModals();
 
 		this.shown = true;
 		if (this.isFlex)

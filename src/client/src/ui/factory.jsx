@@ -9,6 +9,8 @@ import tosAcceptanceValid from '../js/misc/tosAcceptanceValid';
 
 import * as opusUi from '@intenda/opus-ui';
 
+const { stateManager: { getWgtState: getReactCpnState, setWgtState: setReactCpnState } } = opusUi;
+
 window.opusUi = opusUi;
 
 let modUis;
@@ -170,7 +172,23 @@ export default {
 	},
 
 	onReactUiReady: function ({ type }) {
-		this.uis.push({ type });
+		const state = getReactCpnState(type) ?? {};
+		const { modal, hotkeyToOpen } = state;
+
+		this.uis.push({
+			type,
+			modal,
+			hotkeyToOpen,
+			toggle: () => {
+				setReactCpnState(type, {
+					vis: !getReactCpnState(type)?.vis
+				});
+			},
+
+			get shown () {
+				return getReactCpnState(type)?.vis;
+			}
+		});
 	},
 
 	renderUi (ui) {
@@ -187,6 +205,15 @@ export default {
 			else if ((ui.centeredX) || (ui.centeredY))
 				ui.center(ui.centeredX, ui.centeredY);
 		}, this);
+	},
+
+	closeOpenModals () {
+		this.uis.forEach(u => {
+			if (!u.modal || !u.shown)
+				return;
+
+			u.toggle();
+		});
 	},
 
 	onUiKeyDown (keyEvent) {
