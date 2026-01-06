@@ -18,12 +18,35 @@
 			margin: auto;
 		}
 
+		.btn-icon {
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			background-color: @blackA;
+			height: 31px;
+			width: 31px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			cursor: pointer;
+
+			.icon {
+				filter: saturate(0%);
+			}
+
+			&:hover {
+				background-color: lighten(@blackA, 10%);
+			}
+
+		}
+
 	}
 
 	.options {
 		display: flex;
 		flex-direction: column;
 		padding: 10px;
+		gap: 10px;
 
 		.btn {
 			color: @white;
@@ -32,14 +55,6 @@
 			background-color: @blueC;
 			cursor: pointer;
 			padding: 0px 20px;
-
-			+ .btn {
-				margin-top: 10px;
-			}
-
-			&.btnNames {
-				display: none;
-			}
 
 			&:hover {
 				background-color: @blueD;
@@ -54,6 +69,33 @@
 
 			}
 
+			&.btn-light-blue {
+				background-color: @blueB;
+
+				&:hover {
+					background-color: @blueC;
+				}
+
+			}
+
+			&.btn-dark-gray {
+				background-color: @blackA;
+
+				&:hover {
+					background-color: @blackB;
+				}
+
+			}
+
+			&.btn-teal {
+				background-color: @tealD;
+
+				&:hover {
+					background-color: darken(@tealD, 10%);
+				}
+
+			}
+
 			&.btn-orange {
 				background-color: @orangeC;
 
@@ -61,6 +103,19 @@
 					background-color: @orangeD;
 				}
 
+			}
+
+			&.btn-gray {
+				background-color: @grayC;
+
+				&:hover {
+					background-color: @grayD;
+				}
+
+			}
+
+			&.gapAbove {
+				margin-top: 10px;
 			}
 
 		}

@@ -24,6 +24,7 @@ export default {
 		this.el.find('.btnCharSelect').on('click', this.charSelect.bind(this));
 		this.el.find('.btnLogOut').on('click', this.logOut.bind(this));
 		this.el.find('.btnPatreon').on('click', this.patreon.bind(this));
+		this.el.find('.btnReturn').on('click', this.hide.bind(this));
 
 		this.onEvent('onResize', this.onResize.bind(this));
 	},
