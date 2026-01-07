@@ -1,6 +1,6 @@
 {
     "name": "@bigbadwaffle/coreward-client",
-    "version": "0.22.0",
+    "version": "0.22.1",
     "description": "The Coreward Client is an open-source, web-based MMO client designed to connect players to a Coreward server.",
     "keywords": [
         "coreward",
