@@ -348,7 +348,7 @@ module.exports = {
 			return;
 
 		const oldQuantity = item.quantity;
-		this.obj.inventory.destroyItem({ itemId: msg.itemId });
+		this.obj.inventory.destroyItem({ itemId: msg.itemId }, null, true, true);
 
 		if (oldQuantity)
 			item.quantity = oldQuantity;

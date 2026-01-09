@@ -304,7 +304,7 @@ module.exports = {
 			return;
 		}
 
-		this.destroyItem({ itemId: itemId }, null, true);
+		this.destroyItem({ itemId: itemId }, null, true, true);
 
 		itemIdsBeingStashed.spliceWhere(f => f === itemId);
 	},
@@ -341,7 +341,8 @@ module.exports = {
 		this.obj.social.notifySelfArray(messages);
 	},
 
-	destroyItem: function ({ itemId }, amount, force) {
+	//If isTransfer is true, it means the item isn't truly destroyed. It's just been dropped, stashed, etc.
+	destroyItem: function ({ itemId }, amount, force, isTransfer = false) {
 		let item = this.findItem(itemId);
 		if (!item || (item.noDestroy && !force))
 			return;
@@ -374,7 +375,7 @@ module.exports = {
 		}
 
 		this.obj.fireEvent('afterDestroyItem', item, amount);
-		events.emit('afterPlayerDestroyItem', this.obj, item, amount);
+		events.emit('afterPlayerDestroyItem', this.obj, item, amount, isTransfer);
 
 		return item;
 	},
