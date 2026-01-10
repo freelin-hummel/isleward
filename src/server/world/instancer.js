@@ -37,7 +37,7 @@ module.exports = {
 	threadArgs: null,
 
 	init: function (args) {
-		const { zoneId, zoneName } = args;
+		let { zoneId, zoneName } = args;
 
 		tickInterval = consts.tickTime;
 
@@ -48,7 +48,11 @@ module.exports = {
 
 		spellCallbacks.init();
 		herbs.init();
-		map.init(args);
+		map.init({
+			zoneName,
+			path: args.path,
+			overridePath: this.threadArgs.extraThreadArgs?.overrideMapPath
+		});
 
 		const fakeInstance = {
 			objects,

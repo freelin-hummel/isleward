@@ -79,12 +79,15 @@ module.exports = {
 
 	zoneConfig: null,
 
-	init: function ({ zoneName, path }) {
+	//Normally maps load from `${path}/${name}` but if there is an overridePath, just use that
+	init: function ({ zoneName, path, overridePath }) {
 		this.name = zoneName;
 		this.path = path;
+
+		const basePath = `../${overridePath ?? `${this.path}/${this.name}`}/`;
 		
 		try {
-			this.zoneConfig = require('../' + this.path + '/' + this.name + '/zone');
+			this.zoneConfig = require(`${basePath}/zone`);
 		} catch (e) {
 			this.zoneConfig = globalZone;
 
@@ -94,7 +97,7 @@ module.exports = {
 
 		let chats = null;
 		try {
-			chats = require('../' + this.path + '/' + this.name + '/chats');
+			chats = require(`${basePath}/chats`);
 		} catch (e) {
 			if (!e.message.includes('Cannot find module'))
 				console.error('Failed to load zone chats', e);
@@ -109,7 +112,7 @@ module.exports = {
 
 		let dialogues = null;
 		try {
-			dialogues = require('../' + this.path + '/' + this.name + '/dialogues');
+			dialogues = require(`${basePath}/dialogues`);
 		} catch (e) {
 			if (!e.message.includes('Cannot find module'))
 				console.error('Failed to load zone dialogues', e);
@@ -125,7 +128,7 @@ module.exports = {
 		for (let r in resources)
 			resourceSpawner.register(r, resources[r]);
 
-		mapFile = require('../' + this.path + '/' + this.name + '/map');
+		mapFile = require(`${basePath}/map`);
 		this.mapFile = mapFile;
 		//Fix for newer versions of Tiled
 		this.mapFile.properties = objectifyProperties(this.mapFile.properties);
