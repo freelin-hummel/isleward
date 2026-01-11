@@ -68,7 +68,8 @@ module.exports = {
 					y,
 					fromX,
 					fromY
-				}
+				},
+				forceCrash: false
 			});
 		} else {
 			for (let entry of idsOfCollidingObjects) {

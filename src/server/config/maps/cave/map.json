@@ -118026,7 +118026,7 @@
       {
          "columns": 8,
          "firstgid": 1,
-         "image": "../../../../client/images/walls.png",
+         "image": "../../../../client/public/images/walls.png",
          "imageheight": 256,
          "imagewidth": 64,
          "margin": 0,
@@ -118089,7 +118089,7 @@
       {
          "columns": 8,
          "firstgid": 257,
-         "image": "../../../../client/images/mobs.png",
+         "image": "../../../../client/public/images/mobs.png",
          "imageheight": 88,
          "imagewidth": 64,
          "margin": 0,
@@ -118114,7 +118114,7 @@
       {
          "columns": 8,
          "firstgid": 345,
-         "image": "../../../../client/images/tiles.png",
+         "image": "../../../../client/public/images/tiles.png",
          "imageheight": 224,
          "imagewidth": 64,
          "margin": 0,
@@ -118217,7 +118217,7 @@
       {
          "columns": 8,
          "firstgid": 569,
-         "image": "../../../../client/images/objects.png",
+         "image": "../../../../client/public/images/objects.png",
          "imageheight": 176,
          "imagewidth": 64,
          "margin": 0,
@@ -118236,7 +118236,7 @@
       {
          "columns": 8,
          "firstgid": 745,
-         "image": "../../../../client/images/bigObjects.png",
+         "image": "../../../../client/public/images/bigObjects.png",
          "imageheight": 240,
          "imagewidth": 192,
          "margin": 0,
@@ -118249,7 +118249,7 @@
       {
          "columns": 8,
          "firstgid": 825,
-         "image": "../../../../client/images/animBigObjects.png",
+         "image": "../../../../client/public/images/animBigObjects.png",
          "imageheight": 240,
          "imagewidth": 192,
          "margin": 0,
