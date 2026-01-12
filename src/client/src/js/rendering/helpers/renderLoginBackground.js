@@ -71,22 +71,24 @@ const renderLoginBackground = renderer => {
 				}[tile];
 			}
 
-			let sprite = new PIXI.Sprite(renderer.getTexture('sprites', tile));
-
 			alpha = Math.min(Math.max(0.15, alpha), 0.65);
 
-			sprite.alpha = alpha;
-			sprite.position.x = i * scale;
-			sprite.position.y = j * scale;
-			sprite.width = scale;
-			sprite.height = scale;
+			const flipped = mRandom() < 0.5;
 
-			if (mRandom() < 0.5) {
-				sprite.position.x += scale;
-				sprite.scale.x = -scaleMult;
-			}
+			const texture = renderer.getTexture('sprites', tile);
+			const frame = texture.frame;
+			const scaleFactor = scale / frame.width;
 
-			container.addChild(sprite);
+			let sprite = new PIXI.Particle({
+				texture,
+				x: flipped ? (i * scale) + scale : i * scale,
+				y: j * scale,
+				scaleX: flipped ? -scaleFactor : scaleFactor,
+				scaleY: scaleFactor,
+				alpha
+			});
+
+			container.addParticle(sprite);
 		}
 	}
 };
