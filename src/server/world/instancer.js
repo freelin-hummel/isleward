@@ -37,7 +37,7 @@ module.exports = {
 	threadArgs: null,
 
 	init: function (args) {
-		let { zoneId, zoneName } = args;
+		const { zoneId, zoneName } = args;
 
 		tickInterval = consts.tickTime;
 
