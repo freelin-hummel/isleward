@@ -88,7 +88,10 @@ module.exports = {
 				canCastResponse === spellCastResultTypes.success ||
 				(
 					isSpellAuto &&
-					canCastResponse === spellCastResultTypes.outOfRange
+					(
+						canCastResponse === spellCastResultTypes.outOfRange ||
+						canCastResponse === spellCastResultTypes.onCooldown
+					)
 				)
 			);
 			if (!canCast) {
