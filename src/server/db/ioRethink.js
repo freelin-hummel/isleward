@@ -329,7 +329,7 @@ module.exports = {
 		if (!forceCrash)
 			return;
 
-		if (process.send) {
+		if (global.instancer) {
 			process.send({
 				event: 'onCrashed'
 			});
