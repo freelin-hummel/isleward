@@ -75,6 +75,8 @@ const statTranslations = {
 	cooldown: 'Cooldown(Ticks)',
 	uses: 'Uses',
 
+	passivePoint: 'Passive Skill Point',
+
 	//Rune Stats
 	damage: 'Base Damage',
 	healing: 'Base Heal',
@@ -111,6 +113,7 @@ const statTranslations = {
 statTranslations.tooltips = {
 	vit: `Each point of ${statTranslations.vit} increases your ${statTranslations.hpMax} by ${balance.statScales.vitToHp}.`,
 	regenHp: `Amount of ${statTranslations.hp} restored per tick.`,
+	hpMax: `Maximum ${statTranslations.hp} capacity. When it runs out, you die.`,
 	manaMax: `Maximum ${statTranslations.mana} capacity.`,
 	regenMana: `${statTranslations.mana} regenerated per tick.`,
 	str: `Increases the damage of ${statTranslations.str}-based weapons and abilities.<br /><br />Each point of ${statTranslations.str} increases your ${statTranslations.armor} by ${balance.statScales.strToArmor}.`,

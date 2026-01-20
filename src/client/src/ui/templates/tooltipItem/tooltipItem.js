@@ -124,15 +124,15 @@ export default {
 		events.emit('onBuiltItemTooltip', this.tooltip);
 	},
 
-	onHideItemTooltip (item) {
-		if (
-			(!this.item) ||
-				(
-					(this.item !== item) &&
-					(this.item.refItem) &&
-					(this.item.refItem !== item)
-				)
-		)
+	onHideItemTooltip (item, force = false) {
+		const isValid = (
+			force ||
+			!this.item ||
+			this.item === item ||
+			this.item?.refItem === item
+		);
+
+		if (!isValid)
 			return;
 
 		this.item = null;

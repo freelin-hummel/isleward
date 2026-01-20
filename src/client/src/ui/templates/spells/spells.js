@@ -5,12 +5,12 @@ import events from '../../../js/system/events';
 import template from './template.html?raw';
 import './styles.css';
 import templateSpell from './templateSpell.html?raw';
-import templateTooltip from './templateTooltip.html?raw';
 
 export default {
 	tpl: template,
 
 	spells: [],
+	currenTooltipItem: null,
 
 	postRender () {
 		this.onEvent('onGetSpells', this.onGetSpells.bind(this));
@@ -113,8 +113,10 @@ export default {
 			y: elParent[0].offsetTop + 4
 		};
 
+		this.currenTooltipItem = { spell };
+
 		events.emit('showItemTooltip', {
-			item: { spell },
+			item: this.currenTooltipItem,
 			pos: ttPos,
 			rightAlign: true,
 			zIndex: this.el.css('z-index'),
@@ -123,7 +125,9 @@ export default {
 	},
 
 	onHideTooltip (el) {
-		events.emit('onHideItemTooltip', el[0]);
+		events.emit('onHideItemTooltip', this.currenTooltipItem);
+
+		this.currenTooltipItem = null;
 	},
 
 	onGetSpellActive (options) {

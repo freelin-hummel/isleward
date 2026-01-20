@@ -17,7 +17,7 @@
     },
     "dependencies": {
         "@bigbadwaffle/particle-emitter": "^0.0.4",
-        "@intenda/opus-ui": "^2.6.0",
+        "@intenda/opus-ui": "2.6.9",
         "@pixi/utils": "^7.4.3",
         "howler": "^2.2.4",
         "jquery": "^3.7.1",

@@ -1,0 +1,855 @@
+# Events: Client -> Client
+
+## Event: onGetTalk
+blueprint.state
+
+* Files
+  - src\client\src\js\components\dialogue.js
+_____________________________________
+
+## Event: onGetEffectIcon
+{
+	id: this.id,
+	icon: buffIcons[type]
+}
+
+* Files
+  - src\client\src\js\components\effects\auras.js
+  - src\client\src\js\components\effects.js
+_____________________________________
+
+## Event: onRemoveEffectIcon
+{ id: this.id }
+
+* Files
+  - src\client\src\js\components\effects\auras.js
+  - src\client\src\js\components\effects.js
+_____________________________________
+
+## Event: onObtainEvent
+q
+
+* Files
+  - src\client\src\js\components\events.js
+_____________________________________
+
+## Event: onRemoveEvent
+q.id
+
+* Files
+  - src\client\src\js\components\events.js
+_____________________________________
+
+## Event: onShowProgress
+(msg.action || 'Gathering') + '...'
+
+* Files
+  - src\client\src\js\components\gatherer.js
+_____________________________________
+
+## Event: onGetItems
+this.items
+
+* Files
+  - src\client\src\js\components\inventory.js
+_____________________________________
+
+## Event: onGetInventorySize
+this.inventorySize
+
+* Files
+  - src\client\src\js\components\inventory.js
+_____________________________________
+
+## Event: onDestroyItems
+destroyItems
+
+* Files
+  - src\client\src\js\components\inventory.js
+_____________________________________
+
+## Event: onObjCollideBump
+this.obj
+
+* Files
+  - src\client\src\js\components\keyboardMover.js
+_____________________________________
+
+## Event: onChangeHoverTile
+tileX
+
+* Files
+  - src\client\src\js\components\mouseMover.js
+  - src\client\src\js\components\touchMover.js
+_____________________________________
+
+## Event: onGetPassives
+this.selected
+
+* Files
+  - src\client\src\js\components\passives.js
+_____________________________________
+
+## Event: onGetPassivePoints
+this.points
+
+* Files
+  - src\client\src\js\components\passives.js
+_____________________________________
+
+## Event: onGetPortrait
+obj.portrait
+
+* Files
+  - src\client\src\js\components\player.js
+_____________________________________
+
+## Event: onObtainQuest
+q
+
+* Files
+  - src\client\src\js\components\quests.js
+_____________________________________
+
+## Event: onUpdateQuest
+q
+
+* Files
+  - src\client\src\js\components\quests.js
+_____________________________________
+
+## Event: onCompleteQuest
+q
+
+* Files
+  - src\client\src\js\components\quests.js
+_____________________________________
+
+## Event: onGetReputations
+this.list
+
+* Files
+  - src\client\src\js\components\reputation.js
+_____________________________________
+
+## Event: onGetServerActions
+this.actions
+
+* Files
+  - src\client\src\js\components\serverActions.js
+_____________________________________
+
+## Event: onGetCustomChatChannels
+this.customChannels
+
+* Files
+  - src\client\src\js\components\social.js
+_____________________________________
+
+## Event: onGetSocialActions
+this.actions
+
+* Files
+  - src\client\src\js\components\social.js
+_____________________________________
+
+## Event: onGetSpells
+this.spells
+
+* Files
+  - src\client\src\js\components\spellbook.js
+_____________________________________
+
+## Event: onSetTarget
+this.target
+
+* Files
+  - src\client\src\js\components\spellbook.js
+_____________________________________
+
+## Event: onGetAnnouncement
+{ msg: `Cancelled casting ${spell.name}` }
+
+* Files
+  - src\client\src\js\components\spellbook.js
+  - src\client\src\ui\templates\messages\messages.js
+  - src\client\src\ui\templates\quests\quests.js
+  - src\client\src\ui\templates\workbench\workbench.js
+_____________________________________
+
+## Event: onGetStats
+this.values
+
+* Files
+  - src\client\src\js\components\stats.js
+_____________________________________
+
+## Event: onGetPartyStats
+this.obj.serverId
+
+* Files
+  - src\client\src\js\components\stats.js
+_____________________________________
+
+## Event: onGetTradeList
+this.itemList
+
+* Files
+  - src\client\src\js\components\trade.js
+_____________________________________
+
+## Event: onCloseTrade
+
+
+* Files
+  - src\client\src\js\components\trade.js
+_____________________________________
+
+## Event: loaderProgress
+{
+	type: 'components',
+	progress: loadedCount / fullList.length
+}
+
+* Files
+  - src\client\src\js\components.js
+  - src\client\src\js\resources.js
+  - src\client\src\js\sound\sound.js
+_____________________________________
+
+## Event: onKeyUp
+k
+
+* Files
+  - src\client\src\js\input.js
+  - src\client\src\ui\templates\middleHud\middleHud.js
+  - src\client\src\ui\templates\passives\input.js
+_____________________________________
+
+## Event: onUiKeyDown
+keyEvent
+
+* Files
+  - src\client\src\js\input.js
+_____________________________________
+
+## Event: onCanvasKeyDown
+keyEvent
+
+* Files
+  - src\client\src\js\input.js
+_____________________________________
+
+## Event: onKeyDown
+key
+
+* Files
+  - src\client\src\js\input.js
+  - src\client\src\ui\templates\middleHud\middleHud.js
+  - src\client\src\ui\templates\passives\input.js
+_____________________________________
+
+## Event: onToggleFullscreen
+
+
+* Files
+  - src\client\src\js\input.js
+  - src\client\src\ui\templates\passives\input.js
+_____________________________________
+
+## Event: mouseDown
+this.mouse
+
+* Files
+  - src\client\src\js\input.js
+_____________________________________
+
+## Event: mouseUp
+this.mouse
+
+* Files
+  - src\client\src\js\input.js
+_____________________________________
+
+## Event: onTouchStart
+{
+	x: touch.clientX,
+	y: touch.clientY,
+	worldX: touch.clientX + renderer.pos.x,
+	worldY: touch.clientY + renderer.pos.y
+}
+
+* Files
+  - src\client\src\js\input.js
+_____________________________________
+
+## Event: onTouchMove
+{
+	x: touch.clientX,
+	y: touch.clientY,
+	touches: e.touches.length
+}
+
+* Files
+  - src\client\src\js\input.js
+_____________________________________
+
+## Event: onTouchEnd
+
+
+* Files
+  - src\client\src\js\input.js
+_____________________________________
+
+## Event: onTouchCancel
+
+
+* Files
+  - src\client\src\js\input.js
+_____________________________________
+
+## Event: onShake
+e
+
+* Files
+  - src\client\src\js\input.js
+_____________________________________
+
+## Event: onMobHover
+mob
+
+* Files
+  - src\client\src\js\objects\objects.js
+_____________________________________
+
+## Event: onGetPlayer
+obj
+
+* Files
+  - src\client\src\js\objects\objects.js
+_____________________________________
+
+## Event: onGetSelfCasting
+value
+
+* Files
+  - src\client\src\js\objects\objects.js
+_____________________________________
+
+## Event: onGetTargetCasting
+obj.id
+
+* Files
+  - src\client\src\js\objects\objects.js
+_____________________________________
+
+## Event: onTilesVisible
+newHidden
+
+* Files
+  - src\client\src\js\rendering\helpers\buildHiddenContainers.js
+_____________________________________
+
+## Event: onResize
+
+
+* Files
+  - src\client\src\js\rendering\renderer.js
+_____________________________________
+
+## Event: onRezone
+{
+	oldZoneId: this.zoneId,
+	newZoneId: zoneId
+}
+
+* Files
+  - src\client\src\js\rendering\renderer.js
+_____________________________________
+
+## Event: onGetObject
+c
+
+* Files
+  - src\client\src\js\rendering\renderer.js
+_____________________________________
+
+## Event: onMoveSpeedChange
+0
+
+* Files
+  - src\client\src\js\rendering\renderer.js
+_____________________________________
+
+## Event: onSceneMove
+
+
+* Files
+  - src\client\src\js\rendering\renderer.js
+_____________________________________
+
+## Event: onVolumeChange
+{
+	soundType,
+	volume: soundType === 'sound' ? soundVolume : musicVolume
+}
+
+* Files
+  - src\client\src\js\sound\sound.js
+_____________________________________
+
+## Event: onHandshake
+
+
+* Files
+  - src\client\src\js\system\client.js
+_____________________________________
+
+## Event: handshake
+
+
+* Files
+  - src\client\src\js\system\client.js
+_____________________________________
+
+## Event: request
+msg
+
+* Files
+  - src\client\src\js\system\client.js
+_____________________________________
+
+## Event: eventName
+m
+
+* Files
+  - src\client\src\js\system\client.js
+_____________________________________
+
+## Event: rezoneStart
+
+
+* Files
+  - src\client\src\js\system\client.js
+_____________________________________
+
+## Event: destroyAllObjects
+
+
+* Files
+  - src\client\src\js\system\client.js
+  - src\client\src\ui\templates\mainMenu\mainMenu.js
+_____________________________________
+
+## Event: resetRenderer
+
+
+* Files
+  - src\client\src\js\system\client.js
+  - src\client\src\ui\templates\mainMenu\mainMenu.js
+_____________________________________
+
+## Event: resetPhysics
+
+
+* Files
+  - src\client\src\js\system\client.js
+  - src\client\src\ui\templates\mainMenu\mainMenu.js
+_____________________________________
+
+## Event: clearUis
+
+
+* Files
+  - src\client\src\js\system\client.js
+_____________________________________
+
+## Event: onBuildIngameUis
+
+
+* Files
+  - src\client\src\js\system\client.js
+_____________________________________
+
+## Event: onGetMap
+msgs[0]
+
+* Files
+  - src\client\src\js\system\client.js
+_____________________________________
+
+## Event: onResourcesLoaded
+
+
+* Files
+  - src\client\src\main.jsx
+_____________________________________
+
+## Event: onHideContextMenu
+
+
+* Files
+  - src\client\src\ui\factory.jsx
+  - src\client\src\ui\templates\inventory\inventory.js
+  - src\client\src\ui\templates\stash\stash.js
+_____________________________________
+
+## Event: onHideItemTooltip
+item
+
+* Files
+  - src\client\src\ui\shared\renderItem.js
+  - src\client\src\ui\templates\equipment\equipment.js
+  - src\client\src\ui\templates\hud\hud.js
+  - src\client\src\ui\templates\inventory\inventory.js
+  - src\client\src\ui\templates\messages\messages.js
+  - src\client\src\ui\templates\spells\spells.js
+  - src\client\src\ui\templates\stash\stash.js
+  - src\client\src\ui\templates\workbench\workbench.js
+_____________________________________
+
+## Event: onShowItemTooltip
+item
+
+* Files
+  - src\client\src\ui\shared\renderItem.js
+  - src\client\src\ui\templates\equipment\equipment.js
+  - src\client\src\ui\templates\hud\hud.js
+  - src\client\src\ui\templates\inventory\inventory.js
+  - src\client\src\ui\templates\messages\messages.js
+  - src\client\src\ui\templates\stash\stash.js
+  - src\client\src\ui\templates\workbench\workbench.js
+_____________________________________
+
+## Event: onContextMenu
+contextConfig
+
+* Files
+  - src\client\src\ui\shared\renderItem.js
+  - src\client\src\ui\templates\equipment\equipment.js
+  - src\client\src\ui\templates\inventory\inventory.js
+  - src\client\src\ui\templates\party\party.js
+  - src\client\src\ui\templates\stash\stash.js
+  - src\client\src\ui\templates\target\target.js
+_____________________________________
+
+## Event: beforeRenderItem
+emBeforeRenderItem
+
+* Files
+  - src\client\src\ui\shared\renderItem.js
+_____________________________________
+
+## Event: afterGetCharacter
+{ character: result }
+
+* Files
+  - src\client\src\ui\templates\characters\characters.js
+_____________________________________
+
+## Event: onClickContextItem
+
+
+* Files
+  - src\client\src\ui\templates\context\context.js
+_____________________________________
+
+## Event: beforeCreateCharacter
+eCreateCharacter
+
+* Files
+  - src\client\src\ui\templates\createCharacter\createCharacter.js
+_____________________________________
+
+## Event: onShowTooltip
+text
+
+* Files
+  - src\client\src\ui\templates\createCharacter\createCharacter.js
+  - src\client\src\ui\templates\equipment\equipment.js
+  - src\client\src\ui\templates\passives\passives.js
+  - src\client\src\ui\templates\workbench\workbench.js
+_____________________________________
+
+## Event: onHideTooltip
+el[0]
+
+* Files
+  - src\client\src\ui\templates\createCharacter\createCharacter.js
+  - src\client\src\ui\templates\equipment\equipment.js
+  - src\client\src\ui\templates\passives\passives.js
+  - src\client\src\ui\templates\workbench\workbench.js
+_____________________________________
+
+## Event: onHideOverlay
+this.el
+
+* Files
+  - src\client\src\ui\templates\death\death.js
+  - src\client\src\ui\templates\stash\stash.js
+  - src\client\src\ui\templates\trade\trade.js
+_____________________________________
+
+## Event: onShowOverlay
+this.el
+
+* Files
+  - src\client\src\ui\templates\death\death.js
+  - src\client\src\ui\templates\stash\stash.js
+  - src\client\src\ui\templates\trade\trade.js
+_____________________________________
+
+## Event: onUseQuickItem
+quickItem
+
+* Files
+  - src\client\src\ui\templates\hud\hud.js
+_____________________________________
+
+## Event: beforeInventoryClickItem
+msg
+
+* Files
+  - src\client\src\ui\templates\inventory\inventory.js
+_____________________________________
+
+## Event: onStartMoveItem
+this.dragItem.data('item')
+
+* Files
+  - src\client\src\ui\templates\inventory\inventory.js
+_____________________________________
+
+## Event: onStopMoveItem
+this.dragItem.data('item')
+
+* Files
+  - src\client\src\ui\templates\inventory\inventory.js
+_____________________________________
+
+## Event: beforeShowItemContextMenu
+eBeforeShowItemContextMenu
+
+* Files
+  - src\client\src\ui\templates\inventory\inventory.js
+_____________________________________
+
+## Event: onHideInventory
+
+
+* Files
+  - src\client\src\ui\templates\inventory\inventory.js
+_____________________________________
+
+## Event: onOpenOptions
+
+
+* Files
+  - src\client\src\ui\templates\mainMenu\mainMenu.js
+_____________________________________
+
+## Event: onShowCharacterSelect
+
+
+* Files
+  - src\client\src\ui\templates\mainMenu\mainMenu.js
+_____________________________________
+
+## Event: e
+
+
+* Files
+  - src\client\src\ui\templates\menu\menu.js
+  - src\client\src\ui\templates\options\options.js
+_____________________________________
+
+## Event: onBeforeChat
+msgConfig
+
+* Files
+  - src\client\src\ui\templates\messages\messages.js
+_____________________________________
+
+## Event: def.event
+newValue
+
+* Files
+  - src\client\src\ui\templates\options\options.js
+_____________________________________
+
+## Event: onCloseOptions
+
+
+* Files
+  - src\client\src\ui\templates\options\options.js
+_____________________________________
+
+## Event: onToggleNameplates
+config.get('showNames')
+
+* Files
+  - src\client\src\ui\templates\options\options.js
+_____________________________________
+
+## Event: onUiHover
+false
+
+* Files
+  - src\client\src\ui\templates\party\party.js
+  - src\client\src\ui\uiBase.js
+_____________________________________
+
+## Event: uiMouseDown
+this.mouse
+
+* Files
+  - src\client\src\ui\templates\passives\input.js
+_____________________________________
+
+## Event: uiMouseUp
+this.mouse
+
+* Files
+  - src\client\src\ui\templates\passives\input.js
+_____________________________________
+
+## Event: uiMouseMove
+this.mouse
+
+* Files
+  - src\client\src\ui\templates\passives\input.js
+_____________________________________
+
+## Event: uiTouchStart
+{
+	x: pos.x,
+	y: pos.y,
+	raw: {
+		clientX: pos.x,
+		clientY: pos.y
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\passives\input.js
+_____________________________________
+
+## Event: uiTouchMove
+{
+	x: pos.x,
+	y: pos.y,
+	touches: e.touches.length,
+	raw: {
+		clientX: pos.x,
+		clientY: pos.y
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\passives\input.js
+_____________________________________
+
+## Event: uiTouchEnd
+
+
+* Files
+  - src\client\src\ui\templates\passives\input.js
+_____________________________________
+
+## Event: uiTouchCancel
+
+
+* Files
+  - src\client\src\ui\templates\passives\input.js
+_____________________________________
+
+## Event: onTryTickPassiveNode
+{ tick: !node.selected }
+
+* Files
+  - src\client\src\ui\templates\passives\passives.js
+_____________________________________
+
+## Event: onQuestReady
+quest
+
+* Files
+  - src\client\src\ui\templates\quests\quests.js
+_____________________________________
+
+## Event: showItemTooltip
+{
+	item: { spell },
+	pos: ttPos,
+	rightAlign: true,
+	zIndex: this.el.css('z-index'),
+	useTooltipConfig: 'equipedRuneTooltipConfig'
+}
+
+* Files
+  - src\client\src\ui\templates\spells\spells.js
+_____________________________________
+
+## Event: onBeforePlayerContext
+target
+
+* Files
+  - src\client\src\ui\templates\target\target.js
+_____________________________________
+
+## Event: onBeforeNpcContext
+target
+
+* Files
+  - src\client\src\ui\templates\target\target.js
+_____________________________________
+
+## Event: beforeBuildItemTooltip
+emBeforeBuildItemTooltip
+
+* Files
+  - src\client\src\ui\templates\tooltipItem\tooltipItem.js
+_____________________________________
+
+## Event: onBuiltItemTooltip
+this.tooltip
+
+* Files
+  - src\client\src\ui\templates\tooltipItem\tooltipItem.js
+_____________________________________
+
+## Event: onBuySellItem
+this.el
+
+* Files
+  - src\client\src\ui\templates\trade\trade.js
+_____________________________________
+
+## Event: onAfterRenderUi
+{ ui: this }
+
+* Files
+  - src\client\src\ui\uiBase.js
+_____________________________________
+
+## Event: onShowUi
+this
+
+* Files
+  - src\client\src\ui\uiBase.js
+_____________________________________
+
+## Event: onHideUi
+this
+
+* Files
+  - src\client\src\ui\uiBase.js
+_____________________________________
+
+## Event: onToggleUi
+this
+
+* Files
+  - src\client\src\ui\uiBase.js
+_____________________________________
+

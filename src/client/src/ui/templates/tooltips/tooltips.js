@@ -21,8 +21,8 @@ export default {
 		this.onEvent('onHideTooltip', this.onHideTooltip.bind(this));
 	},
 
-	onHideTooltip: function (el) {
-		if (this.hoverEl !== el)
+	onHideTooltip: function (el, force = false) {
+		if (!force && this.hoverEl !== el)
 			return;
 
 		this.hoverEl = null;

@@ -1,0 +1,803 @@
+# Events: Map to Map Thread
+
+## Event: beforeGiveLoginRewards
+emBeforeGiveLoginRewards
+
+* Files
+  - src\server\components\auth\checkLoginRewards.js
+* Async: false
+_____________________________________
+
+## Event: beforeSaveStash
+emBeforeSaveStash
+
+* Files
+  - src\server\components\auth.js
+* Async: false
+_____________________________________
+
+## Event: beforeSendClientCharacterList
+emBeforeSendClientCharacterList
+
+* Files
+  - src\server\components\auth.js
+* Async: true
+_____________________________________
+
+## Event: onAfterGetCharacter
+{
+	obj: this.obj,
+	character
+}
+
+* Files
+  - src\server\components\auth.js
+* Async: true
+_____________________________________
+
+## Event: onBeforeGetAccountSkins
+msgSkinList
+
+* Files
+  - src\server\components\auth.js
+* Async: true
+_____________________________________
+
+## Event: onBeforeLogin
+emBeforeLogin
+
+* Files
+  - src\server\components\auth.js
+* Async: true
+_____________________________________
+
+## Event: onBeforeGetAccountInfo
+msgAccountInfo
+
+* Files
+  - src\server\components\auth.js
+  - src\server\mods\iwd-moderation\commands\ban.js
+  - src\server\mods\iwd-moderation\restEndpoints\helper\authWrap.js
+  - src\server\mods\iwd-testing\restEndpoints\helper\authWrap.js
+* Async: true
+_____________________________________
+
+## Event: onAfterLogin
+{ username }
+
+* Files
+  - src\server\components\auth.js
+* Async: true
+_____________________________________
+
+## Event: onBeforeRegisterAccount
+emBeforeRegisterAccount
+
+* Files
+  - src\server\components\auth.js
+* Async: true
+_____________________________________
+
+## Event: beforeFinalizeAccount
+emBeforeFinalizeAccount
+
+* Files
+  - src\server\components\auth.js
+* Async: true
+_____________________________________
+
+## Event: beforeSaveCharacter
+eBeforeSaveCharacter
+
+* Files
+  - src\server\components\auth.js
+* Async: false
+_____________________________________
+
+## Event: beforeDeleteCharacter
+msgBeforeDeleteCharacter
+
+* Files
+  - src\server\components\auth.js
+* Async: true
+_____________________________________
+
+## Event: onBeforeUnlockObject
+unlockEventMsg
+
+* Files
+  - src\server\components\door.js
+* Async: false
+_____________________________________
+
+## Event: onBeforeGetEffect
+result
+
+* Files
+  - src\server\components\effects.js
+* Async: false
+_____________________________________
+
+## Event: onAddEffect
+this.obj
+
+* Files
+  - src\server\components\effects.js
+* Async: false
+_____________________________________
+
+## Event: beforeGatherResource
+eGather
+
+* Files
+  - src\server\components\gatherer.js
+* Async: false
+_____________________________________
+
+## Event: beforeGatherResourceComplete
+gatherResult
+
+* Files
+  - src\server\components\gatherer.js
+* Async: false
+_____________________________________
+
+## Event: beforeEnterPool
+gatherResult
+
+* Files
+  - src\server\components\gatherer.js
+* Async: false
+_____________________________________
+
+## Event: onBeforeDropBag
+obj
+
+* Files
+  - src\server\components\inventory\dropBag.js
+* Async: false
+_____________________________________
+
+## Event: beforeDropBag
+eventMsg
+
+* Files
+  - src\server\components\inventory\dropBag.js
+* Async: false
+_____________________________________
+
+## Event: onBeforeGetItem
+item
+
+* Files
+  - src\server\components\inventory\getItem.js
+* Async: false
+_____________________________________
+
+## Event: beforePlayerGetItem
+obj
+
+* Files
+  - src\server\components\inventory\getItem.js
+* Async: false
+_____________________________________
+
+## Event: onBeforeGetItemCd
+beforeGetCooldownMessage
+
+* Files
+  - src\server\components\inventory\useItem.js
+* Async: false
+_____________________________________
+
+## Event: onBeforeUseItem
+obj
+
+* Files
+  - src\server\components\inventory\useItem.js
+* Async: false
+_____________________________________
+
+## Event: beforeUseItem
+eventMsg
+
+* Files
+  - src\server\components\inventory\useItem.js
+* Async: false
+_____________________________________
+
+## Event: onBeforeCreateBag
+createBagMsg
+
+* Files
+  - src\server\components\inventory.js
+* Async: false
+_____________________________________
+
+## Event: onBeforePlayerPassivesChange
+passiveResult
+
+* Files
+  - src\server\components\passives.js
+* Async: false
+_____________________________________
+
+## Event: onAfterBuildPlayerObject
+{
+	obj: this.obj,
+	saveData: character
+}
+
+* Files
+  - src\server\components\player.js
+* Async: false
+_____________________________________
+
+## Event: playerDied
+{
+	obj,
+	source
+}
+
+* Files
+  - src\server\components\player.js
+* Async: false
+_____________________________________
+
+## Event: onBeforePlayerRespawn
+obj
+
+* Files
+  - src\server\components\player.js
+* Async: false
+_____________________________________
+
+## Event: onBeforeGetSpellTemplate
+typeTemplate
+
+* Files
+  - src\server\components\spellbook.js
+  - src\server\config\itemEffects\castSpellOnHit.js
+  - src\server\mods\iwd-blisterwind\eventPhases\helpers\spawnSeaBeast\index.js
+* Async: false
+_____________________________________
+
+## Event: beforeLoadStash
+emBeforeLoadStash
+
+* Files
+  - src\server\components\stash.js
+* Async: true
+_____________________________________
+
+## Event: onAfterGetStash
+{
+	obj: obj,
+	stash: this.items
+}
+
+* Files
+  - src\server\components\stash.js
+* Async: true
+_____________________________________
+
+## Event: beforeActorDies
+emBeforeActorDies
+
+* Files
+  - src\server\components\stats\takeDamage.js
+* Async: false
+_____________________________________
+
+## Event: onBeforeGetGlobalXpMultiplier
+xpEvent
+
+* Files
+  - src\server\components\stats.js
+* Async: false
+_____________________________________
+
+## Event: afterActorLevelUp
+{
+	obj,
+	levelBefore,
+	levelAfter: values.level,
+	statsBefore,
+	statsAfter: values,
+	passivePointsBefore,
+	passivePointsAfter: obj.passives.points
+}
+
+* Files
+  - src\server\components\stats.js
+* Async: false
+_____________________________________
+
+## Event: onAfterActorDies
+deathEvent
+
+* Files
+  - src\server\components\stats.js
+* Async: false
+_____________________________________
+
+## Event: beforeSendSellableItems
+emBeforeSendSellableItems
+
+* Files
+  - src\server\components\trade.js
+* Async: false
+_____________________________________
+
+## Event: beforeSendRecipeToPlayer
+emBeforeSendRecipeToPlayer
+
+* Files
+  - src\server\components\workbench\buildRecipe.js
+* Async: false
+_____________________________________
+
+## Event: afterCraft
+emAfterCraft
+
+* Files
+  - src\server\components\workbench\craft.js
+* Async: false
+_____________________________________
+
+## Event: beforeGetBalance
+emBeforeGetBalance
+
+* Files
+  - src\server\config\balance.js
+* Async: false
+_____________________________________
+
+## Event: beforeGetConsts
+emBeforeGetConsts
+
+* Files
+  - src\server\config\consts.js
+* Async: false
+_____________________________________
+
+## Event: onBeforeGetQuests
+{
+	obj,
+	config,
+	zoneName,
+	template
+}
+
+* Files
+  - src\server\config\quests\questBuilder.js
+* Async: false
+_____________________________________
+
+## Event: beforeCompleteAutoquest
+this
+
+* Files
+  - src\server\config\quests\templates\questTemplate.js
+* Async: false
+_____________________________________
+
+## Event: onCompleteQuest
+this
+
+* Files
+  - src\server\config\quests\templates\questTemplate.js
+* Async: false
+_____________________________________
+
+## Event: beforeGetEventPhasePaths
+{
+	phasePaths
+}
+
+* Files
+  - src\server\events\events.js
+* Async: false
+_____________________________________
+
+## Event: onBeforeGetEventList
+zoneName
+
+* Files
+  - src\server\events\events.js
+* Async: false
+_____________________________________
+
+## Event: afterGetEventList
+{
+	eventConfigs: this.configs
+}
+
+* Files
+  - src\server\events\events.js
+* Async: false
+_____________________________________
+
+## Event: beforeMainThreadReady
+
+
+* Files
+  - src\server\index.js
+* Async: true
+_____________________________________
+
+## Event: onBeforeGetDropChances
+dropChancesEvent
+
+* Files
+  - src\server\items\generator.js
+* Async: false
+_____________________________________
+
+## Event: beforeGenerateItem
+beforeGenerateItemEvent
+
+* Files
+  - src\server\items\generator.js
+* Async: false
+_____________________________________
+
+## Event: onBeforeGetCardsConfig
+configs
+
+* Files
+  - src\server\mods\feature-cards\cards.js
+* Async: false
+_____________________________________
+
+## Event: onGetMtx
+obj
+
+* Files
+  - src\server\mods\iwd-construction\components\plot.js
+  - src\server\mods\iwd-leagues\events\onBeforePlayerEnterWorld.js
+* Async: false
+_____________________________________
+
+## Event: onSpendMtx
+msgEvent
+
+* Files
+  - src\server\mods\iwd-construction\components\plot.js
+* Async: false
+_____________________________________
+
+## Event: playerObjChanged
+{
+	obj: entry
+}
+
+* Files
+  - src\server\mods\iwd-cosmetics\index.js
+  - src\server\objects\objects.js
+* Async: false
+_____________________________________
+
+## Event: waitForConfirmedAction
+{
+	heading: `Apply [${mtxName}]`,
+	infoLines: [
+		'Choose an item to which you would like to apply this cosmetic effect. '
+	],
+	parameters: [{
+		dataType: 'itemIdFromInventory',
+		name: 'Select Item'
+	}],
+	textConfirm: 'Apply',
+	textDecline: 'Cancel',
+	cbConfirm: r => handleResponse(res, true, r),
+	cbDecline: r => handleResponse(res, false, r),
+	sourceObj: obj,
+	timeoutOptionIndex: 0
+}
+
+* Files
+  - src\server\mods\iwd-cosmetics\index.js
+  - src\server\mods\iwd-crews\components\crewStash\recolorTab.js
+  - src\server\mods\iwd-crews\components\crewStash\renameTab.js
+  - src\server\mods\iwd-crews\managers\crewManager\addMember.js
+  - src\server\mods\iwd-crews\managers\crewManager\changeCaptain.js
+  - src\server\mods\iwd-crews\managers\crewManager\createCrew.js
+  - src\server\mods\iwd-crews\managers\crewManager\removeMember.js
+  - src\server\mods\iwd-moderation\commands\ban.js
+  - src\server\mods\iwd-mtx-shop\index.js
+  - src\server\mods\iwd-online-list\managers\friendsManager\addAsFriend.js
+  - src\server\mods\iwd-online-list\managers\friendsManager\changeFriendNickname.js
+  - src\server\mods\iwd-online-list\managers\friendsManager\removeAsFriend.js
+  - src\server\mods\iwd-testing\config\testingFeatures\getItem.js
+  - src\server\mods\iwd-testing\config\testingFeatures\teleportTo.js
+  - src\server\mods\iwd-testing\config\testingFeatures.js
+  - src\server\mods\iwd-trading\components\server\tradingPost.js
+  - src\server\mods\iwd-trials-of-the-abyss\config\testingFeatures.js
+* Async: true
+_____________________________________
+
+## Event: onRegisterMtx
+config
+
+* Files
+  - src\server\mods\iwd-cosmetics\itemAtlas.js
+* Async: false
+_____________________________________
+
+## Event: beforeGetCtfConfig
+emBeforeGetCtfConfig
+
+* Files
+  - src\server\mods\iwd-ctf\config\index.js
+* Async: false
+_____________________________________
+
+## Event: beforeGetLeaguesConfig
+emBeforeGetLeaguesConfig
+
+* Files
+  - src\server\mods\iwd-leagues\config\index.js
+* Async: false
+_____________________________________
+
+## Event: beforeDeleteAccount
+emBeforeDeleteAccount
+
+* Files
+  - src\server\mods\iwd-leagues\modules\auth\deleteAccount.js
+* Async: true
+_____________________________________
+
+## Event: afterDeleteAccount
+emAfterDeleteAccount
+
+* Files
+  - src\server\mods\iwd-leagues\modules\auth\deleteAccount.js
+* Async: true
+_____________________________________
+
+## Event: beforeSendMail
+emBeforeSendMail
+
+* Files
+  - src\server\mods\iwd-mail\mailManager\actions\sendMail.js
+* Async: false
+_____________________________________
+
+## Event: beforeCheckCanMount
+eBeforeCheckCanMount
+
+* Files
+  - src\server\mods\iwd-mounts\helpers.js
+* Async: false
+_____________________________________
+
+## Event: beforeGetMtxShopList
+eBeforeGetMtxShopList
+
+* Files
+  - src\server\mods\iwd-mtx-shop\config.js
+* Async: false
+_____________________________________
+
+## Event: beforeRenameCharacter
+msgBeforeRenameCharacter
+
+* Files
+  - src\server\mods\iwd-mtx-shop\helpers\renameCharacter.js
+* Async: true
+_____________________________________
+
+## Event: beforeActivateMtx
+eBeforeActivateMtx
+
+* Files
+  - src\server\mods\iwd-mtx-stash\helpers\activateMtx.js
+* Async: true
+_____________________________________
+
+## Event: beforeDeactivateMtx
+eBeforeDeactivateMtx
+
+* Files
+  - src\server\mods\iwd-mtx-stash\helpers\deactivateMtx.js
+* Async: true
+_____________________________________
+
+## Event: mtxStashChanged
+{
+	username,
+	mtxStash
+}
+
+* Files
+  - src\server\mods\iwd-mtx-stash\stashCache.js
+* Async: false
+_____________________________________
+
+## Event: beforeAddObjectToGlobalList
+msgBeforeAddObjectToGlobalList
+
+* Files
+  - src\server\mods\iwd-online-list\managers\onlineListManager.js
+* Async: false
+_____________________________________
+
+## Event: onGetMtxList
+eventConfig
+
+* Files
+  - src\server\mods\iwd-testing\commands\getAtlasItem.js
+* Async: true
+_____________________________________
+
+## Event: rebalance
+{
+	mod,
+	contentKey,
+	config
+}
+
+* Files
+  - src\server\mods\iwd-testing\restEndpoints\rebalance.js
+* Async: true
+_____________________________________
+
+## Event: beforeSendTradingPostSellableItems
+emBeforeSendTradingPostSellableItems
+
+* Files
+  - src\server\mods\iwd-trading\components\server\tradingPost.js
+* Async: false
+_____________________________________
+
+## Event: beforeGetTotaConfig
+eBeforeGetTotaConfig
+
+* Files
+  - src\server\mods\iwd-trials-of-the-abyss\config\getInstanceConfig.js
+  - src\server\mods\iwd-trials-of-the-abyss\config\mobConfig.js
+  - src\server\mods\iwd-trials-of-the-abyss\config\totaInstances\index.js
+* Async: false
+_____________________________________
+
+## Event: onShowTooltip
+tooltip
+
+* Files
+  - src\server\mods\iwd-trials-of-the-abyss\ui\totaPortal\totaPortal.js
+* Async: false
+_____________________________________
+
+## Event: onHideTooltip
+e.currentTarget
+
+* Files
+  - src\server\mods\iwd-trials-of-the-abyss\ui\totaPortal\totaPortal.js
+* Async: false
+_____________________________________
+
+## Event: playerObjRemoved
+{
+	id: player.id
+}
+
+* Files
+  - src\server\security\connections.js
+* Async: false
+_____________________________________
+
+## Event: onAfterPlayerEnterZone
+o
+
+* Files
+  - src\server\world\instancer\handshakes.js
+  - src\server\world\instancer.js
+* Async: false
+_____________________________________
+
+## Event: afterZoneReady
+this.zoneName
+
+* Files
+  - src\server\world\instancer.js
+* Async: false
+_____________________________________
+
+## Event: onBeforePlayerSpawn
+{ name: obj.name, instance: { physics } }
+
+* Files
+  - src\server\world\instancer.js
+* Async: false
+_____________________________________
+
+## Event: removeObject
+{ obj: msg.obj }
+
+* Files
+  - src\server\world\instancer.js
+* Async: false
+_____________________________________
+
+## Event: onAfterPlayerLeaveZone
+obj
+
+* Files
+  - src\server\world\instancer.js
+* Async: false
+_____________________________________
+
+## Event: beforeBuildMob
+{
+	mob,
+	blueprint,
+	type,
+	zoneName
+}
+
+* Files
+  - src\server\world\mobBuilder.js
+* Async: false
+_____________________________________
+
+## Event: onBeforeBuildMob
+zoneName
+
+* Files
+  - src\server\world\mobBuilder.js
+* Async: false
+_____________________________________
+
+## Event: onAfterBuildMob
+{
+	zoneName,
+	mob
+}
+
+* Files
+  - src\server\world\mobBuilder.js
+* Async: false
+_____________________________________
+
+## Event: beforeSpawnResource
+eBeforeSpawnResource
+
+* Files
+  - src\server\world\resourceSpawner.js
+* Async: false
+_____________________________________
+
+## Event: beforeSpawnThread
+emBeforeSpawnThread
+
+* Files
+  - src\server\world\threadManager.js
+* Async: false
+_____________________________________
+
+## Event: beforeChooseThread
+emBeforeChooseThread
+
+* Files
+  - src\server\world\threadManager.js
+* Async: false
+_____________________________________
+
+## Event: beforeMapThreadReady
+
+
+* Files
+  - src\server\world\worker.js
+* Async: true
+_____________________________________
+
+## Event: m.event
+m.data
+
+* Files
+  - src\server\world\worker.js
+* Async: false
+_____________________________________
+

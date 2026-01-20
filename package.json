@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "generate-docs": "node docs/autoDocs/scanClientToClient.js && node docs/autoDocs/scanServerToClient.js && node docs/autoDocs/scanClientToServer.js && node docs/autoDocs/scanMapToMapThread.js"
+  }
+}

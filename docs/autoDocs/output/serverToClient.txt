@@ -1,0 +1,611 @@
+# Events: Server -> Client
+
+## Event: onGetMessages
+{
+	messages: {
+		class: 'color-pinkA',
+		message: this.obj.name + ': ' + pick.msg
+	}
+}
+
+* Sent to: all players
+* Files
+  - src\server\components\chatter.js
+  - src\server\components\inventory\getItem.js
+  - src\server\components\social.js
+  - src\server\components\trade.js
+  - src\server\events\events.js
+  - src\server\events\phases\phaseEventChain.js
+  - src\server\mods\iwd-ctf\eventPhases\ctfManager.js
+  - src\server\mods\iwd-ctf\eventPhases\events\onAfterPlayerEnterZone.js
+_____________________________________
+
+## Event: onGetAnnouncement
+{
+	src: this.obj.id,
+	msg: msg
+}
+
+* Sent to: single player
+* Files
+  - src\server\components\door.js
+  - src\server\components\notice.js
+  - src\server\components\stash.js
+  - src\server\components\trade.js
+  - src\server\components\wardrobe.js
+  - src\server\components\workbench.js
+  - src\server\mods\iwd-blisterwind\components\shipCannon.js
+  - src\server\mods\iwd-blisterwind\components\shipCannonball.js
+  - src\server\mods\iwd-blisterwind\eventPhases\sailingToBlisterwind.js
+  - src\server\mods\iwd-burrow-defense\maps\fjolgard\zone.js
+  - src\server\mods\iwd-crews\components\crewStash\setStashActive.js
+  - src\server\mods\iwd-fast-travel\components\fastTravel.js
+  - src\server\mods\iwd-mail\components\server\mailbox.js
+  - src\server\mods\iwd-trading\components\server\tradingPost.js
+  - src\server\mods\iwd-trials-of-the-abyss\managers\abyssalTrialsManager.js
+_____________________________________
+
+## Event: onDoorUnlock
+null
+
+* Sent to: single player
+* Files
+  - src\server\components\door.js
+_____________________________________
+
+## Event: onDoorOpen
+null
+
+* Sent to: single player
+* Files
+  - src\server\components\door.js
+_____________________________________
+
+## Event: onDoorClose
+null
+
+* Sent to: single player
+* Files
+  - src\server\components\door.js
+_____________________________________
+
+## Event: onInspectTarget
+result
+
+* Sent to: single player
+* Files
+  - src\server\components\equipment.js
+_____________________________________
+
+## Event: onGetObject
+{
+	x: obj.x,
+	y: obj.y,
+	components: [{
+		type: 'attackAnimation',
+		row: 0,
+		col: 4
+	}]
+}
+
+* Sent to: all players
+* Files
+  - src\server\components\follower.js
+  - src\server\components\stats.js
+  - src\server\config\factions\akarei.js
+  - src\server\config\maps\cave\zone.js
+  - src\server\config\spells\spellAmbush.js
+  - src\server\config\spells\spellChainLightning.js
+  - src\server\config\spells\spellCharge.js
+  - src\server\config\spells\spellFireblast.js
+  - src\server\config\spells\spellHolyVengeance.js
+  - src\server\config\spells\spellReflectDamage.js
+  - src\server\config\spells\spellSingleTargetHeal.js
+  - src\server\config\spells\spellSlowBlast.js
+  - src\server\config\spells\spellSummonConsumableFollower.js
+  - src\server\config\spells\spellTemplate.js
+  - src\server\config\spells\spellWarnBlast.js
+  - src\server\config\spells\spellWhirlwind.js
+  - src\server\events\events.js
+  - src\server\events\phases\phaseDespawnMob.js
+  - src\server\events\phases\phaseSpawnMob.js
+  - src\server\events\phases\phaseSpawnObject.js
+  - src\server\mods\class-necromancer\spells\spellSummonSkeleton.js
+  - src\server\mods\iwd-blisterwind\components\shipCannon\shoot.js
+  - src\server\mods\iwd-blisterwind\eventPhases\helpers\spawnSeaBeast\shoot.js
+  - src\server\mods\iwd-construction\constructionManager\build.js
+  - src\server\mods\iwd-gaekatla-temple\spells\spellBarbedChain.js
+  - src\server\mods\iwd-gaekatla-temple\spells\spellDigblast.js
+  - src\server\mods\iwd-gaekatla-temple\spells\spellEncase.js
+  - src\server\mods\iwd-gaekatla-temple\spells\spellSnekjump.js
+  - src\server\mods\iwd-misc-events\events\fragmented.js
+  - src\server\mods\iwd-mounts\helpers.js
+  - src\server\mods\iwd-pets\index.js
+  - src\server\mods\iwd-ranger\effects\effectDecoy.js
+  - src\server\mods\iwd-ranger\spells\spellSummonDecoy.js
+  - src\server\mods\iwd-souls-moor\effects\cordialCurse.js
+  - src\server\mods\iwd-souls-moor\maps\theSquashPatch\mazeGenerator\index.js
+  - src\server\mods\iwd-trading\tradingPost\createPlotObject.js
+  - src\server\mods\iwd-trading\tradingPost\destroyPost.js
+  - src\server\mods\iwd-tutorial\index.js
+  - src\server\mods\iwd-tutorial\maps\tutorial\dialogues.js
+  - src\server\world\resourceSpawner.js
+  - src\server\world\spawners.js
+_____________________________________
+
+## Event: onGetDamage
+{
+	id: obj.id,
+	event: true,
+	text: 'loot'
+}
+
+* Sent to: all players
+* Files
+  - src\server\components\inventory\getItem.js
+  - src\server\components\stats\takeDamage.js
+  - src\server\components\stats.js
+  - src\server\config\effects\effectReflectDamage.js
+  - src\server\config\spells\spellAmbush.js
+  - src\server\config\spells\spellCocoon.js
+  - src\server\mods\iwd-gaekatla-temple\spells\spellCocoon.js
+  - src\server\mods\iwd-summer-fest\itemEffects\reflectDamage.js
+_____________________________________
+
+## Event: onGetDialogue
+{
+	src: this.obj.id,
+	msg
+}
+
+* Sent to: single player
+* Files
+  - src\server\components\notice.js
+_____________________________________
+
+## Event: onRemoveDialogue
+{
+	src: this.obj.id
+}
+
+* Sent to: single player
+* Files
+  - src\server\components\notice.js
+_____________________________________
+
+## Event: teleportToPosition
+{
+	x: obj.x,
+	y: obj.y
+}
+
+* Sent to: single player
+* Files
+  - src\server\components\player.js
+_____________________________________
+
+## Event: onGetSpellActive
+{
+	id: obj.id,
+	spell: spell.id,
+	active: spellbook.autoMoveActive
+}
+
+* Sent to: single player
+* Files
+  - src\server\components\spellbook.js
+  - src\server\config\spells\spellTemplate.js
+_____________________________________
+
+## Event: onAddStashItems
+[sendItem]
+
+* Sent to: single player
+* Files
+  - src\server\components\stash.js
+_____________________________________
+
+## Event: onRemoveStashItems
+[itemId]
+
+* Sent to: single player
+* Files
+  - src\server\components\stash.js
+_____________________________________
+
+## Event: onOpenStash
+msg
+
+* Sent to: single player
+* Files
+  - src\server\components\stash.js
+_____________________________________
+
+## Event: onCloseWardrobe
+null
+
+* Sent to: single player
+* Files
+  - src\server\components\wardrobe.js
+_____________________________________
+
+## Event: onGetWardrobeSkins
+{
+	id: this.obj.id,
+	skins: result
+}
+
+* Sent to: single player
+* Files
+  - src\server\components\wardrobe.js
+_____________________________________
+
+## Event: onCloseWorkbench
+null
+
+* Sent to: single player
+* Files
+  - src\server\components\workbench.js
+_____________________________________
+
+## Event: onOpenWorkbench
+{
+	workbenchId: this.obj.id,
+	name: this.obj.name,
+	recipes: recipes.getList(this.craftType, unlocked)
+}
+
+* Sent to: single player
+* Files
+  - src\server\components\workbench.js
+_____________________________________
+
+## Event: serverModule
+{
+	module: 'cons',
+	method: 'emit',
+	msg: [
+		'event',
+		{
+			event: 'onGetMessages',
+			data: {
+				messages: {
+					class: 'color-pinkA',
+					message: event.winText
+				}
+			}
+		}
+	]
+}
+
+* Sent to: ['server']
+* Files
+  - src\server\events\events.js
+_____________________________________
+
+## Event: timeoutConfirmRequest
+{
+	id
+}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-confirm-action\managers\confirmActionManagerMapThread.js
+_____________________________________
+
+## Event: getConfirmRequest
+{
+	msg: {
+		id,
+		heading,
+		infoLines,
+		parameters,
+		options,
+		respondToMapThread: true
+	}
+}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-confirm-action\managers\confirmActionManagerMapThread.js
+_____________________________________
+
+## Event: onOpenConstruction
+{}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-construction\components\plot.js
+_____________________________________
+
+## Event: onOpenCrewStash
+{
+	stashId: this.obj.id,
+	permissions,
+	tabs
+}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-crews\components\crewStash\open.js
+_____________________________________
+
+## Event: joinCrew
+{}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-crews\index.js
+_____________________________________
+
+## Event: onCloseFastTravel
+{}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-fast-travel\components\fastTravel.js
+_____________________________________
+
+## Event: onOpenFastTravel
+{
+	portObjId: this.obj.id,
+	routes
+}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-fast-travel\components\fastTravel.js
+_____________________________________
+
+## Event: onCloseMailbox
+{}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-mail\components\server\mailbox.js
+_____________________________________
+
+## Event: onOpenMailbox
+{}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-mail\components\server\mailbox.js
+_____________________________________
+
+## Event: onGetMotd
+{
+	title,
+	msg
+}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-motd\helpers\sendMotdToPlayer.js
+_____________________________________
+
+## Event: onMoveSpeedChange
+this.speed
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-mounts\effects\effectMounted.js
+_____________________________________
+
+## Event: onOpenMtxShop
+null
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-mtx-shop\index.js
+_____________________________________
+
+## Event: onGetPatreonLinkedStatus
+{ linked: !!tokenEntry }
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-patreon\index.js
+_____________________________________
+
+## Event: onPlaySoundAtPosition
+{
+	position: {
+		x: obj.x,
+		y: obj.y
+	},
+	file: 'server/mods/iwd-souls-moor/audio/music/squashLaugh.mp3',
+	volume: 1
+}
+
+* Sent to: all players
+* Files
+  - src\server\mods\iwd-souls-moor\index.js
+_____________________________________
+
+## Event: clientEvent
+{}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-trading\components\server\tradingPost.js
+_____________________________________
+
+## Event: openTradingPostManager
+{
+	sourceId: this.obj.id,
+	idTradingPost: this.idTradingPost,
+	tradingPostName
+}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-trading\components\server\tradingPost.js
+_____________________________________
+
+## Event: openTradingPostShop
+{
+	sourceId: this.obj.id,
+	idTradingPost: this.idTradingPost,
+	tradingPostName
+}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-trading\components\server\tradingPost.js
+_____________________________________
+
+## Event: onCancelTrade
+{}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-trading\index.js
+  - src\server\mods\iwd-trading\tradingManager.js
+_____________________________________
+
+## Event: onTradeTargetReady
+{ isReady }
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-trading\tradingManager.js
+_____________________________________
+
+## Event: onTradeSelfReady
+{ isReady }
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-trading\tradingManager.js
+_____________________________________
+
+## Event: onGetTradeRequest
+{
+	id: srcPlayer.serverId,
+	name: srcPlayer.name
+}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-trading\tradingManager.js
+_____________________________________
+
+## Event: onTradeSuccessful
+{}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-trading\tradingManager.js
+_____________________________________
+
+## Event: onAcceptTradeRequest
+{
+	id: tgtPlayer.serverId
+}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-trading\tradingManager.js
+_____________________________________
+
+## Event: onGetTradeGiveList
+{
+	list: morphedList
+}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-trading\tradingManager.js
+_____________________________________
+
+## Event: onGetTradeGetList
+{
+	list: morphedList
+}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-trading\tradingManager.js
+_____________________________________
+
+## Event: totaPortalUIClose
+null
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-trials-of-the-abyss\managers\abyssalTrialsManager.js
+  - src\server\mods\iwd-trials-of-the-abyss\maps\shared\zone.js
+_____________________________________
+
+## Event: totaLeaderboardOpen
+getInstanceInfoForClient(undefined, totaId)
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-trials-of-the-abyss\managers\abyssalTrialsManager.js
+  - src\server\mods\iwd-trials-of-the-abyss\maps\shared\zone.js
+_____________________________________
+
+## Event: totaLeaderboardClose
+null
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-trials-of-the-abyss\maps\shared\zone.js
+_____________________________________
+
+## Event: totaPortalUIOpen
+getInstanceInfoForClient(this.obj)
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-trials-of-the-abyss\maps\shared\zone.js
+_____________________________________
+
+## Event: onTriggerTutorialStage
+{
+	stage: stageInfo,
+	stageNumber: stage
+}
+
+* Sent to: single player
+* Files
+  - src\server\mods\iwd-tutorial\components\tutorialTrigger.js
+  - src\server\mods\iwd-tutorial\maps\tutorial\dialogues.js
+_____________________________________
+
+## Event: onClearQueue
+{
+	id: this.id
+}
+
+* Sent to: single player
+* Files
+  - src\server\objects\objQueue.js
+_____________________________________
+
+## Event: overridePath
+{
+	id: this.id,
+	data: {
+		path: moveQueue.map(m => m.data)
+	}
+}
+
+* Sent to: single player
+* Files
+  - src\server\objects\objQueue.js
+_____________________________________
+
+## Event: onDeath
+{
+	x: obj.x,
+	y: obj.y
+}
+
+* Sent to: single player
+* Files
+  - src\server\world\instancer.js
+_____________________________________
+

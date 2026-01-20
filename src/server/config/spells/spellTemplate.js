@@ -48,19 +48,18 @@ module.exports = {
 		if (!this.targetGround && !target.aggro)
 			return spellCastResultTypes.invalidTarget;
 
+		if (target.aggro) {
+			if (this.targetFriendly) {
+				if (obj.aggro.canAttack(target))
+					return spellCastResultTypes.invalidTarget;
+			} else if (!this.aura && !obj.aggro.canAttack(target))
+				return spellCastResultTypes.invalidTarget;
+		}
+
 		if (this.cd > 0)
 			return spellCastResultTypes.onCooldown;
 		else if (this.manaCost > obj.stats.values.mana)
 			return spellCastResultTypes.insufficientMana;
-		else if (target.aggro) {
-			if (this.targetFriendly) {
-				if (obj.aggro.canAttack(target))
-					return spellCastResultTypes.invalidTarget;
-			} else if (this.aura)
-				return spellCastResultTypes.success;
-			else if (!obj.aggro.canAttack(target))
-				return spellCastResultTypes.invalidTarget;
-		}
 
 		if (this.has('range')) {
 			const distance = Math.max(Math.abs(target.x - obj.x), Math.abs(target.y - obj.y));

@@ -1,7 +1,8 @@
 const scheduler = require('../../misc/scheduler');
 const rewardGenerator = require('../../misc/rewardGenerator');
+const eventEmitter = require('../../misc/events');
 
-const maxRewardedDays = 21;
+const maxRewardedDays = 60;
 
 const calculateDaysSkipped = (oldTime, newTime) => {
 	let daysSkipped = 1;
@@ -65,8 +66,8 @@ module.exports = async (cpnAuth, data, character, cbDone) => {
 
 	const cappedLoginStreak = Math.max(1, Math.min(maxRewardedDays, loginStreak));
 	const itemCount = 1 + ~~(cappedLoginStreak / 2);
-	const rewards = rewardGenerator(itemCount);
-	if (!rewards) {
+	const items = rewardGenerator(itemCount);
+	if (!items) {
 		cbDone();
 
 		return;
@@ -74,13 +75,29 @@ module.exports = async (cpnAuth, data, character, cbDone) => {
 
 	const msg = `Daily login reward for ${loginStreak} day${(loginStreak > 1) ? 's' : ''}`;
 
-	//Hack: Mail is a mod. As such, events should be a mod that depends on mail
+	const emBeforeGiveLoginRewards = {
+		msg,
+		items,
+		days: loginStreak,
+		username: character.account,
+		characterName: character.name,
+		success: true
+	};
+	eventEmitter.emit('beforeGiveLoginRewards', emBeforeGiveLoginRewards);
+
+	if (!emBeforeGiveLoginRewards.success) {
+		cbDone();
+
+		return;
+	}
+
+	//Hack: Mail is a mod. As such, rewards should be a mod that depends on mail
 	if (global.mailManager) {
 		await global.mailManager.sendSystemMail({
 			to: character.name,
 			subject: 'Login Rewards',
 			msg,
-			items: rewards
+			items
 		});
 	}
 

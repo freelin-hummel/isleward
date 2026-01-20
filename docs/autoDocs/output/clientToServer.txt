@@ -1,0 +1,661 @@
+# Events: Client -> Server
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'dialogue',
+		method: 'talk',
+		data: { target: target.id }
+	}
+}
+
+* Files
+  - src\client\src\js\components\dialogue.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'gatherer',
+		method: 'gather',
+		data: {}
+	}
+}
+
+* Files
+  - src\client\src\js\components\gatherer.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'player',
+		method: 'clearQueue',
+		data: {}
+	}
+}
+
+* Files
+  - src\client\src\js\components\keyboardMover.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'move',
+	data: {
+		x,
+		y,
+		priority: !this.path.length
+	}
+}
+
+* Files
+  - src\client\src\js\components\pather.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: a.action
+}
+
+* Files
+  - src\client\src\js\components\serverActions.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'castSpell',
+	data: {
+		priority: true,
+		target: null
+	}
+}
+
+* Files
+  - src\client\src\js\components\spellbook.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'castSpell',
+	data: {
+		priority: input.isKeyDown('ctrl'),
+		spell: spell.id,
+		target,
+		self: isShiftDown
+	}
+}
+
+* Files
+  - src\client\src\js\components\spellbook.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'player',
+		method: 'clearQueue',
+		data: {}
+	}
+}
+
+* Files
+  - src\client\src\js\components\touchMover.js
+_____________________________________
+
+## Event: client.request
+{
+	threadModule: 'rezoneManager',
+	method: 'clientAck',
+	data: {}
+}
+
+* Files
+  - src\client\src\js\system\client.js
+_____________________________________
+
+## Event: client.request
+{
+	module: 'clientConfig',
+	method: 'getClientConfig',
+	callback: res
+}
+
+* Files
+  - src\client\src\main.jsx
+_____________________________________
+
+## Event: client.request
+{
+	threadModule: 'instancer',
+	method: 'clientAck',
+	data: {}
+}
+
+* Files
+  - src\client\src\ui\factory.jsx
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'auth',
+	method: 'play',
+	data: { name: this.selected },
+	callback: this.onPlay.bind(this)
+}
+
+* Files
+  - src\client\src\ui\templates\characters\characters.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'auth',
+	method: 'getCharacterList',
+	callback: this.onGetCharacters.bind(this)
+}
+
+* Files
+  - src\client\src\ui\templates\characters\characters.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'auth',
+	method: 'getCharacter',
+	data: { name: charName },
+	callback: this.onGetCharacter.bind(this, charName)
+}
+
+* Files
+  - src\client\src\ui\templates\characters\characters.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'auth',
+	method: 'deleteCharacter',
+	data: { name: this.selected },
+	callback: res
+}
+
+* Files
+  - src\client\src\ui\templates\characters\characters.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'auth',
+	method: 'getSkinList',
+	data: {},
+	callback: this.onGetSkins.bind(this)
+}
+
+* Files
+  - src\client\src\ui\templates\createCharacter\createCharacter.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'auth',
+	method: 'createCharacter',
+	data: eCreateCharacter,
+	callback: this.onCreate.bind(this)
+}
+
+* Files
+  - src\client\src\ui\templates\createCharacter\createCharacter.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'stats',
+		method: 'respawn',
+		data: {}
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\death\death.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'equipment',
+		method,
+		data
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\equipment\equipment.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn,
+		method,
+		data
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\equipment\equipment.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'equipment',
+		method: 'useQuickSlot',
+		data: { slot: 0 }
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\hud\hud.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'social',
+	method: 'chat',
+	data: {
+		message: '',
+		item,
+		type: 'global'
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\inventory\inventory.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'inventory',
+		method,
+		data
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\inventory\inventory.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'inventory',
+		method: 'sortInventory',
+		data: {}
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\inventory\inventory.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'inventory',
+		method: 'splitStack',
+		data: {
+			itemId: box.data('item').id,
+			stackSize: ~~this.find('.split-box .amount').val()
+		}
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\inventory\inventory.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn,
+		method: action,
+		data
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\inventory\inventory.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'auth',
+	method: 'login',
+	data: {
+		username: this.val('.txtUsername'),
+		password: this.val('.txtPassword')
+	},
+	callback: this.onLogin.bind(this)
+}
+
+* Files
+  - src\client\src\ui\templates\login\login.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'auth',
+	method: 'register',
+	data: {
+		username: this.val('.txtUsername'),
+		password: this.val('.txtPassword')
+	},
+	callback: this.onLogin.bind(this)
+}
+
+* Files
+  - src\client\src\ui\templates\login\login.js
+_____________________________________
+
+## Event: client.request
+{
+	module: 'cons',
+	method: 'unzone',
+	callback: this.onCharSelect.bind(this)
+}
+
+* Files
+  - src\client\src\ui\templates\mainMenu\mainMenu.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'social',
+	method: 'chat',
+	data: {
+		message: val,
+		type: this.currentChannel,
+		subType: this.currentSubChannel
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\messages\messages.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'social',
+	method: 'acceptInvite',
+	data: { targetId: this.invite.fromId }
+}
+
+* Files
+  - src\client\src\ui\templates\party\party.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'social',
+	method: 'declineInvite',
+	data: { targetId: this.invite.fromId }
+}
+
+* Files
+  - src\client\src\ui\templates\party\party.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'social',
+	method: 'removeFromParty',
+	data: { id }
+}
+
+* Files
+  - src\client\src\ui\templates\party\party.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'social',
+	method: 'leaveParty'
+}
+
+* Files
+  - src\client\src\ui\templates\party\party.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'passives',
+		method: node.selected ? 'untickNode' : 'tickNode',
+		data: { nodeId: node.id }
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\passives\passives.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'passives',
+		method: 'untickNode',
+		data: {}
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\passives\passives.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'quests',
+		method: 'complete',
+		data: { questId: quest.id }
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\quests\quests.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'stash',
+		method: 'withdraw',
+		data: { itemId: item.id }
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\stash\stash.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'dialogue',
+		method: 'talk',
+		data: {
+			target: this.state.id,
+			state: option.id
+		}
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\talk\talk.js
+_____________________________________
+
+## Event: client.request
+{
+	module: actionModule,
+	threadModule,
+	cpn,
+	method,
+	data
+}
+
+* Files
+  - src\client\src\ui\templates\target\target.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'equipment',
+		method: 'inspect',
+		data: { playerId: this.target.id }
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\target\target.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'trade',
+		method: 'buySell',
+		data: {
+			itemId: item.id,
+			action
+		}
+	},
+	callback: this.onServerRespond.bind(this, el)
+}
+
+* Files
+  - src\client\src\ui\templates\trade\trade.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'wardrobe',
+		method: 'apply',
+		data: {
+			skinId: this.skin.id,
+			targetId: this.wardrobeId
+		}
+	}
+}
+
+* Files
+  - src\client\src\ui\templates\wardrobe\wardrobe.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'workbench',
+		method: 'getRecipe',
+		data: {
+			targetId: this.workbenchId,
+			name: recipeName
+		}
+	},
+	callback: this.onGetRecipe.bind(this, false)
+}
+
+* Files
+  - src\client\src\ui\templates\workbench\workbench.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'workbench',
+		method: 'getRecipe',
+		data: {
+			targetId: this.workbenchId,
+			name: this.currentRecipe.name,
+			pickedItemIds
+		}
+	},
+	callback: this.onGetRecipe.bind(this, true)
+}
+
+* Files
+  - src\client\src\ui\templates\workbench\workbench.js
+_____________________________________
+
+## Event: client.request
+{
+	cpn: 'player',
+	method: 'performAction',
+	data: {
+		cpn: 'workbench',
+		method: 'craft',
+		data: {
+			targetId: this.workbenchId,
+			name: selectedRecipe,
+			pickedItemIds
+		}
+	},
+	callback: this.onCraft.bind(this)
+}
+
+* Files
+  - src\client\src\ui\templates\workbench\workbench.js
+_____________________________________
+
