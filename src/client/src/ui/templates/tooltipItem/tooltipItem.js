@@ -127,6 +127,7 @@ export default {
 	onHideItemTooltip (item, force = false) {
 		const isValid = (
 			force ||
+			!this.item ||
 			this.item === item ||
 			this.item?.refItem === item
 		);
