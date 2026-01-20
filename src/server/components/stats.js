@@ -300,6 +300,9 @@ module.exports = {
 		let didLevelUp = false;
 		const levelBefore = values.level;
 
+		const statsBefore = extend({}, values);
+		const passivePointsBefore = obj.passives.points;
+
 		while (values.xp >= values.xpMax) {
 			didLevelUp = true;
 			values.xp -= values.xpMax;
@@ -354,7 +357,11 @@ module.exports = {
 			obj.instance.eventEmitter.emit('afterActorLevelUp', {
 				obj,
 				levelBefore,
-				levelAfter: values.level
+				levelAfter: values.level,
+				statsBefore,
+				statsAfter: values,
+				passivePointsBefore,
+				passivePointsAfter: obj.passives.points
 			});
 		}
 	},

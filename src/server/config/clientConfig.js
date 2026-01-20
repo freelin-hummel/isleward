@@ -10,6 +10,7 @@ const consts = require('./consts');
 const tos = require('./tos');
 const { spells } = require('./spells');
 const { spells: spellsConfig } = require('./spellsConfig');
+const translations = require('./translations');
 const statTranslations = require('./statTranslations');
 const slotTranslations = require('./slotTranslations');
 //Config
@@ -373,6 +374,7 @@ const config = {
 	},
 	spells: 'Set inside the init method below',
 	tos,
+	translations,
 	statTranslations,
 	slotTranslations
 };
