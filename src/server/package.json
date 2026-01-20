@@ -22,11 +22,11 @@
 		"socket.io": "^4.8.1"
 	},
 	"devDependencies": {
-		"nodemon": "^3.1.9",
-		"sqlite3": "^5.1.7",
-		"globals": "^16.0.0",
 		"babel-eslint": "^10.1.0",
 		"eslint": "^9.24.0",
-		"eslint-plugin-prettier": "5.2.6"
+		"eslint-plugin-prettier": "5.2.6",
+		"globals": "^16.0.0",
+		"nodemon": "^3.1.9",
+		"sqlite3": "^5.0.2"
 	}
 }
