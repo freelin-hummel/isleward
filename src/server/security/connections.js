@@ -144,9 +144,27 @@ module.exports = {
 				if (p.name && p.zoneId)
 					await atlas.forceSavePlayer(p);
 
+				if (p.busySaving) {
+					await new Promise(res => {
+						const waiter = () => {
+							if (!p.busySaving) {
+								res();
+
+								return;
+							}
+
+							setTimeout(waiter, 300);
+						};
+
+						waiter();
+					});
+				}
+
 				if (p.socket?.connected)
 					p.socket.emit('dc', {});
-				else {
+				else if (players[i].socket.id === p.socket.id) {
+					//Maybe we were waiting for a long save+dc and now it was already spliced
+					// The else if above ensures we don't splice in those cases
 					players.splice(i, 1);
 					i--;
 					pLen--;

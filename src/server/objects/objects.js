@@ -296,6 +296,19 @@ module.exports = {
 
 	updateObject: async function (msg) {
 		let player = this.objects.find(p => p.id === msg.serverId);
+
+		//If we can't find the player but we're trying to update the busySaving flag,
+		// put it directly on the player object
+		if (!player && msg.obj?.busySaving !== undefined) {
+			player = cons.players.find(f => f.id === msg.serverId);
+
+			if (player) {
+				player.busySaving = msg.obj.busySaving;
+
+				return;
+			}
+		}
+
 		if (!player)
 			return;
 

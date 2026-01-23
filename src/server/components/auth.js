@@ -92,6 +92,14 @@ module.exports = {
 
 		simple.components.spliceWhere(f => (f.type === 'stash'));
 
+		process.send({
+			method: 'object',
+			serverId: this.obj.serverId,
+			obj: {
+				busySaving: true
+			}
+		});
+
 		await io.setAsync({
 			key: this.charname,
 			table: 'character',
@@ -101,6 +109,14 @@ module.exports = {
 		});
 
 		await this.doSaveStash();
+
+		process.send({
+			method: 'object',
+			serverId: this.obj.serverId,
+			obj: {
+				busySaving: false
+			}
+		});
 
 		if (callback)
 			callback();
