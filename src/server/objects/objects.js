@@ -91,6 +91,9 @@ module.exports = {
 			obj.x = l.x;
 			obj.y = l.y;
 
+			if (l.hidden)
+				obj.hidden = l.hidden;
+
 			obj.isNew = true;
 
 			if (l.ttl)
