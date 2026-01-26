@@ -5,6 +5,12 @@ export default {
 	emitter: null,
 
 	init (blueprint) {
+		if (!document.hasFocus() && blueprint.ttl !== undefined && blueprint.ttl !== -1) {
+			this.obj.destroyed = true;
+
+			return;
+		}
+
 		this.blueprint = this.blueprint || {};
 		this.blueprint.pos = {
 			x: (this.obj.x * scale) + (scale / 2),
@@ -15,6 +21,20 @@ export default {
 
 		this.emitter = renderer.buildEmitter(this.blueprint);
 
+		this.isFocused = document.hasFocus();
+
+		this.onBlur = () => {
+			this.isFocused = false;
+			this.setVisible(this.obj.isVisible);
+		};
+		this.onFocus = () => {
+			this.isFocused = true;
+			this.setVisible(this.obj.isVisible);
+		};
+
+		window.addEventListener('blur', this.onBlur);
+		window.addEventListener('focus', this.onFocus);
+
 		this.setVisible(this.obj.isVisible);
 	},
 
@@ -22,13 +42,13 @@ export default {
 		//Sometimes, we make emitters stop emitting for a reason
 		// for example, when an explosion stops
 		if (!this.emitter.disabled)
-			this.emitter.emit = visible;
+			this.emitter.emit = visible && this.isFocused;
 	},
 
 	update () {
 		const { ttl, destroyObject, emitter, obj } = this;
 
-		if (ttl !== null) {
+		if (ttl !== null && ttl !== undefined) {
 			this.ttl--;
 			if (this.ttl <= 0) {
 				if (destroyObject)
@@ -48,6 +68,10 @@ export default {
 	},
 
 	destroy () {
-		renderer.destroyEmitter(this.emitter);
+		window.removeEventListener('blur', this.onBlur);
+		window.removeEventListener('focus', this.onFocus);
+
+		if (this.emitter)
+			renderer.destroyEmitter(this.emitter);
 	}
 };
