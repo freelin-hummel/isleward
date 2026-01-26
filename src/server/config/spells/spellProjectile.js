@@ -47,6 +47,7 @@ module.exports = {
 				loop: -1,
 				row: this.row,
 				col: this.col,
+				frames: this.frames,
 				spriteSheet: this.spriteSheet
 			}]
 		};
