@@ -119,36 +119,84 @@ module.exports = {
 	},
 
 	die: function (source) {
-		let obj = this.obj;
+		const { obj } = this;
+		const {
+			instance,
+			spawn: spawns,
+			stats: {
+				values: { level }
+			}
+		} = obj;
+
+		const { physics } = instance;
 
 		obj.clearQueue();
-
-		let physics = obj.instance.physics;
 
 		physics.removeObject(obj, obj.x, obj.y);
 		obj.dead = true;
 
 		obj.aggro.die();
 
-		obj.instance.eventEmitter.emit('playerDied', {
+		eventEmitter.emit('playerDied', {
 			obj,
 			source
 		});
 
-		let level = obj.stats.values.level;
-		let spawns = obj.spawn;
-		let spawnPos = spawns.filter(s => ((s.maxLevel && s.maxLevel >= level) || !s.maxLevel));
-		if (!spawnPos.length || !source.name)
-			spawnPos = spawns[0];
-		else if (source.name) {
-			let sourceSpawnPos = spawnPos.find(s => ((s.source) && (s.source.toLowerCase() === source.name.toLowerCase())));
-			if (sourceSpawnPos)
-				spawnPos = sourceSpawnPos;
-			else
-				spawnPos = spawnPos[0];
-		}
+		const chebyshev = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 
-		obj.instance.eventEmitter.emit('onBeforePlayerRespawn', obj, spawnPos);
+		const getClosest = candidates => {
+			if (!candidates.length)
+				return null;
+
+			let best = candidates[0];
+			let bestDist = chebyshev(best, obj);
+
+			for (let i = 1; i < candidates.length; i++) {
+				const candidate = candidates[i];
+				const dist = chebyshev(candidate, obj);
+
+				if (dist < bestDist) {
+					best = candidate;
+					bestDist = dist;
+				}
+			}
+
+			return best;
+		};
+
+		const sourceName = source?.name?.toLowerCase() ?? null;
+
+		// Hard rules:
+		// - If sourceName is present, candidates must match it (using `s.source`)
+		// - Candidates may not include spawns with maxLevel > level
+		const byLevel = s => {
+			if (!s.maxLevel)
+				return true;
+
+			return s.maxLevel <= level;
+		};
+
+		const bySource = s => {
+			if (!sourceName)
+				return true;
+
+			if (!s.source)
+				return false;
+
+			return s.source.toLowerCase() === sourceName;
+		};
+
+		let baseCandidates = spawns.filter(s => byLevel(s) && bySource(s));
+		if (!baseCandidates.length && !!source)
+			baseCandidates = spawns.filter(s => byLevel(s) && s.source === undefined);
+
+		let spawnPos = getClosest(baseCandidates);
+
+		// Safety fallback (e.g. no spawns or all filtered out)
+		if (!spawnPos)
+			spawnPos = { x: obj.x, y: obj.y };
+
+		eventEmitter.emit('onBeforePlayerRespawn', obj, spawnPos);
 
 		obj.x = spawnPos.x;
 		obj.y = spawnPos.y;
