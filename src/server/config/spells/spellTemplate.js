@@ -62,7 +62,7 @@ module.exports = {
 			return spellCastResultTypes.insufficientMana;
 
 		if (this.has('range')) {
-			const distance = Math.max(Math.abs(target.x - obj.x), Math.abs(target.y - obj.y));
+			const distance = obj.getDistanceTo(target);
 
 			if (distance > this.range)
 				return spellCastResultTypes.outOfRange;

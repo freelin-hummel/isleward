@@ -156,7 +156,7 @@ module.exports = {
 
 		const addToQueue = [];
 
-		let distance = getDistance(x, y, tx, ty);
+		let distance = this.getDistanceTo(target);
 		while (distance > range) {
 			if (x !== tx)
 				x += dx;
@@ -178,7 +178,7 @@ module.exports = {
 				}
 			});
 
-			distance = getDistance(x, y, tx, ty);
+			distance = target.getDistanceTo({ x, y, size: this.size });
 		}
 
 		if (addToQueue.length === 0) {

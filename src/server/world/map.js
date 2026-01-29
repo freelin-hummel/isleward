@@ -496,6 +496,11 @@ module.exports = {
 			} else if (cell.width === 24)
 				blueprint.x++;
 
+			if (blueprint.size) {
+				blueprint.width = blueprint.size.width;
+				blueprint.height = blueprint.size.height;
+			}
+
 			if (cell.polyline) 
 				mapObjects.polyline(this.size, blueprint, cell, mapScale);
 

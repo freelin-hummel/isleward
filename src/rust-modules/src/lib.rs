@@ -48,6 +48,8 @@ pub mod logging {
 #[napi]
 pub mod physics {
 
+    use std::collections::HashSet;
+
     use napi::{
         bindgen_prelude::{External, Null, ObjectFinalize, Undefined},
         JsObject,
@@ -69,11 +71,19 @@ pub mod physics {
 
     #[derive(Debug, Clone)]
     #[napi(object)]
+    pub struct Size {
+        pub width: i32,
+        pub height: i32,
+    }
+
+    #[derive(Debug, Clone)]
+    #[napi(object)]
     pub struct PhysicsObject {
         pub x: i32,
         pub y: i32,
         pub width: i32,
         pub height: i32,
+        pub size: Option<Size>,
         pub id: String,
         pub is_notice: bool,
         pub area: Option<Area>,
@@ -129,6 +139,20 @@ pub mod physics {
                 }
             };
 
+            let size = match value.get_named_property::<JsObject>("size") {
+                Ok(size_obj) => {
+                    let width = size_obj.get_named_property("width").unwrap_or_default();
+                    let height = size_obj.get_named_property("height").unwrap_or_default();
+
+                    if width > 0 && height > 0 {
+                        Some(Size { width, height })
+                    } else {
+                        None
+                    }
+                }
+                Err(_) => None,
+            };
+
             assert!(value.get_named_property::<Null>("notice").is_err());
             assert!(value.get_named_property::<Null>("area").is_err());
 
@@ -137,6 +161,7 @@ pub mod physics {
                 y: value.get_named_property("y").unwrap_or_default(),
                 width: value.get_named_property("width").unwrap_or_default(),
                 height: value.get_named_property("height").unwrap_or_default(),
+                size,
                 is_notice: !is_undefined(value, "notice"),
                 area: match (
                     is_undefined(value, "notice"),
@@ -144,7 +169,7 @@ pub mod physics {
                 ) {
                     (true, _) => None,
                     (_, Ok(v)) if !v.is_empty() => Some(v),
-                    (_, Ok(_empty_list)) => None,
+                    (_, Ok(_)) => None,
                     (false, Err(area_error)) => {
                         debug!("PhysicsObject get_named_property: {area_error}");
                         None
@@ -202,53 +227,89 @@ pub mod physics {
             from_height: Option<i32>,
         ) -> Vec<String> {
             let obj = PhysicsObject::from(&jobj);
-            let low_x = obj.x;
-            let low_y = obj.y;
+
+            // If all from_* are present, unwrap once.
+            let from = if from_x.is_some()
+                && from_y.is_some()
+                && from_width.is_some()
+                && from_height.is_some()
+            {
+                Some((
+                    from_x.unwrap(),
+                    from_y.unwrap(),
+                    from_width.unwrap(),
+                    from_height.unwrap(),
+                ))
+            } else {
+                None
+            };
+
+            // Convert origin to top-left bounds.
+            // Default: obj.x/obj.y is top-left.
+            // If obj.size exists: obj.x/obj.y is bottom-middle.
+            let mut low_x = obj.x;
+            let mut low_y = obj.y;
+
+            if obj.size.is_some() {
+                // width/height are tile dimensions
+                // bottom-middle origin -> top-left
+                let half_w = obj.width / 2;
+                low_x = obj.x - half_w;
+                low_y = obj.y - obj.height + 1;
+            }
+
             let high_x = low_x + obj.width;
             let high_y = low_y + obj.height;
+
             let cells = &mut self.cells;
-            let mut ret = vec![];
+
+            // Use a set for dedupe, keep Vec<String> for return
+            let mut seen: HashSet<String> = HashSet::new();
+            let mut ret: Vec<String> = Vec::new();
 
             for i in low_x..high_x {
-                let i: usize = i.try_into().unwrap();
+                if i < 0 {
+                    continue;
+                }
+
+                let i: usize = i as usize;
                 if i >= cells.len() {
                     continue;
                 }
+
                 let row = &mut cells[i];
+
                 for j in low_y..high_y {
-                    let j: usize = j.try_into().unwrap();
-                    if j > row.len() {
+                    if j < 0 {
                         continue;
                     }
-                    let cells = &mut row[j];
 
-                    for c in &mut *cells {
-                        if !ret.contains(&c.id) {
-                            if from_x.is_some()
-                                && from_y.is_some()
-                                && from_width.is_some()
-                                && from_height.is_some()
+                    let j: usize = j as usize;
+                    if j >= row.len() {
+                        continue;
+                    }
+
+                    let cell = &mut row[j];
+
+                    for c in &mut *cell {
+                        if from.is_some() {
+                            let (fx, fy, fw, fh) = from.unwrap();
+
+                            // Keep your existing logic as-is
+                            if (fx + fw <= c.x || fx > c.x || fy + fh <= c.y || fy > c.y)
+                                && seen.insert(c.id.to_string())
                             {
-                                let from_x = from_x.unwrap();
-                                let from_y = from_y.unwrap();
-                                let from_width = from_width.unwrap();
-                                let from_height = from_height.unwrap();
-
-                                if from_x + from_width <= c.x
-                                    || from_x > c.x
-                                    || from_y + from_height <= c.y
-                                    || from_y > c.y
-                                {
-                                    ret.push(c.id.to_string());
-                                }
-                            } else {
                                 ret.push(c.id.to_string());
                             }
+                        } else if seen.insert(c.id.to_string()) {
+                            ret.push(c.id.to_string());
                         }
                     }
-                    cells.push(obj.clone());
+
+                    cell.push(obj.clone());
                 }
             }
+
             ret
         }
 
@@ -264,57 +325,101 @@ pub mod physics {
             let obj = PhysicsObject::from(&jobj);
             let o_id = obj.id;
 
-            let low_x = obj.x;
-            let low_y = obj.y;
+            // If all to_* are present, unwrap once.
+            let to =
+                if to_x.is_some() && to_y.is_some() && to_width.is_some() && to_height.is_some() {
+                    Some((
+                        to_x.unwrap(),
+                        to_y.unwrap(),
+                        to_width.unwrap(),
+                        to_height.unwrap(),
+                    ))
+                } else {
+                    None
+                };
+
+            // Convert origin to top-left bounds.
+            // Default: obj.x/obj.y is top-left.
+            // If obj.size exists: obj.x/obj.y is bottom-middle.
+            let mut low_x = obj.x;
+            let mut low_y = obj.y;
+
+            if obj.size.is_some() {
+                let half_w = obj.width / 2;
+                low_x = obj.x - half_w;
+                low_y = obj.y - obj.height + 1;
+            }
+
             let high_x = low_x + obj.width;
             let high_y = low_y + obj.height;
+
             let cells = &mut self.cells;
-            let mut ret = vec![];
 
-            let mut remove_ids = vec![];
+            let mut seen: HashSet<String> = HashSet::new();
+            let mut ret: Vec<String> = Vec::new();
+
+            // Track removals by id to avoid cloning objects and O(n^2) contains checks
+            let mut remove_ids: Vec<String> = Vec::new();
+
             for i in low_x..high_x {
-                let i: usize = i.try_into().unwrap();
-                let row = &mut cells[i];
-                for j in low_y..high_y {
-                    let j: usize = j.try_into().unwrap();
-                    let cells = &mut row[j];
+                if i < 0 {
+                    continue;
+                }
 
-                    if cells.is_empty() {
+                let i: usize = i as usize;
+                if i >= cells.len() {
+                    continue;
+                }
+
+                let row = &mut cells[i];
+
+                for j in low_y..high_y {
+                    if j < 0 {
                         continue;
                     }
-                    remove_ids.clear();
-                    for c in &mut *cells {
-                        if c.id != o_id {
-                            if !ret.contains(&c.id) {
-                                if to_x.is_some()
-                                    && to_y.is_some()
-                                    && to_width.is_some()
-                                    && to_height.is_some()
-                                {
-                                    let to_x = to_x.unwrap();
-                                    let to_y = to_y.unwrap();
-                                    let to_width = to_width.unwrap();
-                                    let to_height = to_height.unwrap();
 
-                                    if to_x + to_width <= c.x
-                                        || to_x > c.x
-                                        || to_y + to_height <= c.y
-                                        || to_y > c.y
-                                    {
-                                        ret.push(c.id.to_string());
-                                    }
-                                } else {
+                    let j: usize = j as usize;
+                    if j >= row.len() {
+                        continue;
+                    }
+
+                    let cell = &mut row[j];
+
+                    if cell.is_empty() {
+                        continue;
+                    }
+
+                    remove_ids.clear();
+
+                    for c in &mut *cell {
+                        if c.id != o_id {
+                            if to.is_some() {
+                                let (tx, ty, tw, th) = to.unwrap();
+
+                                if (tx + tw <= c.x || tx > c.x || ty + th <= c.y || ty > c.y)
+                                    && seen.insert(c.id.to_string())
+                                {
                                     ret.push(c.id.to_string());
                                 }
+                            } else if seen.insert(c.id.to_string()) {
+                                ret.push(c.id.to_string());
                             }
                         } else {
-                            remove_ids.push(c.clone());
+                            remove_ids.push(c.id.to_string());
                         }
                     }
 
-                    cells.retain(|c| !remove_ids.contains(c));
+                    cell.retain(|c| {
+                        if c.id != o_id {
+                            return true;
+                        }
+
+                        // Only remove entries matching the same id
+                        !remove_ids.iter().any(|rid| rid == &c.id)
+                    });
                 }
             }
+
             ret
         }
 

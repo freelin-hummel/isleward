@@ -64,48 +64,7 @@ module.exports = {
 		let obj = this.obj;
 		let target = action.target;
 
-		let x = obj.x;
-		let y = obj.y;
-
-		let dx = target.x - x;
-		let dy = target.y - y;
-
-		//This calculation is much like the charge one except we land on the
-		// furthest side of the target instead of the closest. Hence, we multiply
-		// the delta by -1
-		let offsetX = 0;
-		if (dx !== 0)
-			offsetX = dx / Math.abs(dx);
-
-		let offsetY = 0;
-		if (dy !== 0)
-			offsetY = dy / Math.abs(dy);
-
-		let targetPos = {
-			x: target.x,
-			y: target.y
-		};
-
-		const physics = obj.instance.physics;
-		const fnTileValid = this.isTileValid.bind(this, physics, x, y);
-
-		//First we try to land directly opposite the target
-		// if that doesn't work, we try just one offset
-		// and fallback to doing nothing (landing directly on the target)
-		const candidateDeltas = [
-			{ dx: offsetX, dy: offsetY },
-			{ dx: offsetX, dy: 0 },
-			{ dx: 0, dy: offsetY },
-			{ dx: -offsetX, dy: -offsetY }
-		];
-
-		for (const { dx: ux, dy: uy } of candidateDeltas) {
-			if (fnTileValid(targetPos.x + ux, targetPos.y + uy)) {
-				targetPos.x += ux;
-				targetPos.y += uy;
-				break;
-			}
-		}
+		const targetPos = target.getFurthestNonBlockingPositionFrom(obj);
 
 		const selfEffect = this.obj.effects.addEffect({
 			type: 'stunned',
@@ -136,8 +95,8 @@ module.exports = {
 			}, -1);
 		}
 
-		physics.removeObject(obj, obj.x, obj.y, targetPos.x, targetPos.y);
-		physics.addObject(obj, targetPos.x, targetPos.y, obj.x, obj.y);
+		obj.instance.physics.removeObject(obj, obj.x, obj.y, targetPos.x, targetPos.y);
+		obj.instance.physics.addObject(obj, targetPos.x, targetPos.y, obj.x, obj.y);
 
 		this.reachDestination(target, targetPos, selfEffect);
 

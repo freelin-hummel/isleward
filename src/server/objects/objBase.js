@@ -1,5 +1,6 @@
 const components = require('../components/components');
 const objQueue = require('./objQueue');
+const objDistanceChecks = require('./objDistanceChecks');
 
 module.exports = Object.assign({
 	components: [],
@@ -371,4 +372,4 @@ module.exports = Object.assign({
 
 		return JSON.stringify(res, null, 4).split('"').join('') + '\r\n';
 	}
-}, objQueue);
+}, objQueue, objDistanceChecks);

@@ -22,31 +22,7 @@ module.exports = {
 		let dx = target.x - x;
 		let dy = target.y - y;
 
-		//We need to stop just short of the target
-		let offsetX = 0;
-		if (dx !== 0)
-			offsetX = dx / Math.abs(dx);
-
-		let offsetY = 0;
-		if (dy !== 0)
-			offsetY = dy / Math.abs(dy);
-
-		let targetPos = {
-			x: target.x,
-			y: target.y
-		};
-
-		let physics = obj.instance.physics;
-		//Check where we should land
-		if (!this.isTileValid(physics, x, y, targetPos.x - offsetX, targetPos.y - offsetY)) {
-			if (!this.isTileValid(physics, x, y, targetPos.x - offsetX, targetPos.y)) 
-				targetPos.y -= offsetY;
-			else 
-				targetPos.x -= offsetX;
-		} else {
-			targetPos.x -= offsetX;
-			targetPos.y -= offsetY;
-		}
+		const targetPos = target.getClosestNonBlockingPositionFrom(obj);
 
 		let distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
 		let ttl = distance * this.speed;

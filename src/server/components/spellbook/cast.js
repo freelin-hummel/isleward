@@ -2,7 +2,14 @@ const targetIsOutOfRange = (action, spell, obj) => {
 	if (spell.range === null || spell.range === undefined)
 		return false;
 
-	const distance = Math.max(Math.abs(action.target.x - obj.x), Math.abs(action.target.y - obj.y));
+	const { target } = action;
+
+	let distance;
+	if (target.id)
+		distance = obj.getDistanceTo(target);
+	else
+		distance = Math.max(Math.abs(target.x - obj.x), Math.abs(target.y - obj.y));
+
 	let range = spell.range;
 	if ((spell.useWeaponRange) && (obj.player)) {
 		const weapon = obj.inventory.findItem(obj.equipment.eq.oneHanded) || obj.inventory.findItem(obj.equipment.eq.twoHanded);

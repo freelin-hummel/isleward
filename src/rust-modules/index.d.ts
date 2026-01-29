@@ -22,11 +22,16 @@ export namespace physics {
     width: number
     height: number
   }
+  export interface Size {
+    width: number
+    height: number
+  }
   export interface PhysicsObject {
     x: number
     y: number
     width: number
     height: number
+    size?: Size
     id: string
     isNotice: boolean
     area?: Area
