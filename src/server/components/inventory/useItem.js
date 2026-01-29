@@ -107,17 +107,30 @@ module.exports = async (cpnInv, itemId) => {
 	}
 
 	if (item.type === 'consumable') {
+		let mustDestroy = true;
+
 		if (item.uses) {
 			item.uses--;
 
 			if (item.uses) {
 				obj.syncer.setArray(true, 'inventory', 'getItems', item);
+
+				mustDestroy = false;
 				return;
 			}
 		}
 
-		cpnInv.destroyItem({ itemId }, 1);
-		if (item.has('quickSlot'))
-			cpnInv.obj.equipment.replaceQuickSlot(item);
+		if (mustDestroy) {
+			cpnInv.destroyItem({ itemId }, 1);
+			if (item.has('quickSlot'))
+				cpnInv.obj.equipment.replaceQuickSlot(item);
+		}
 	}
+
+	const afterEventMsg = {
+		obj,
+		item
+	};
+	obj.instance.eventEmitter.emit('afterUseItem', afterEventMsg);
+	obj.fireEvent('afterUseItem', afterEventMsg);
 };
