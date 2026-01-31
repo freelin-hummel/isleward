@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 const getTargetPos = (physics, obj, m, pushback) => {
 	let targetPos = {
 		x: m.x,
@@ -65,6 +66,8 @@ module.exports = {
 		};
 		obj.fireEvent('beforeSpawnParticles', particleEvent);
 
+		const mobsDamaged = [];
+
 		for (let i = x - radius; i <= x + radius; i++) {
 			for (let j = y - radius; j <= y + radius; j++) {
 				if (!physics.hasLos(~~x, ~~y, ~~i, ~~j))
@@ -88,6 +91,9 @@ module.exports = {
 				for (let k = 0; k < mLen; k++) {
 					let m = mobs[k];
 
+					if (mobsDamaged.includes(m))
+						continue;
+
 					//Maybe we killed something?
 					if (!m) {
 						mLen--;
@@ -96,6 +102,8 @@ module.exports = {
 						continue;
 					else if (!obj.aggro.canAttack(m))
 						continue;
+
+					mobsDamaged.push(m);
 
 					const targetPos = getTargetPos(physics, obj, m, this.pushback);
 

@@ -39,6 +39,8 @@ const cpnSmokePatch = {
 	},
 
 	update: function () {
+		const { sharedHitCheckArray, isLast } = this;
+
 		this.ttl--;
 		if (this.ttl <= 0)
 			this.obj.destroyed = true;
@@ -47,11 +49,19 @@ const cpnSmokePatch = {
 		for (let i = 0; i < contents.length; i++) {
 			let c = contents[i];
 
+			if (sharedHitCheckArray.includes(c))
+				continue;
+
+			sharedHitCheckArray.push(c);
+
 			if (c) {
 				let damage = this.getDamage(c);
 				this.applyDamage(c, damage);
 			}
 		}
+
+		if (isLast)
+			sharedHitCheckArray.length = 0;
 	}
 };
 
@@ -152,6 +162,9 @@ module.exports = {
 
 			let physics = this.obj.instance.physics;
 
+			//We need to make sure different particles don't hit the same mob in the same tick
+			const sharedHitCheckArray = [];
+
 			for (let i = x - radius; i <= x + radius; i++) {
 				let dx = Math.abs(x - i);
 				for (let j = y - radius; j <= y + radius; j++) {
@@ -163,7 +176,7 @@ module.exports = {
 					if (!physics.hasLos(x, y, i, j))
 						continue;
 
-					let patch = objects.buildObjects([{
+					const patch = objects.buildObjects([{
 						x: i,
 						y: j,
 						properties: {
@@ -192,6 +205,13 @@ module.exports = {
 					patches.push(patch);
 				}
 			}
+
+			patches.forEach((p, i) => {
+				p.smokePatch.sharedHitCheckArray = sharedHitCheckArray;
+
+				if (i === patches.length - 1)
+					p.smokePatch.isLast = true;
+			});
 
 			if (!this.castEvent) {
 				this.sendBump({

@@ -43,6 +43,8 @@ module.exports = {
 			attackTemplate = attackTemplate.split(' ');
 		let count = -1;
 
+		const mobsDamaged = [];
+
 		for (let i = xMin; i <= xMax; i++) {
 			for (let j = yMin; j <= yMax; j++) {
 				count++;
@@ -56,7 +58,7 @@ module.exports = {
 					this.queueCallback(this.spawnWarning.bind(this, i, j), ~~attackTemplate[count] * consts.tickTime);
 					continue;
 				} else
-					this.spawnWarning(i, j);
+					this.spawnWarning(i, j, mobsDamaged);
 			}
 		}
 
@@ -65,7 +67,7 @@ module.exports = {
 		return true;
 	},
 
-	spawnWarning: function (x, y) {
+	spawnWarning: function (x, y, mobsDamaged) {
 		let obj = this.obj;
 		let syncer = obj.instance.syncer;
 
@@ -82,10 +84,10 @@ module.exports = {
 
 		syncer.queue('onGetObject', effect, -1);
 
-		this.queueCallback(this.onWarningOver.bind(this, x, y), this.delay * consts.tickTime);
+		this.queueCallback(this.onWarningOver.bind(this, x, y, mobsDamaged), this.delay * consts.tickTime);
 	},
 
-	onWarningOver: function (x, y) {
+	onWarningOver: function (x, y, mobsDamaged) {
 		const { obj, spriteSheet, rowOptions, col, row } = this;
 
 		let physics = obj.instance.physics;
@@ -112,6 +114,8 @@ module.exports = {
 		let mLen = mobs.length;
 		for (let k = 0; k < mLen; k++) {
 			let m = mobs[k];
+			if (mobsDamaged.includes(m))
+				continue;
 
 			//Maybe we killed something?
 			if (!m) {
@@ -121,6 +125,8 @@ module.exports = {
 				continue;
 			else if (!this.obj.aggro.canAttack(m))
 				continue;
+
+			mobsDamaged.push(m);
 
 			let damage = this.getDamage(m);
 			m.stats.takeDamage({
