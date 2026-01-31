@@ -416,7 +416,7 @@ export default {
 		}
 	},
 
-	onGetStats (stats, componentBlueprint, isInspectedStats = false) {
+	onGetStats (stats, isInspectedStats = false) {
 		if (this.isInspecting && !isInspectedStats)
 			return;
 
