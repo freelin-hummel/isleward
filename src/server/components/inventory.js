@@ -551,8 +551,15 @@ module.exports = {
 	},
 
 	sortInventory: function () {
-		this.items
-			.filter(i => !i.eq)
+		const items = this.items.filter(item => !item.eq);
+
+		const emBeforeAutoSortInventory = {
+			items,
+			itemIdsToNotMove: []
+		};
+		events.emit('beforeAutoSortInventory', emBeforeAutoSortInventory);
+
+		const sortedItems = items
 			.map(i => {
 				//If we don't do this, [waist] goes before [undefined]
 				const useSlot = i.slot ? i.slot : 'z';
@@ -567,12 +574,28 @@ module.exports = {
 					return 1;
 				else if (a.sortId > b.sortId)
 					return -1;
+
 				return 0;
 			})
-			.forEach((i, index) => {
-				i.item.pos = index;
-				this.obj.syncer.setArray(true, 'inventory', 'getItems', this.simplifyItem(i.item));
-			});
+			.map(({ item }) => item);
+
+		const { itemIdsToNotMove } = emBeforeAutoSortInventory;
+
+		const syncer = this.obj.syncer;
+
+		let nextPosition = 0;
+		sortedItems.forEach(item => {
+			if (itemIdsToNotMove.includes(item.id))
+				return;
+
+			while (items.some(f => f.pos === nextPosition && itemIdsToNotMove.includes(f.id)))
+				nextPosition++;
+
+			item.pos = nextPosition;
+			syncer.setArray(true, 'inventory', 'getItems', this.simplifyItem(item));
+
+			nextPosition++;
+		});
 	},
 
 	resolveCallback: function (msg, result) {
