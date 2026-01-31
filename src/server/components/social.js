@@ -145,41 +145,42 @@ module.exports = {
 
 	//Gets called on the player that requested to leave
 	leaveParty: function (msg) {
-		if (!this.party)
+		const { party, obj: { id, name } } = this;
+
+		if (!party)
 			return;
 
-		let name = this.obj.name;
+		party.spliceWhere(p => p === id);
 
-		this.party.spliceWhere(p => p === this.obj.id);
-
-		this.party.forEach(function (p) {
-			let player = cons.players.find(c => c.id === p);
-
-			let messages = [{
-				class: 'q0',
-				message: name + ' has left the party'
-			}];
-			let party = this.party;
-			if (this.party.length === 1) {
-				messages.push({
+		const emitToOthers = {
+			onGetParty: [party],
+			onGetMessages: [{
+				messages: [{
 					class: 'q0',
-					message: 'your group has been disbanded'
-				});
+					message: name + ' has left the party'
+				}]
+			}]
+		};
 
+		if (party.length === 1) {
+			emitToOthers.onPartyDisband = [{}];
+			emitToOthers.onGetMessages[0].messages.push({
+				class: 'q0',
+				message: 'your group has been disbanded'
+			});
+		}
+
+		party.forEach(p => {
+			const player = cons.players.find(c => c.id === p);
+
+			if (party.length === 1) {
 				player.social.isPartyLeader = false;
 				player.social.party = null;
 				player.social.updateMainThread('party', player.social.party);
-				party = null;
 			}
 
-			player.socket.emit('events', {
-				onGetParty: [party],
-				onGetMessages: [{
-					messages: messages
-				}],
-				onPartyDisband: [{}]
-			});
-		}, this);
+			player.socket.emit('events', emitToOthers);
+		});
 
 		this.obj.socket.emit('events', {
 			onGetMessages: [{
@@ -191,10 +192,11 @@ module.exports = {
 			onPartyDisband: [{}]
 		});
 
-		if ((this.isPartyLeader) && (this.party.length >= 2)) {
+		if (this.isPartyLeader && this.party.length >= 2) {
 			let newLeader = cons.players.find(c => c.id === this.party[0]).social;
 			newLeader.isPartyLeader = true;
-			this.party.forEach(function (p) {
+
+			this.party.forEach(p => {
 				let returnMsg = newLeader.obj.name + ' is now the party leader';
 				if (p === newLeader.obj.id)
 					returnMsg = 'you are now the party leader';
@@ -207,7 +209,7 @@ module.exports = {
 						}]
 					}]
 				});
-			}, this);
+			});
 		}
 
 		this.party = null;
