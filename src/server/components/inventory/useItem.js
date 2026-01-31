@@ -116,7 +116,6 @@ module.exports = async (cpnInv, itemId) => {
 				obj.syncer.setArray(true, 'inventory', 'getItems', item);
 
 				mustDestroy = false;
-				return;
 			}
 		}
 
