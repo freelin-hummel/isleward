@@ -7,7 +7,6 @@ const rezone = require('../social/rezone');
 const canChat = require('../social/canChat');
 const startEvent = require('../social/startEvent');
 const stopEvent = require('../social/stopEvent');
-const teleport = require('../social/teleport');
 
 let commandRoles = {
 	//Regular players
@@ -37,7 +36,6 @@ let commandRoles = {
 	rezone: 10,
 	startEvent: 10,
 	stopEvent: 10,
-	teleport: 10,
 	roll: 10,
 	unEq: 10
 };
@@ -539,9 +537,5 @@ module.exports = {
 
 	stopEvent: function (msg) {
 		stopEvent(this, msg);
-	},
-
-	teleport: function (msg) {
-		teleport(this, msg);
 	}
 };
