@@ -13,18 +13,6 @@ const sendAnnouncement = (obj, msg) => {
 	});
 };
 
-const getDistance = (xa, ya, xb, yb) => {
-	let dx = xa - xb;
-	if (dx < 0)
-		dx = -dx;
-
-	let dy = ya - yb;
-	if (dy < 0)
-		dy = -dy;
-
-	return dx > dy ? dx : dy;
-};
-
 module.exports = {
 	moveQueue: [],
 	spellQueue: [],
@@ -41,10 +29,12 @@ module.exports = {
 		this.moveQueue = [];
 		this.spellQueue = [];
 
-		this.spellbook.spells.forEach(s => {
-			if (s.autoActive)
-				s.setAuto(null);
-		});
+		if (this.spellbook) {
+			this.spellbook.spells.forEach(s => {
+				if (s.autoActive)
+					s.setAuto(null);
+			});
+		}
 
 		this.fireEvent('clearQueue');
 	},
