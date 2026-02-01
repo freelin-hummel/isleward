@@ -157,9 +157,6 @@ module.exports = {
 			this.obj.syncer.set(false, null, 'casting', (action.castTimeMax - this.castTime) / action.castTimeMax);
 
 			if (!this.castTime) {
-				if (this.obj.player)
-					this.obj.player.die(action.target);
-
 				this.currentAction = null;
 
 				if (!this.obj.dead && this.castingInfo && this.cast(action)) {
