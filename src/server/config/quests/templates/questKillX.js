@@ -30,7 +30,7 @@ module.exports = {
 							mobBlueprint.attackable ||
 							!mobBlueprint.has('attackable')
 						) &&
-						mobBlueprint.level <= ~~(this.obj.stats.values.level * 1.35) &&
+						mobBlueprint.level <= this.obj.stats.values.level &&
 						mobCounts[m] > 1
 					);
 				}, this);

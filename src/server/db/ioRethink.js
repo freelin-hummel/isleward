@@ -67,18 +67,14 @@ module.exports = {
 		}
 	},
 
-	getRecordCount: async function ({
-		table,
-		filter
-	}) {
-		let res = null;
+	getRecordCount: async function ({ table, filter }) {
+		let res = r.table(table);
 
-		res = await r.table(table)
-			.filter(filter)
-			.count()
-			.run();
+		if (filter)
+			res = res.filter(filter);
 
-		return res;
+		const count = await res.count().run();
+		return count;
 	},
 
 	getAsyncIgnoreCase: async function (table, key) {
@@ -131,8 +127,10 @@ module.exports = {
 		{ table, noDefault, filter, limit, offset, orderAsc, orderDesc }
 	) {
 		let res = r
-			.table(table)
-			.filter(filter);
+			.table(table);
+
+		if (filter)
+			res = res.filter(filter);
 
 		if (orderAsc)
 			res = res.orderBy(orderAsc);
