@@ -1,9 +1,12 @@
+/* eslint-disable max-lines-per-function */
 const { updatePatrol } = require('./mob/patrol');
 const { canPathHome, teleportHome, queueMovementToLocation, getPathToPosition, replacePath } = require('./mob/helpers');
 
 const abs = Math.abs.bind(Math);
 const rnd = Math.random.bind(Math);
 const max = Math.max.bind(Math);
+
+const maxFightRecurseCount = 10;
 
 module.exports = {
 	type: 'mob',
@@ -140,7 +143,7 @@ module.exports = {
 		queueMovementToLocation(obj, this, toX, toY);
 	},
 
-	fight: function (target) {
+	fight: function (target, recurseCount = 0) {
 		const { obj } = this;
 		const { x, y } = obj;
 
@@ -236,8 +239,26 @@ module.exports = {
 
 			target = obj.aggro.getHighest();
 
-			if (target)
-				return this.fight(target);
+			if (target) {
+				if (recurseCount < maxFightRecurseCount)
+					return this.fight(target, recurseCount + 1);
+
+				io.logError({
+					sourceModule: 'component.mob',
+					sourceMethod: 'fight',
+					error: new Error('Recursion limit reached'),
+					info: {
+						mobName: obj.name,
+						targetName: target.name,
+						ignoreList: [...obj.aggro.ignoreSet].map(o => o.name),
+						mobX: x,
+						mobY: y,
+						targetX: tx,
+						targetY: ty
+					},
+					forceCrash: false
+				});
+			}
 
 			//Nobody left to attack so reset our aggro table
 			obj.aggro.die();
