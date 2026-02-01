@@ -82,7 +82,7 @@ export default {
 
 		let stats = this.isInspecting ? this.result.stats : this.stats;
 
-		this.onGetStats(stats);
+		this.onGetStats(stats, this.isInspecting);
 	},
 
 	onGetItems (items, isInspectedItems = false) {
