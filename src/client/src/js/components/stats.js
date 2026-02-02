@@ -61,7 +61,7 @@ export default {
 	},
 
 	removeSprites (bar) {
-		bar.container.parent.removeChild(bar.container);
+		bar.container.parent?.removeChild(bar.container);
 	},
 
 	updateBars () {
