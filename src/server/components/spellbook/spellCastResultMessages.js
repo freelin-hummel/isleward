@@ -10,12 +10,15 @@ const messages = {
 	onCooldown: 'Spell is on cooldown'
 };
 
-const exportMap = Object.entries(spellCastResultTypes)
-	.filter(([key]) => key !== 'success')
-	.reduce((acc, [key, value]) => {
-		acc[value] = messages[key] || key;
+const exportMap = {
+	...messages,
+	...Object.entries(spellCastResultTypes)
+		.filter(([key]) => key !== 'success')
+		.reduce((acc, [key, value]) => {
+			acc[value] = messages[key] || key;
 
-		return acc;
-	}, {});
+			return acc;
+		}, {})
+};
 
 module.exports = exportMap;

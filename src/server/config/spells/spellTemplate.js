@@ -44,6 +44,8 @@ module.exports = {
 
 		if (!target)
 			return spellCastResultTypes.noTarget;
+		else if (this.noTargetSelf && target === obj)
+			return spellCastResultTypes.invalidTarget;
 
 		if (!this.targetGround && !target.aggro)
 			return spellCastResultTypes.invalidTarget;
