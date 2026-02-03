@@ -173,7 +173,7 @@ module.exports = {
 			if (!s.maxLevel)
 				return true;
 
-			return s.maxLevel <= level;
+			return level <= s.maxLevel;
 		};
 
 		const bySource = s => {
