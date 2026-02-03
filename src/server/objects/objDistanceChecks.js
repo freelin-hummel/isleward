@@ -79,7 +79,8 @@ const objDistanceChecks = {
 		const as = this.size;
 		const bs = target.size;
 
-		let dx, dy;
+		let dx = 0;
+		let dy = 0;
 
 		// Fast path: both are 1x1
 		if (!as && !bs) {
