@@ -194,6 +194,9 @@ module.exports = {
 				this.obj.fireEvent('afterGatherResource', gatherResult);
 		});
 
+		if (gatherResult.items.some(f => f.material))
+			this.obj.instance.eventEmitter.emit('afterGatherResource', gatherResult);
+
 		if (!gatherResult.noChangeAmount)
 			resourceNode.gather();
 
