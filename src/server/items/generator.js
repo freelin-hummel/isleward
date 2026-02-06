@@ -1,3 +1,5 @@
+const eventEmitter = require('../misc/events');
+
 const { setItemRollRanges } = require('../fixes/fixes');
 
 let g1 = require('./generators/level'); 
@@ -83,7 +85,7 @@ module.exports = {
 			blueprint,
 			item: null
 		};
-		global.instancer.instances[0].eventEmitter.emit('beforeGenerateItem', beforeGenerateItemEvent);
+		eventEmitter.emit('beforeGenerateItem', beforeGenerateItemEvent);
 		if (beforeGenerateItemEvent.item) {
 			setItemRollRanges(beforeGenerateItemEvent.item);
 
