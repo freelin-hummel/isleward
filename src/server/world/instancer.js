@@ -36,6 +36,8 @@ module.exports = {
 	mapName: null,
 	threadArgs: null,
 
+	callbacksWaitingForMainThread: [],
+
 	init: function (args) {
 		const { zoneId, zoneName } = args;
 
@@ -427,5 +429,37 @@ module.exports = {
 			Object.assign(payload.msg, data);
 
 		process.send(payload);
+	},
+
+	callMainThreadAndGetResponse: function ({ callback, data }) {
+		const callbackId = _.getGuid();
+
+		const entry = {
+			callbackId,
+			callback,
+			data
+		};
+
+		this.callbacksWaitingForMainThread.push(entry);
+
+		process.send({
+			sendResponseBackToMapThread: {
+				callbackId,
+				data
+			}
+		});
+	},
+
+	getResponseFromMainThread: function ({ callbackId, response }) {
+		const idx = this.callbacksWaitingForMainThread.findIndex(c => c.callbackId === callbackId);
+
+		if (idx === -1)
+			return;
+
+		const pending = this.callbacksWaitingForMainThread[idx];
+		this.callbacksWaitingForMainThread.splice(idx, 1);
+
+		pending.callback(response);
 	}
+
 };

@@ -123,4 +123,6 @@ process.on('message', m => {
 		instancer[m.method](m.args);
 	else if (m.event)
 		eventEmitter.emit(m.event, m.data);
+	else if (m.getResponseFromMainThread)
+		instancer.getResponseFromMainThread(m.getResponseFromMainThread);
 });

@@ -156,6 +156,18 @@ const onMessage = (thread, message) => {
 	} else if (message.event === 'onCrashed') {
 		thread.worker.kill();
 		process.exit();
+	} else if (message.sendResponseBackToMapThread) {
+		(async () => {
+			const { callbackId, data: { module: moduleName, method, data } } = message.sendResponseBackToMapThread;
+			const response = await global[moduleName][method](data);
+
+			thread.worker.send({
+				getResponseFromMainThread: {
+					callbackId,
+					response
+				}
+			});
+		})();
 	} else
 		messageHandlers[message.method](thread, message);
 };
