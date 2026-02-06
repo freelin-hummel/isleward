@@ -12,6 +12,8 @@ const r = require('rethinkdbdash')({
 module.exports = {
 	staticCon: null,
 
+	con: r,
+
 	init: async function (cbReady) {
 		await this.create();
 
@@ -58,9 +60,16 @@ module.exports = {
 		}
 	},
 
-	indexCreate: async function ({ table, key }) {
+	indexCreate: async function ({ table, key, fn, options }) {
 		try {
-			await r.table(table).indexCreate(key);
+			if (fn)
+				await r.table(table).indexCreate(key, fn, options);
+			else
+				await r.table(table).indexCreate(key);
+
+			await r.table(table).indexWait(key);
+
+			_.log(`Created index: ${key} on table: ${table}`);
 		} catch (e) {
 			if (!e.message.includes('already exists'))
 				_.log(e);
@@ -291,6 +300,91 @@ module.exports = {
 			.run();
 
 		return !!res;
+	},
+
+	getBetweenByIndex: async function ({
+		table,
+		index,
+		lower,
+		upper,
+		orderDesc = true,
+		offset = 0,
+		limit = 50
+	}) {
+		let q = r.table(table)
+			.between(lower, upper, { index });
+
+		if (orderDesc)
+			q = q.orderBy({ index: r.desc(index) });
+		else
+			q = q.orderBy({ index });
+
+		if (offset)
+			q = q.skip(offset);
+
+		if (limit)
+			q = q.limit(limit);
+
+		return q.run();
+	},
+
+	distinctByIndex: async function ({
+		table,
+		index,
+		//optional: row => row('field')
+		transform,
+		//optional
+		filter,
+		orderAsc,
+		orderDesc
+	}) {
+		let q = r.table(table);
+
+		if (filter)
+			q = q.filter(filter);
+
+		// If an index is provided, use it for better performance on the initial fetch.
+		// Note: distinct itself still has to dedupe, but this avoids full scans when filter is selective.
+		if (index)
+			q = q.orderBy({ index });
+
+		if (transform)
+			q = q.map(transform);
+
+		q = q.distinct();
+
+		if (orderAsc)
+			q = q.orderBy(orderAsc);
+
+		if (orderDesc)
+			q = q.orderBy(r.desc(orderDesc));
+
+		return q.run();
+	},
+
+	getByIndex: async function ({
+		table,
+		index,
+		value,
+		limit = 1
+	}) {
+		const res = await r.table(table)
+			.getAll(value, { index })
+			.limit(limit)
+			.run();
+
+		return res;
+	},
+
+	deleteByIndex: async function ({
+		table,
+		index,
+		value
+	}) {
+		return r.table(table)
+			.getAll(value, { index })
+			.delete()
+			.run();
 	},
 
 	logError: async function ({
