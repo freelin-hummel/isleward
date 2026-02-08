@@ -242,6 +242,13 @@ module.exports = {
 			});
 
 		items
+			.filter(i => i.name === 'Milkwort')
+			.forEach(i => {
+				i.noDrop = false;
+				i.noDestroy = false;
+			});
+
+		items
 			.filter(i => i.name === 'Enchanted Wreath')
 			.forEach(i => {
 				delete i.noDrop;
