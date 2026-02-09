@@ -15,14 +15,18 @@ const applyDamage = (target, damage, threatMult, source) => {
 
 const dealDamage = (spell, obj, coords) => {
 	const { delay } = spell;
-
 	const physics = obj.instance.physics;
+
+	// Prevent hitting the same target more than once per cast.
+	// This matters because larger mobs can exist in multiple cells.
+	const mobsDamaged = new Set();
 
 	coords.forEach(([x, y], i) => {
 		const cellDelay = i * delay;
 
 		const mobs = physics.getCell(x, y);
 		let mLen = mobs.length;
+
 		for (let k = 0; k < mLen; k++) {
 			const m = mobs[k];
 
@@ -31,12 +35,23 @@ const dealDamage = (spell, obj, coords) => {
 				continue;
 			}
 
-			if (!m.aggro || !m.effects || !obj.aggro.canAttack(m))
+			if (mobsDamaged.has(m))
 				continue;
+
+			if (!m.aggro || !m.effects)
+				continue;
+
+			if (!obj.aggro.canAttack(m))
+				continue;
+
+			mobsDamaged.add(m);
 
 			const damage = spell.getDamage(m);
 
-			spell.queueCallback(applyDamage.bind(null, m, damage, 1, obj), cellDelay);
+			spell.queueCallback(
+				applyDamage.bind(null, m, damage, 1, obj),
+				cellDelay
+			);
 		}
 	});
 };
@@ -47,7 +62,7 @@ module.exports = {
 	cdMax: 5,
 	manaCost: 10,
 	range: 1,
-	//The delay is sent to the client and is how long (in ms) each tick takes to display
+	// The delay is sent to the client and is how long (in ms) each tick takes to display
 	delay: 32,
 
 	row: 5,
