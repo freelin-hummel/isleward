@@ -2,6 +2,7 @@
 const animations = require('../config/animations');
 const spirits = require('../config/spirits');
 const scheduler = require('../misc/scheduler');
+const eventEmitter = require('../misc/events');
 
 //Methods
 const die = require('./stats/die');
@@ -686,6 +687,15 @@ module.exports = {
 		afterKillMob: function (mob) {
 			let mobKillStreaks = this.stats.mobKillStreaks;
 			let mobName = mob.name;
+
+			const eBeforeTrackMobKillStreak = {
+				mob,
+				track: true
+			};
+			eventEmitter.emit('beforeTrackMobKillStreak', eBeforeTrackMobKillStreak);
+
+			if (!eBeforeTrackMobKillStreak.track)
+				return;
 
 			if (!mobKillStreaks[mobName])
 				mobKillStreaks[mobName] = 0;
