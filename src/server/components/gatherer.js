@@ -176,6 +176,8 @@ module.exports = {
 			}
 		}
 
+		this.obj.fireEvent('beforeGetGatherResults', gatherResult);
+
 		let blueprint = gatherResult.blueprint;
 
 		gatherResult.items.forEach((item, i) => {

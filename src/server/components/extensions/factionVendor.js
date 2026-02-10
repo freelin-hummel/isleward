@@ -80,11 +80,15 @@ module.exports = {
 				noSpell: true,
 				magicFind: 150,
 				slot: blueprint.items.slot,
-				level: level
+				level,
+				...(blueprint.items.blueprints?.[i] ?? {})
 			});
 
 			let randomQuality = ~~(Math.random() * 5);
-			item.worth = Math.pow(item.level, 1.5) + (Math.pow((randomQuality + 1), 2) * 10);
+			item.worth = (
+				blueprint.items.blueprints?.[i]?.worth ??
+				Math.pow(item.level, 1.5) + (Math.pow((randomQuality + 1), 2) * 10)
+			);
 
 			let id = 0;
 			list.items.forEach(function (checkItem) {

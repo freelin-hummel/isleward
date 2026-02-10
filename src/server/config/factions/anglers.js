@@ -23,8 +23,10 @@ module.exports = {
 
 				result = {
 					factionId: 'anglers',
-					chance: chanceRoll,
-					text: chanceRoll + '% chance to multi-catch',
+					properties: {
+						chance: chanceRoll
+					},
+					text: chanceRoll + '% chance to multi-catch items.',
 					events: {}
 				};
 
@@ -41,15 +43,20 @@ module.exports = {
 		},
 
 		events: {
-			beforeGatherResourceComplete: function (item, { items }) {
-				let effect = item.effects.find(e => (e.factionId === 'anglers'));
+			beforeGetGatherResults: function (item, { obj, items }) {
+				const effect = item.effects.find(e => (e.factionId === 'anglers'));
 
-				let roll = Math.random() * 100;
-				if (roll >= effect.chance)
+				const chance = effect.properties.chance / items.length;
+
+				const roll = Math.random() * 100;
+				if (roll >= chance)
 					return;
 
-				let pick = items[~~(Math.random() * items.length)];
-				items.push(extend({}, pick));
+				const pickItem = items[~~(Math.random() * items.length)];
+				const cloned = extend({}, pickItem);
+				delete cloned.id;
+
+				items.push(cloned);
 			}
 		}
 	},
