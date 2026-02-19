@@ -18,6 +18,10 @@ RUN /node/bin/npm run build
 # Base image on Node.js latest LTS
 FROM node:lts-bookworm-slim
 
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends netcat-openbsd \
+	&& rm -rf /var/lib/apt/lists/*
+
 # Create app directory
 WORKDIR /app/isleward
 
@@ -36,8 +40,8 @@ WORKDIR /app/isleward/src/server/
 # Install only production npm modules specified in package.json
 RUN npm ci --omit=dev
 
-# Expose container's port 4000
-EXPOSE 4000
+# Expose container's port 5000
+EXPOSE 5000
 
 # Launch Isleward server
 CMD ["node", "index.js"]

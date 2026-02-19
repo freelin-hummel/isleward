@@ -6,7 +6,7 @@ const r = require('rethinkdbdash')({
 	port: serverConfig.dbPort,
 	db: serverConfig.dbName,
 	user: serverConfig.dbUser,
-	password: serverConfig.dpPass
+	password: serverConfig.dbPass
 });
 
 module.exports = {
