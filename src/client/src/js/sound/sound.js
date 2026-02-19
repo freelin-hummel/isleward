@@ -32,6 +32,10 @@ const soundManager = {
 	muted: false,
 
 	async init () {
+		loadCount = 0;
+		totalToLoad = 0;
+		promiseResolver = null;
+
 		soundVolume = Number(config.get('soundVolume'));
 		if (!Number.isFinite(soundVolume))
 			soundVolume = 100;
@@ -80,8 +84,14 @@ const soundManager = {
 			});
 		});
 
-		if (totalToLoad === 0)
+		if (totalToLoad === 0) {
+			events.emit('loaderProgress', {
+				type: 'sounds',
+				progress: 1
+			});
+
 			promiseResolver();
+		}
 	},
 
 	notifyLoadDone () {
@@ -107,8 +117,23 @@ const soundManager = {
 			html5: loop
 		});
 
-		if (notifyLoadDone)
-			sound.once('load', () => this.notifyLoadDone());
+		if (notifyLoadDone) {
+			let didNotify = false;
+
+			const notifyOnce = () => {
+				if (didNotify)
+					return;
+
+				didNotify = true;
+				this.notifyLoadDone();
+			};
+
+			sound.once('load', notifyOnce);
+			sound.once('loaderror', (id, error) => {
+				console.error(`❌ Failed to load sound: ${resolved}`, error || id);
+				notifyOnce();
+			});
+		}
 
 		return sound;
 	},
