@@ -53,6 +53,9 @@ export default {
 			When false, only consider objects that objSeeker can heal
 	*/
 	getClosest (objSeeker, maxDistance, findHostile, fromObj) {
+		if (!objSeeker?.aggro)
+			return null;
+
 		const { x, y, aggro: { faction, subFaction } } = objSeeker;
 
 		let list = this.objects.filter(o => {

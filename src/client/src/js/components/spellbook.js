@@ -114,9 +114,12 @@ export default {
 	},
 
 	tabTarget (ignoreIfSet) {
+		if (!window.player)
+			return;
+
 		let compareAgainst = ignoreIfSet ? null : this.target;
 
-		let closest = objects.getClosest(window.player.x, window.player.y, 10, input.isKeyDown('shift'), compareAgainst);
+		let closest = objects.getClosest(window.player, 10, input.isKeyDown('shift'), compareAgainst);
 
 		this.setTarget(closest, null);
 	},
