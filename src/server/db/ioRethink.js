@@ -15,9 +15,30 @@ module.exports = {
 	con: r,
 
 	init: async function (cbReady) {
-		await this.create();
+		const maxAttempts = 30;
+		const retryDelayMs = 2000;
 
-		cbReady();
+		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			try {
+				await this.create();
+				cbReady();
+				return;
+			} catch (error) {
+				const hasMoreAttempts = attempt < maxAttempts;
+
+				console.error(
+					`RethinkDB init failed (attempt ${attempt}/${maxAttempts}) ` +
+					`host=${serverConfig.dbHost} port=${serverConfig.dbPort} db=${serverConfig.dbName} user=${serverConfig.dbUser}`,
+					error.message
+				);
+
+				if (!hasMoreAttempts)
+					throw error;
+
+				await new Promise(resolve => setTimeout(resolve, retryDelayMs));
+			}
+		}
+
 	},
 
 	create: async function () {
