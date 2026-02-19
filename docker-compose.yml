@@ -51,6 +51,7 @@ services:
       retries: 10
     networks:
       - isleward
+      - coolify
     labels:
       - traefik.enable=true
       - traefik.docker.network=coolify
@@ -66,3 +67,5 @@ volumes:
 networks:
   isleward:
     name: isleward
+  coolify:
+    external: true
